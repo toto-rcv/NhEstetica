@@ -1,0 +1,13 @@
+{
+  "name": "mi-proyecto",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node backend/index.js",
+    "client": "npm start --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}
