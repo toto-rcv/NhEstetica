@@ -1,23 +1,31 @@
 import { useEffect, useState } from 'react';
+import Header from './components/header';
+import Footer from './components/footer';
+import Inicio from './pages/Inicio';
+import Servicios from './pages/Servicios';
+import Nosotros from './pages/Nosotros';
+import Productos from './pages/Productos';
+import Promociones from './pages/Promociones';
+import Contacto from './pages/Contacto';
+import { Routes, Route, Link } from 'react-router-dom';
 
 function App() {
-  const [mensaje, setMensaje] = useState('Cargando...');
-
-  useEffect(() => {
-    fetch('/api/saludo') // Gracias al "proxy" no necesitas poner el localhost:5000
-      .then(res => res.json())
-      .then(data => setMensaje(data.mensaje))
-      .catch(err => {
-        console.error('Error al conectar con el backend:', err);
-        setMensaje('Error al conectar con el backend');
-      });
-  }, []);
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
-      <h1>Mensaje desde el backend:</h1>
-      <p>{mensaje}</p>
-    </div>
+    <>    
+    <Header />
+       <Routes>
+        <Route path="/" element={<Inicio />} />
+        <Route path="/nosotros" element={<Nosotros />} />
+        <Route path="/servicios" element={<Servicios />} />
+        <Route path="/Productos" element={<Productos />} />
+        <Route path="/promociones" element={<Promociones />} />
+        <Route path="/servicios" element={<Servicios />} />
+        <Route path="/contacto" element={<Contacto />} />
+      </Routes>
+
+    <Footer />
+    </>
   );
 }
 
