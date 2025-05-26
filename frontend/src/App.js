@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Header from './components/header';
 import Footer from './components/footer';
-import Inicio from './pages/Inicio';
+import Inicio from './pages/Home';
 import Servicios from './pages/Servicios';
 import Nosotros from './pages/Nosotros';
 import Productos from './pages/Productos';
@@ -23,7 +23,6 @@ function App() {
         <Route path="/servicios" element={<Servicios />} />
         <Route path="/contacto" element={<Contacto />} />
       </Routes>
-
     <Footer />
     </>
   );

@@ -44,13 +44,21 @@ function Header() {
 export default Header
 
 const HeaderContainer = styled.header`
-  background-color: var(--primary-color);
+   background: linear-gradient(
+    90deg,
+    rgba(224, 117, 212, 0.3) 0%,
+    var(--primary-color) 25%,
+    var(--secondary-color) 75%,
+    rgba(224, 117, 212, 0.3) 100%
+  );
   padding: 1rem 5rem;
   border-bottom: 1px solid #eee;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-height: 96px;
+  max-height: 60px;
+  position: relative;
+  overflow: hidden;
 `;
 
 

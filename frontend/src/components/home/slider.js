@@ -1,0 +1,152 @@
+import React from 'react'
+import styled from 'styled-components';
+import { Link as RouterLink } from 'react-router-dom';
+
+function Slider() {
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const slides = [
+    "slider/pepe.webp",
+    "slider/estetica_dos.jpg",
+    "slider/estetica_tres.webp",
+  ];
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+  const prevSlide = () => { 
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  return (
+    <ConteinerSlider>
+      <SliderWrapper>
+        <SlideContainer>
+          <SliderImage src={slides[currentSlide]} alt="Slider" />
+          <ContactButtonWrapper>
+            <Title>Bienvenido a NH Estética</Title>
+            <Subtitle>Tu belleza, nuestra pasión</Subtitle>
+            <ContactButton to="/contacto">CONTACTANOS</ContactButton>
+          </ContactButtonWrapper>
+        </SlideContainer>
+      </SliderWrapper>
+      <ControlsWrapper>
+        <NavigationButton onClick={prevSlide}>❮</NavigationButton>
+        <NavigationButton onClick={nextSlide}>❯</NavigationButton>
+      </ControlsWrapper>
+    </ConteinerSlider>
+  )
+}
+export default Slider
+
+const ConteinerSlider = styled.div`
+    position: relative;
+    width: 100%;
+    height: 700px;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+`;
+
+const SliderWrapper = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.5s ease-in-out;
+`;
+
+const SlideContainer = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+`;
+
+const SliderImage = styled.img`
+    width: 100%;
+    height: 800px;
+    object-fit: cover;
+    object-position: center;
+`;
+
+const ContactButtonWrapper = styled.div`
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+const ContactButton = styled(RouterLink)`
+    padding: 15px 30px;
+    font-size: 1rem;
+    background-color: var(--terciary-color);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: inline-block;
+    font-family: var(--heading-font);
+    font-weight: 600;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--terciary-color) 95%, black 5%);
+        transform: scale(1.05);
+    }
+`;
+
+const ControlsWrapper = styled.div`
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    padding: 0 20px;
+`;
+
+const NavigationButton = styled.button`
+    background-color: rgb(87, 89, 92, 0.9);
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+
+    &:hover {
+        transform: scale(1.1);
+        background-color: rgb(87, 89, 92, 1);
+    }
+`;
+const Title = styled.h1`
+    font-size: 2.5rem;
+    font-family: var(--text-font);
+    color: white;
+    text-align: center;
+    margin-bottom: 0px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+`;
+const Subtitle = styled.h2`
+    font-size: 1.5rem;
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+`;

@@ -1,7 +1,7 @@
 
 :root {
   --primary-color: rgba(224, 117, 162, 0.3);
-  --primary-color: rgba(224, 117, 212, 0.3);
+  --secondary-color: rgba(224, 117, 212, 0.3);
   --terciary-color: #E0A875;
   --background-color: #FDF9FB;
   --background-dark: #373535;
