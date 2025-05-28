@@ -59,6 +59,11 @@ const WhatsAppButton = styled.a`
     transform: scale(1.1);
     transition: background-color 0.3s ease, transform 0.3s ease;
   }
+
+  @media (max-width: 768px) {
+    left: 10px;
+    right: none;
+  }
 `;
 
 const Backdrop = styled.div`

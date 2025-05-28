@@ -1,10 +1,29 @@
-import React from 'react';
 import styled from 'styled-components';
 import testimonials from './testimonialsData';
 import Slider from 'react-slick';
 
 
 function Testimonials() {
+  const StarRating = ({ rating }) => {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  const stars = [
+    ...Array(fullStars).fill('★'),
+    ...(hasHalfStar ? ['☆'] : []),
+    ...Array(emptyStars).fill('✩'),
+  ];
+
+  return (
+    <StarsWrapper>
+      {stars.map((star, index) => (
+        <Star key={index}>{star}</Star>
+      ))}
+    </StarsWrapper>
+  );
+};
+
     const settings = {
     dots: true,
     infinite: true,
@@ -16,14 +35,14 @@ function Testimonials() {
     autoplaySpeed: 4000,
     responsive: [
         {
-        breakpoint: 768,
+        breakpoint: 940,
         settings: {
             slidesToShow: 1,
             slidesToScroll: 1,
         },
         },
         {
-        breakpoint: 1290,
+        breakpoint: 1390,
         settings: {
             slidesToShow: 2,
             slidesToScroll: 2,
@@ -49,13 +68,14 @@ function Testimonials() {
         {testimonials.map((t, index) => (
             <Card key={index}>
             <Text>{t.text}</Text>
+            <StarRating rating={t.rating} />
             <UserInfo>
                 <Avatar src={t.image} />
                 <UserDetails>
                 <Name>{t.name}</Name>
                 <Source>{t.source}</Source>
                 </UserDetails>
-                <QuoteMark>❝❞</QuoteMark>
+                <QuoteMark>❞</QuoteMark>
             </UserInfo>
             </Card>
         ))}
@@ -110,7 +130,7 @@ const Card = styled.div`
   background: white;
   border-radius: 12px;
   padding: 25px;
-  max-width: 350px;
+  max-width: 390px;
   flex: 1 1 300px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -126,7 +146,7 @@ const Text = styled.p`
 
 const UserInfo = styled.div`
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
 `;
 
@@ -156,7 +176,7 @@ const Source = styled.div`
 const QuoteMark = styled.div`
     font-size: 4.5rem;
     color: var(--secondary-color);
-    top: 40px;
+    top: 8px;
     position: relative;
 `;
 
@@ -180,11 +200,23 @@ const StyledSlider = styled(Slider)`
   }
 
   .slick-dots {
-    bottom: -30px;
+    bottom: -60px;
   }
 
   .slick-dots li button:before {
     color: var(--terciary-color);
     font-size: 12px;
   }
+`;
+
+const StarsWrapper = styled.div`
+  margin: 20px 0 10px;
+  display: flex;
+  justify-content: center;
+`;
+
+const Star = styled.span`
+  font-size: 1.4rem;
+  color: gold;
+  margin: 0 2px;
 `;

@@ -1,47 +1,100 @@
-import React from 'react'
-import styled from 'styled-components';
-import { Link as RouterLink } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFacebook, faWhatsapp, faInstagram } from '@fortawesome/free-brands-svg-icons';
+import React, { useState } from "react";
+import styled from "styled-components";
+import SideMenu from "./sideMenu";
+import HamburgerMenu from "./hamburgerMenu";
+import { Link as RouterLink } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFacebook,
+  faWhatsapp,
+  faInstagram,
+} from "@fortawesome/free-brands-svg-icons";
 
 function Header() {
-    return (
-        <HeaderContainer>
-            <LogoContainer>
-                <Logo src='logo.png' alt="Logo" />
-                <TitleContainer>
-                    <Title>
-                        NH
-                    </Title>
-                    <Title>
-                        ESTÉTICA
-                    </Title>
-                </TitleContainer>
-            </LogoContainer>
+  const [isOpen, setIsOpen] = useState(false);
 
-            <NavContainer>
-                <nav>
-                    <StyledLink to="/">Home</StyledLink>
-                    <StyledLink to="/nosotros">Nosotros</StyledLink>
-                    <StyledLink to="/servicios">Servicios</StyledLink>
-                    <StyledLink to="/promociones">Promociones</StyledLink>
-                    <StyledLink to="/productos">Productos</StyledLink>
-                    <StyledLink to="/contacto">Contacto</StyledLink>
-                </nav>
-            </NavContainer>
+  return (
+    <HeaderContainer>
+      <LogoContainer>
+        <Logo src="logo.png" alt="Logo" />
+        <TitleContainer>
+          <Title>NH</Title>
+          <Title>ESTÉTICA</Title>
+        </TitleContainer>
+      </LogoContainer>
 
-            <IconsContainer>
-                <Icons>
-                    <a href='https://w.app/chlxyz' target="_blank"> <FontAwesomeIcon icon={faWhatsapp} style={{ color: "var(--terciary-color)" }} /> </a>
-                    <a href='https://www.instagram.com/nhesteticaposadas/' target="_blank"> <FontAwesomeIcon icon={faInstagram} style={{ color: "var(--terciary-color)" }} /> </a>
-                    <a href='https://www.facebook.com/nh.estetica/?locale=es_LA' target="_blank"> <FontAwesomeIcon icon={faFacebook} style={{ color: "var(--terciary-color)" }} /> </a>
-                </Icons>
-            </IconsContainer>
-        </HeaderContainer>
-    )
+      <NavContainer isOpen={isOpen}>
+        <nav>
+          <StyledLink to="/">Home</StyledLink>
+          <StyledLink to="/nosotros">Nosotros</StyledLink>
+          <StyledLink to="/servicios">Servicios</StyledLink>
+          <StyledLink to="/promociones">Promociones</StyledLink>
+          <StyledLink to="/productos">Productos</StyledLink>
+          <StyledLink to="/contacto">Contacto</StyledLink>
+        </nav>
+      </NavContainer>
+
+      <IconsContainer isOpen={isOpen}>
+        <Icons>
+          <a href="https://w.app/chlxyz" target="_blank">
+            <FontAwesomeIcon
+              icon={faWhatsapp}
+              style={{ color: "var(--terciary-color)" }}
+            />
+          </a>
+          <a
+            href="https://www.instagram.com/nhesteticaposadas/"
+            target="_blank"
+          >
+            <FontAwesomeIcon
+              icon={faInstagram}
+              style={{ color: "var(--terciary-color)" }}
+            />
+          </a>
+          <a
+            href="https://www.facebook.com/nh.estetica/?locale=es_LA"
+            target="_blank"
+          >
+            <FontAwesomeIcon
+              icon={faFacebook}
+              style={{ color: "var(--terciary-color)" }}
+            />
+          </a>
+        </Icons>
+      </IconsContainer>
+
+      <HamburgerMenu isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
+      <SideMenu isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
+    </HeaderContainer>
+  );
 }
 
-export default Header
+export default Header;
+
+const NavContainer = styled.div`
+  nav {
+    display: flex;
+    gap: 1.5rem;
+    transition: all 0.4s ease;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const IconsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20px;
+
+  @media (max-width: 768px) {
+    display: ${(props) => (props.isOpen ? "flex" : "none")};
+    margin-top: -10px;
+    margin-bottom: 1rem;
+  }
+`;
 
 const HeaderContainer = styled.header`
    background: linear-gradient(
@@ -59,15 +112,16 @@ const HeaderContainer = styled.header`
   max-height: 60px;
   position: relative;
   overflow: hidden;
-`;
 
+  @media (max-width: 768px) {
+    padding: 1rem 1.5rem;
+  }
+`;
 
 const Logo = styled.img`
   width: 50px;
   object-fit: contain;
-
 `;
-
 
 const Title = styled.h1`
   color: var(--background-dark);
@@ -79,37 +133,24 @@ const Title = styled.h1`
 `;
 
 const TitleContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`
-
-const NavContainer = styled.div`
-   
-nav { 
-    display: flex;
-    gap: 1.5rem; 
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
+
+//
 
 const LogoContainer = styled.div`
-    display: flex;
-    row-direction: row;
-    gap: 5px; 
+  display: flex;
+  row-direction: row;
+  gap: 5px;
 `;
 
-const IconsContainer = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 20px;
-    `;
-
 const Icons = styled.div`
-    font-size: 25px;
-    display: flex;
-    gap: 1rem;
+  font-size: 25px;
+  display: flex;
+  gap: 1rem;
 `;
 
 const StyledLink = styled(RouterLink)`
@@ -126,7 +167,7 @@ const StyledLink = styled(RouterLink)`
   }
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     height: 2px;
     background: var(--terciary-color);
