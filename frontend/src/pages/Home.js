@@ -3,15 +3,19 @@ import styled from 'styled-components';
 import Slider from '../components/home/slider';
 import AboutUs from '../components/home/about-us';
 import Services from '../components/home/services';
+import Reserve from '../components/home/reserve';
+import Testimonials from '../components/home/testimonials';
+import WhatsApp from '../components/home/whatsApp-modal';
 import { motion } from 'framer-motion';
+
 
 function Inicio() {
   return (
     <>
       <FadeIn>
+        <WhatsApp />
         <Slider />
       </FadeIn>
-
       <FadeIn delay={0.1}>
         <Container>
           <FadeIn delay={0.2}>
@@ -19,6 +23,12 @@ function Inicio() {
           </FadeIn>
           <FadeIn delay={0.4}>
             <Services />
+          </FadeIn>
+          <FadeIn delay={0.5}>
+            <Reserve />
+          </FadeIn>
+          <FadeIn delay={0.6}>
+            <Testimonials />
           </FadeIn>
         </Container>
       </FadeIn>
@@ -32,7 +42,7 @@ const Container = styled.div`
   background: linear-gradient(
     180deg,
     rgb(246, 216, 242) 20%,
-    #ffffff 86%
+    #ffffff 45%
   );
 `;
 
@@ -46,3 +56,4 @@ const FadeIn = ({ children, delay = 0 }) => (
     {children}
   </motion.div>
 );
+

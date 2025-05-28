@@ -62,7 +62,7 @@ function Footer() {
       </TopSection>
 
       <BottomSection>
-        <span>Desarrollado por (nombre de empresa)</span>
+        <span>Desarrollado por los pibardos</span>
         <span>2025 - © Todos los derechos reservados.</span>
             <IconsContainer>
                 <Icons>

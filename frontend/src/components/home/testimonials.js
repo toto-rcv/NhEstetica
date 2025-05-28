@@ -1,0 +1,190 @@
+import React from 'react';
+import styled from 'styled-components';
+import testimonials from './testimonialsData';
+import Slider from 'react-slick';
+
+
+function Testimonials() {
+    const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 3,
+    arrows: false,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    responsive: [
+        {
+        breakpoint: 768,
+        settings: {
+            slidesToShow: 1,
+            slidesToScroll: 1,
+        },
+        },
+        {
+        breakpoint: 1290,
+        settings: {
+            slidesToShow: 2,
+            slidesToScroll: 2,
+        },
+        },
+    ],
+    };
+
+  return (
+    
+    <Wrapper>
+      <TopText>
+        <Subtitle>¿Qué dicen?</Subtitle>
+        <Title>TESTIMONIOS DE NUESTROS CLIENTES</Title>
+        <SeeMore 
+        href="https://www.google.com/maps/place/NH+Estetica/@-27.3670409,-55.90326,17z/data=!4m8!3m7!1s0x9457bfb577360051:0x9876c29b4475f4d1!8m2!3d-27.3670457!4d-55.9006851!9m1!1b1!16s%2Fg%2F12qfvr_23?entry=ttu&g_ep=EgoyMDI1MDUyMS4wIKXMDSoASAFQAw%3D%3D" 
+        target="_blank">
+            Ver todas →
+        </SeeMore>
+      </TopText>
+
+      <StyledSlider {...settings}>
+        {testimonials.map((t, index) => (
+            <Card key={index}>
+            <Text>{t.text}</Text>
+            <UserInfo>
+                <Avatar src={t.image} />
+                <UserDetails>
+                <Name>{t.name}</Name>
+                <Source>{t.source}</Source>
+                </UserDetails>
+                <QuoteMark>❝❞</QuoteMark>
+            </UserInfo>
+            </Card>
+        ))}
+        </StyledSlider>
+    </Wrapper>
+  );
+}
+
+export default Testimonials;
+
+const Wrapper = styled.section`
+  padding: 120px 20px;
+  background-color: var(--background-overlay);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+
+const TopText = styled.div`
+  margin-bottom: 40px;
+`;
+
+const Subtitle = styled.p`
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    color: var(--terciary-color);
+    margin: 0 !important;
+    font-family: var(--heading-font), sans-serif;
+
+`;
+
+const Title = styled.h2`
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--tertiary-color);
+    margin: 0 !important;
+    font-family: var(--heading-font), sans-serif;
+    transform: skew(-10deg);
+`;
+
+const CardsContainer = styled.div`
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const Card = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  max-width: 350px;
+  flex: 1 1 300px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const Text = styled.p`
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.5;
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+`;
+
+const Avatar = styled.img`
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const UserDetails = styled.div`
+  flex: 1;
+  text-align: left;
+  margin-left: 10px;
+`;
+
+const Name = styled.div`
+  font-weight: bold;
+`;
+
+const Source = styled.div`
+  font-size: 0.8rem;
+  color: gray;
+  margin-top: 5px;
+`;
+
+const QuoteMark = styled.div`
+    font-size: 4.5rem;
+    color: var(--secondary-color);
+    top: 40px;
+    position: relative;
+`;
+
+const SeeMore = styled.a`
+    font-size: 0.9rem;
+    color: var(--terciary-color);
+    margin-top: 0.3rem;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+`;
+
+const StyledSlider = styled(Slider)`
+  width: 100%;
+  max-width: 1588px;
+  margin: 0 30px;
+
+  .slick-slide {
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+
+  .slick-dots {
+    bottom: -30px;
+  }
+
+  .slick-dots li button:before {
+    color: var(--terciary-color);
+    font-size: 12px;
+  }
+`;

@@ -22,7 +22,7 @@ function Slider() {
         <SlideContainer>
           <SliderImage src={slides[currentSlide]} alt="Slider" />
           <ContactButtonWrapper>
-            <Title>Bienvenido a NH Estética</Title>
+            <Title>BIENVENIDO A NH ESTÉTICA</Title>
             <Subtitle>Tu belleza, nuestra pasión</Subtitle>
             <ContactButton to="/contacto">CONTACTANOS</ContactButton>
           </ContactButtonWrapper>
@@ -116,7 +116,7 @@ const ControlsWrapper = styled.div`
 `;
 
 const NavigationButton = styled.button`
-    background-color: rgb(87, 89, 92, 0.9);
+    background-color: var(--terciary-color);
     border: none;
     padding: 15px;
     cursor: pointer;
@@ -132,7 +132,6 @@ const NavigationButton = styled.button`
 
     &:hover {
         transform: scale(1.1);
-        background-color: rgb(87, 89, 92, 1);
     }
 `;
 const Title = styled.h1`

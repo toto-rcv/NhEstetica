@@ -40,7 +40,7 @@ const AboutUsContent = styled.div`
     gap: 2rem;
 `;
 const Image = styled.img`
-    width: 110px;
+    width: 140px;
     height: auto;
     border-radius: 10px;
     position: absolute;
@@ -50,12 +50,12 @@ const Image = styled.img`
 `;
 
 const ImageFlor = styled.img`
-  width: 110px;
+    width: 100px;
     height: auto;
     border-radius: 10px;
     position: absolute;
     margin-bottom: 10rem;
-    left: 2%;
+    left: 3%;
     filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
 `;
 
@@ -82,6 +82,7 @@ const SubTitle = styled.h3`
     margin: 0 !important;
     font-family: var(--heading-font), sans-serif;
 `;
+
 const Title = styled.h2`
     font-size: 2.5rem;
     margin-bottom: 1rem;
@@ -98,7 +99,7 @@ const Description = styled.div`
 `;
 
 const Text = styled.p`
-    margin: 3rem 0;
+    margin: 2rem 0;
     font-size: 1.1rem;
     color: #555;
 `;
