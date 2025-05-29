@@ -103,7 +103,7 @@ const SideMenuContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  z-index: 10;
+  z-index: 1011;
   transform: ${(props) =>
     props.isOpen ? "translateX(0)" : "translateX(100%)"};
   transition: transform 0.7s ease;
