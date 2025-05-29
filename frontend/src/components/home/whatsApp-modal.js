@@ -1,33 +1,51 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 function WhatsApp() {
-    const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-    return (
-        <>
-            <WhatsAppButton onClick={() => setShowModal(true)}>
-                <FontAwesomeIcon icon={faWhatsapp} style={{ color: "#25d366" }} />
-            </WhatsAppButton>
-            {showModal && (
-                <Backdrop onClick={() => setShowModal(false)}>
-                    <ModalContent onClick={e => e.stopPropagation()}>
-                        <HeaderConteiner>
-                            <ConteinerTitleIcon>
-                                <FontAwesomeIcon icon={faWhatsapp} style={{ color: "#fff", fontSize: "24px" }} />
-                                <Title>WhatsApp!</Title>
-                            </ConteinerTitleIcon>
-                            <CloseButton onClick={() => setShowModal(false)}>×</CloseButton>
-                        </HeaderConteiner>
-                        <Text>Si tienes curiosidad acerca de mis servicios o estás listo para reservar una sesión, ¡no dudes en ponerte en contacto conmigo!</Text>
-                        {/* Aquí puedes poner más contenido */}
-                    </ModalContent>
-                </Backdrop>
-            )}
-        </>
-    );
+  const openModal = () => {
+    setShowModal(true);
+    setIsClosing(false);
+  };
+
+  const closeModal = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setIsClosing(false);
+    }, 300); // Duración igual a la animación de salida
+  };
+
+  return (
+    <>
+      <WhatsAppButton onClick={openModal}>
+        <FontAwesomeIcon icon={faWhatsapp} style={{ color: "#25d366" }} />
+      </WhatsAppButton>
+      {showModal && (
+        <Backdrop onClick={closeModal}>
+          <ModalContent
+            onClick={e => e.stopPropagation()}
+            $isClosing={isClosing}
+          >
+            <HeaderConteiner>
+              <ConteinerTitleIcon>
+                <FontAwesomeIcon icon={faWhatsapp} style={{ color: "#fff", fontSize: "35px" }} />
+                <Title>WhatsApp</Title>
+              </ConteinerTitleIcon>
+              <CloseButton onClick={closeModal}>×</CloseButton>
+            </HeaderConteiner>
+            <Text>Si tienes curiosidad acerca de mis servicios o estás listo para reservar una sesión, ¡no dudes en ponerte en contacto conmigo!</Text>
+            {/* Aquí puedes poner más contenido */}
+            <TextOpen href='https://wa.me/5491168520606'>¡Abrir Chat!</TextOpen>
+          </ModalContent>
+        </Backdrop>
+      )}
+    </>
+  );
 }
 
 export default WhatsApp;
@@ -66,6 +84,28 @@ const WhatsAppButton = styled.a`
   }
 `;
 
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(1000px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+`;
+
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(1000px) scale(0.95);
+  }
+`;
+
 const Backdrop = styled.div`
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -77,29 +117,31 @@ const Backdrop = styled.div`
 
 const ModalContent = styled.div`
   background: #fff;
-  border-radius: 10px;
+  border-radius: 10%;
   position: absolute; 
   bottom: 6%;
   right: 1%;
   width: 400px;
+  animation: ${({ $isClosing }) => $isClosing ? fadeOut : fadeIn} 0.3s forwards;
 `;
 
 const CloseButton = styled.button`
-  top: 10px; right: 10px;
-  background: rgba(0, 0, 0, .4) ;
-  color: var(--background-overlay);
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  --size: 34px;
-  position: absolute;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 50%;
-  transition: background-color .3s ease-out;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, .35);
+    color: var(--background-overlay);
+    border: none;
+    font-size: 1.7rem;
+    cursor: pointer;
+    --size: 36px;
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    transition: background-color .3s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `;
 
 const HeaderConteiner = styled.div`
@@ -109,7 +151,7 @@ const HeaderConteiner = styled.div`
   margin-bottom: 1rem;
   background-color: #26d566;
   padding: 1rem;
-  border-radius: 10px 10px 0 0;
+  border-radius: 25px 25px 0 0;
 `;
 const Title = styled.h3`
   font-size: 1.5rem;
@@ -138,4 +180,25 @@ const ConteinerTitleIcon = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+`;
+
+const TextOpen = styled.a`
+  display: block;
+  margin: 10px 28px 20px auto;
+  padding: 15px 25px;
+  background-color: #25d366;
+  color: white;
+  border-radius: 26px;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+  width: fit-content;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .3));
+  transform-origin: 0 50%;
+  animation: joinchat_show .25s cubic-bezier(0,0,.58,1.19) 10ms both;
+
+  &:hover {
+    background-color: #128C7E;
+    transition: background-color 0.3s ease;
+  }
 `;
