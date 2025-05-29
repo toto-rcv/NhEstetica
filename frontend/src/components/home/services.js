@@ -83,6 +83,10 @@ const Title = styled.h2`
     transform: skew(-10deg);
     margin-bottom: 1rem;
     margin: 0;
+
+    @media (max-width: 768px) {
+        font-size: 2.3rem;
+    }
 `;
 
 const Description = styled.p`

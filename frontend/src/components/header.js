@@ -45,14 +45,15 @@ function Header() {
   return (
     <FixedWrapper>
       <HeaderContainer visible={showHeader} scrolled={hasScrolled}>
-        <LogoContainer>
-          <Logo src="logo.png" alt="Logo" />
-          <TitleContainer>
-            <Title>NH</Title>
-            <Title>ESTÉTICA</Title>
-          </TitleContainer>
-        </LogoContainer>
-
+        <RouterLink to="/" style={{ textDecoration: "none" }}>
+          <LogoContainer>
+            <Logo src="logo.png" alt="Logo" />
+            <TitleContainer>
+              <Title>NH</Title>
+              <Title>ESTÉTICA</Title>
+            </TitleContainer>
+          </LogoContainer>
+        </RouterLink>
         <NavContainer>
           <nav>
             <StyledLink to="/">Home</StyledLink>
@@ -66,22 +67,42 @@ function Header() {
 
         <IconsContainer isOpen={isOpen}>
           <Icons>
-            <a href="https://w.app/chlxyz" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faWhatsapp} style={{ color: "var(--terciary-color)" }} />
+            <a
+              href="https://w.app/chlxyz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon
+                icon={faWhatsapp}
+                style={{ color: "var(--terciary-color)" }}
+              />
             </a>
-            <a href="https://www.instagram.com/nhesteticaposadas/" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faInstagram} style={{ color: "var(--terciary-color)" }} />
+            <a
+              href="https://www.instagram.com/nhesteticaposadas/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon
+                icon={faInstagram}
+                style={{ color: "var(--terciary-color)" }}
+              />
             </a>
-            <a href="https://www.facebook.com/nh.estetica/?locale=es_LA" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faFacebook} style={{ color: "var(--terciary-color)" }} />
+            <a
+              href="https://www.facebook.com/nh.estetica/?locale=es_LA"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon
+                icon={faFacebook}
+                style={{ color: "var(--terciary-color)" }}
+              />
             </a>
           </Icons>
         </IconsContainer>
 
         <HamburgerMenu isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
       </HeaderContainer>
-        <SideMenu isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
-
+      <SideMenu isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
     </FixedWrapper>
   );
 }
@@ -103,22 +124,22 @@ const HeaderContainer = styled.header`
   align-items: center;
   justify-content: space-between;
   max-height: 60px;
-  background: linear-gradient(90deg, #F6D8F2 0%, #F6D8F2 25%, #F6D8F2 75%, #F6D8F2 100%);
+  background: linear-gradient(
+    90deg,
+    #f6d8f2 0%,
+    #f6d8f2 25%,
+    #f6d8f2 75%,
+    #f6d8f2 100%
+  );
   border-bottom: 1px solid #eee;
 
-transform: ${(props) =>
-  props.scrolled
-    ? props.visible
-      ? "translateY(0)"
-      : "translateY(-100%)"
-    : "translateY(0)"};
-opacity: ${(props) =>
-  props.scrolled
-    ? props.visible
-      ? 1
-      : 0
-      : 1};
-
+  transform: ${(props) =>
+    props.scrolled
+      ? props.visible
+        ? "translateY(0)"
+        : "translateY(-100%)"
+      : "translateY(0)"};
+  opacity: ${(props) => (props.scrolled ? (props.visible ? 1 : 0) : 1)};
 
   transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
 

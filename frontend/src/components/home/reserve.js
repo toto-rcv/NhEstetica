@@ -5,6 +5,7 @@ function Reserve() {
     return (
         <ServicesContainer>
             <Background />
+            <DarkOverlay />
             <Overlay>
                 <Title>HACÉ UNA PAUSA, TE LO MERECÉS</Title>
                 <Button>Reserva tu turno</Button>
@@ -24,6 +25,10 @@ const ServicesContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+
+    @media (max-width: 768px) {
+        height: 30vh;
+    }
 `;
 
 const Background = styled.div`
@@ -35,13 +40,12 @@ const Background = styled.div`
     background-image: url('/slider/mujerTurnos.jpg');
     background-size: cover;
     background-position: center;
-    filter: blur(1px);
     z-index: 1;
 `;
 
 const Overlay = styled.div`
     position: absolute;
-    z-index: 2;
+    z-index: 3;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -50,15 +54,22 @@ const Overlay = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 90%;
 `;
 
 const Title = styled.h2`
-    font-size: 2.5rem;
+    font-size: 2.1rem;
     margin-bottom: 1rem;
     color: var(--background-color);
     font-family: var(--heading-font), sans-serif;
     transform: skew(-10deg);
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+
+    @media (max-width: 768px) {
+        font-size: 1.3rem;
+        margin: 0;
+        margin-bottom: 20px;
+    }
 `;
 
 const Button = styled.button`
@@ -84,4 +95,19 @@ const Button = styled.button`
         background-color: color-mix(in srgb, var(--terciary-color) 95%, black 5%);
         transform: scale(1.05);
     }
+
+    @media (max-width: 768px) {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+`;
+
+const DarkOverlay = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    z-index: 2;
 `;

@@ -1,4 +1,5 @@
 import React from "react";
+import {useEffect} from "react";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,6 +11,14 @@ import { faEnvelopeOpenText } from "@fortawesome/free-solid-svg-icons";
 import { Link as RouterLink } from "react-router-dom";
 
 function SideMenu({ isOpen, toggleMenu }) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("menu-open");
+    } else {
+      document.body.classList.remove("menu-open");
+    }
+  }, [isOpen]);
+  
   return (
     <>
       <Overlay isOpen={isOpen} onClick={toggleMenu} />

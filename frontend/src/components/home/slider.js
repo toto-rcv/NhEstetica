@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Link as RouterLink } from "react-router-dom";
 
-function Slider() {
+function Slider({ isMenuOpen }) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const slides = [
     "slider/pepe.webp",
@@ -117,7 +117,9 @@ const ContactButton = styled(RouterLink)`
   }
 `;
 
-const ControlsWrapper = styled.div`
+const ControlsWrapper = styled.div.attrs({
+  className: "slider-controls"
+})`
   position: absolute;
   top: 50%;
   left: 0;
@@ -127,8 +129,8 @@ const ControlsWrapper = styled.div`
   transform: translateY(-50%);
   padding: 0 20px;
   z-index: 1000;
-
 `;
+
 
 const NavigationButton = styled.button`
   background-color: transparent;
@@ -190,3 +192,5 @@ const SlideOverlay = styled.div`
   background: rgba(0, 0, 0, 0.3);
   z-index: 1;
 `;
+
+

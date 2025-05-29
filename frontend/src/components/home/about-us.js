@@ -6,7 +6,7 @@ function AboutUs() {
     return (
         <AboutUsContainer>
             <AboutUsContent>
-                <Image src='aboutUs/mujerflor.png' alt="mujerFlor" />
+                <ImageMujer src='aboutUs/mujerflor.png' alt="mujerFlor" />
                 <ImageFlor src='aboutUs/flor.png' alt="Flor" />
                 <TextContainer>
                     <TitleContainer>
@@ -31,9 +31,10 @@ const AboutUsContainer = styled.div`
     padding: 4rem;
     display: flex;
     justify-content: center;
+    position: relative;
 
       @media (max-width: 768px) {
-            padding: 2.5rem;
+            padding: 4rem 2.5rem;
         }
 `;
 const AboutUsContent = styled.div`
@@ -45,16 +46,34 @@ const AboutUsContent = styled.div`
     
     @media (max-width: 768px) {
       text-align: center;
-  }
+    }
 `;
-const Image = styled.img`
+const ImageMujer = styled.img`
     width: 140px;
     height: auto;
     border-radius: 10px;
     position: absolute;
-    margin-top: 15rem;
+    top: 38vh;
     right: 2%;
     filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
+
+        
+    @media (max-width: 768px) {
+        width: 100px;
+        right: 1%;        
+    }
+
+    @media (min-width:510px) and (max-width: 768px) {
+        top: 700px;    
+    }
+
+    @media (min-width:436px) and (max-width: 510px) {
+        top: 900px;    
+    }
+
+    @media (min-width:350px) and (max-width: 436px) {
+        top: 1080px;    
+    }
 `;
 
 const ImageFlor = styled.img`
@@ -65,6 +84,10 @@ const ImageFlor = styled.img`
     margin-bottom: 10rem;
     left: 3%;
     filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
+
+     @media (max-width: 768px) {
+        display: none;      
+    }
 `;
 
 const TextContainer = styled.div`
