@@ -45,6 +45,11 @@ const SliderContainer = styled.div`
   overflow: hidden;
   margin: 0;
   padding: 0;
+
+  
+  @media (max-width: 768px) {
+      height: 70vh;
+  }
 `;
 
 const SliderWrapper = styled.div`
@@ -67,11 +72,12 @@ const SlideContainer = styled.div`
 
 const SliderImage = styled.img`
   width: 100%;
-  height: 800px;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   z-index: 0;
   position: relative;
+
 `;
 
 const ContactButtonWrapper = styled.div`
@@ -83,6 +89,10 @@ const ContactButtonWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+    @media (max-width: 768px) {
+      gap: 3px;
+  }
 `;
 
 const ContactButton = styled(RouterLink)`
@@ -116,6 +126,8 @@ const ControlsWrapper = styled.div`
   justify-content: space-between;
   transform: translateY(-50%);
   padding: 0 20px;
+  z-index: 1000;
+
 `;
 
 const NavigationButton = styled.button`
@@ -133,15 +145,18 @@ const NavigationButton = styled.button`
   justify-content: center;
   color: white;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
 
   &:hover {
     transform: scale(1.1);
+    text-shadow: 2px 2px 5px black;
   }
 
   @media (max-width: 768px) {
-    font-size: 30px;
+    font-size: 40px;
   }
 `;
+
 const Title = styled.h1`
   font-size: 2.5rem;
   font-family: var(--text-font);
@@ -149,18 +164,29 @@ const Title = styled.h1`
   text-align: center;
   margin-bottom: 0px;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+
+  
+  @media (max-width: 768px) {
+      font-size: 1.9em;
+  }
 `;
+
 const Subtitle = styled.h2`
   font-size: 1.5rem;
   color: white;
   text-align: center;
   margin-bottom: 20px;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+
+  
+    @media (max-width: 768px) {
+      font-size: 1.2em;
+    }
 `;
 
 const SlideOverlay = styled.div`
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.2); // ajustá el nivel de oscurecimiento acá
+  background: rgba(0, 0, 0, 0.3);
   z-index: 1;
 `;

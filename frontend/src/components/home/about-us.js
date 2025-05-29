@@ -31,6 +31,10 @@ const AboutUsContainer = styled.div`
     padding: 4rem;
     display: flex;
     justify-content: center;
+
+      @media (max-width: 768px) {
+            padding: 2.5rem;
+        }
 `;
 const AboutUsContent = styled.div`
     display: flex;
@@ -38,6 +42,10 @@ const AboutUsContent = styled.div`
     max-width: 1200px;
     width: 100%;
     gap: 2rem;
+    
+    @media (max-width: 768px) {
+      text-align: center;
+  }
 `;
 const Image = styled.img`
     width: 140px;
@@ -90,6 +98,12 @@ const Title = styled.h2`
     margin: 0 !important;
     font-family: var(--heading-font), sans-serif;
     transform: skew(-10deg);
+
+    @media (max-width: 768px) {
+      font-size: 2.3em;
+    margin-bottom: 0rem;
+
+    }
 `;
 const Description = styled.div`
     font-size: 1.2rem;

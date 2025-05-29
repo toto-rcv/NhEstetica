@@ -130,6 +130,10 @@ const Title = styled.h1`
   transform: skew(-10deg);
   margin: 0 2px;
   font-weight: 700;
+
+  @media (max-width: 768px) {
+     font-size: 28px;
+  }
 `;
 
 const TitleContainer = styled.div`
@@ -137,14 +141,21 @@ const TitleContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+     flex-direction: row;
+  }
 `;
 
 //
 
 const LogoContainer = styled.div`
   display: flex;
-  row-direction: row;
   gap: 5px;
+
+    @media (max-width: 768px) {
+     gap: 12px;
+  }
 `;
 
 const Icons = styled.div`

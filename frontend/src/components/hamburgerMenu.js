@@ -21,7 +21,7 @@ const Hamburger = styled.div`
   align-items: center;
   cursor: pointer;
   height: 25px;
-  width: 30px;
+  width: 40px;
   z-index: 11;
 
   span {

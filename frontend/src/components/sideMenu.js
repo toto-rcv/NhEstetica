@@ -6,7 +6,7 @@ import {
   faInstagram,
   faFacebook,
 } from "@fortawesome/free-brands-svg-icons";
-import { faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelopeOpenText } from "@fortawesome/free-solid-svg-icons";
 import { Link as RouterLink } from "react-router-dom";
 
 function SideMenu({ isOpen, toggleMenu }) {
@@ -15,7 +15,7 @@ function SideMenu({ isOpen, toggleMenu }) {
       <Overlay isOpen={isOpen} onClick={toggleMenu} />
       <SideMenuContainer isOpen={isOpen}>
         <LogoSection>
-          <img src="/logo.png" alt="Logo" width="50" />
+          <img src="/logo.png" alt="Logo" width="70" />
           <h2>NH ESTÉTICA</h2>
         </LogoSection>
 
@@ -40,40 +40,37 @@ function SideMenu({ isOpen, toggleMenu }) {
           </StyledLink>
         </Nav>
 
-              <IconsContainer isOpen={isOpen}>
-                <Icons>
-                  <a href="https://w.app/chlxyz" target="_blank">
-                    <FontAwesomeIcon
-                      icon={faWhatsapp}                 
-                    />
-                  </a>
-                  <a
-                    href="https://www.instagram.com/nhesteticaposadas/"
-                    target="_blank"
-                  >
-                    <FontAwesomeIcon
-                      icon={faInstagram}                   
-                    />
-                  </a>
-                  <a
-                    href="https://www.facebook.com/nh.estetica/?locale=es_LA"
-                    target="_blank"
-                  >
-                    <FontAwesomeIcon
-                      icon={faFacebook}              
-                    />
-                  </a>
-                </Icons>
-              </IconsContainer>
+        
+        <ReserveContainer>
+          <Button>Reservá tu turno</Button>
+        </ReserveContainer>
 
-        <ContactSection>
-          <ContactItem>
-            <FontAwesomeIcon icon={faEnvelope} /> contacto@nhestetica.com
-          </ContactItem>
-          <ContactItem>
-            <FontAwesomeIcon icon={faPhone} /> +54 376 4123456
-          </ContactItem>
-        </ContactSection>
+
+        <IconsContainer isOpen={isOpen}>
+          <Icons>
+            <a href="https://w.app/chlxyz" target="_blank">
+              <FontAwesomeIcon icon={faWhatsapp} />
+            </a>
+            <a
+              href="https://www.instagram.com/nhesteticaposadas/"
+              target="_blank"
+            >
+              <FontAwesomeIcon icon={faInstagram} />
+            </a>
+            <a
+              href="https://www.facebook.com/nh.estetica/?locale=es_LA"
+              target="_blank"
+            >
+              <FontAwesomeIcon icon={faFacebook} />
+            </a>
+            <a
+              href="mailto:contacto@nhestetica.com"
+              target="_blank"
+            >
+              <FontAwesomeIcon icon={faEnvelopeOpenText} />
+            </a>
+          </Icons>
+        </IconsContainer>
       </SideMenuContainer>
     </>
   );
@@ -81,17 +78,18 @@ function SideMenu({ isOpen, toggleMenu }) {
 
 export default SideMenu;
 
-// Styled Components
-
 const Overlay = styled.div`
   opacity: ${(props) => (props.isOpen ? "1" : "0")};
   visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
+  transform: ${(props) =>
+    props.isOpen ? "translateX(0)" : "translateX(100%)"};
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 9;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.7s ease, visibility 0.7s ease, transform 0.7s ease;
 `;
+
 
 const SideMenuContainer = styled.div`
   position: fixed;
@@ -99,7 +97,7 @@ const SideMenuContainer = styled.div`
   right: 0;
   height: 100%;
   width: 280px;
-  background-color: rgba(224, 117, 162, 0.9);
+  background-color: rgba(224, 117, 162, 1);
   color: white;
   padding: 2rem 1rem;
   display: flex;
@@ -108,7 +106,7 @@ const SideMenuContainer = styled.div`
   z-index: 10;
   transform: ${(props) =>
     props.isOpen ? "translateX(0)" : "translateX(100%)"};
-  transition: transform 0.3s ease;
+  transition: transform 0.7s ease;
 `;
 
 const LogoSection = styled.div`
@@ -116,7 +114,7 @@ const LogoSection = styled.div`
   flex-direction: column;
   align-items: center;
   h2 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-top: 0.5rem;
     text-align: center;
     font-family: var(--heading-font);
@@ -134,7 +132,7 @@ const Nav = styled.nav`
 const StyledLink = styled(RouterLink)`
   color: white;
   text-decoration: none;
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-family: var(--heading-font);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 3px 0;
@@ -143,24 +141,6 @@ const StyledLink = styled(RouterLink)`
     color: var(--terciary-color);
   }
 `;
-
-const ContactSection = styled.div`
-  padding-top: 0.5rem;
-`;
-
-const ContactItem = styled.div`
-  font-size: 1.2rem;
-  margin: 0.6rem 0;
-  padding: 0.6rem 0.3rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  > * {
-    font-size: 25px;
-  }
-`;
-
 
 const IconsContainer = styled.div`
   display: flex;
@@ -183,5 +163,36 @@ const Icons = styled.div`
     color: var(--background-color);
     padding: 30px 0;
   }
-
 `;
+
+
+const Button = styled.button`
+    padding: 15px 30px;
+    font-size: 1rem;
+    background-color: var(--terciary-color);
+    font-family: var(--heading-font);
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: inline-block;
+    width: fit-content;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--terciary-color) 95%, black 5%);
+        transform: scale(1.05);
+    }
+`;
+
+const ReserveContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 30px 0 0;
+`
