@@ -56,6 +56,9 @@ const ServicesContainer = styled.div`
 
     @media (max-width: 768px) {
         flex-direction: column;
+        text-align: center;
+        padding: 4rem 3rem;
+        align-items: center;
     }
 `;
 
@@ -66,6 +69,10 @@ const TextContainer = styled.div`
     justify-content: center;
     max-width: 570px;
     gap: 15px;
+
+    @media (max-width: 768px) {
+        align-items: center;
+    }
 `;
 
 const SubTitle = styled.h3`
@@ -151,6 +158,16 @@ const Card = styled.div`
 
   &:hover {
     transform: scale(1.02);
+  }
+
+  &.offset {
+    @media (min-width: 769px) {
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      margin-top: 0;
+    }
   }
 `;
 

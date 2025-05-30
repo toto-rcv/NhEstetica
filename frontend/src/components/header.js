@@ -47,7 +47,7 @@ function Header() {
       <HeaderContainer visible={showHeader} scrolled={hasScrolled}>
         <RouterLink to="/" style={{ textDecoration: "none" }}>
           <LogoContainer>
-            <Logo src="logo.png" alt="Logo" />
+            <Logo src="/logo.png" alt="Logo" />
             <TitleContainer>
               <Title>NH</Title>
               <Title>ESTÉTICA</Title>
@@ -117,7 +117,10 @@ const FixedWrapper = styled.div`
   z-index: 900;
 `;
 
-const HeaderContainer = styled.header`
+
+const HeaderContainer = styled.header.withConfig({
+  shouldForwardProp: (prop) => prop !== "visible" && prop !== "scrolled",
+})`
   pointer-events: auto;
   padding: 1rem 5rem;
   display: flex;
@@ -160,7 +163,9 @@ const NavContainer = styled.div`
   }
 `;
 
-const IconsContainer = styled.div`
+const IconsContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   display: flex;
   align-items: center;
   justify-content: center;

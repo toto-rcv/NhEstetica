@@ -52,7 +52,7 @@ export default WhatsApp;
 
 const WhatsAppButton = styled.a`
   position: fixed;
-  bottom: 60px;
+  bottom: 20px;
   right: 20px;
   border-radius: 50%;
   width: 60px;
@@ -95,6 +95,18 @@ const fadeIn = keyframes`
   }
 `;
 
+const fadeInLeft = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-1000px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+`;
+
+
 const fadeOut = keyframes`
   from {
     opacity: 1;
@@ -103,6 +115,17 @@ const fadeOut = keyframes`
   to {
     opacity: 0;
     transform: translateX(1000px) scale(0.95);
+  }
+`;
+
+const fadeOutLeft = keyframes`
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-1000px) scale(0.95);
   }
 `;
 
@@ -123,6 +146,12 @@ const ModalContent = styled.div`
   right: 1%;
   width: 400px;
   animation: ${({ $isClosing }) => $isClosing ? fadeOut : fadeIn} 0.3s forwards;
+
+  @media (max-width: 768px) {
+    animation: ${({ $isClosing }) => $isClosing ? fadeOutLeft : fadeInLeft} 0.3s forwards;
+    right: auto; 
+    left: 1%;
+  }
 `;
 
 const CloseButton = styled.button`

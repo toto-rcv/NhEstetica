@@ -31,7 +31,7 @@ function Testimonials() {
     slidesToScroll: 3,
     arrows: false,
     autoplay: true,
-    autoplaySpeed: 4000,
+    autoplaySpeed: 3000,
     responsive: [
       {
         breakpoint: 940,

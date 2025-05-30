@@ -14,7 +14,9 @@ function HamburgerMenu({ isOpen, toggleMenu }) {
 
 export default HamburgerMenu;
 
-const Hamburger = styled.div`
+const Hamburger = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   display: none;
   flex-direction: column;
   justify-content: center;

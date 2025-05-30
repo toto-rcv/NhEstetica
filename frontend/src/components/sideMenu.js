@@ -87,11 +87,11 @@ function SideMenu({ isOpen, toggleMenu }) {
 
 export default SideMenu;
 
-const Overlay = styled.div`
+const Overlay = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   opacity: ${(props) => (props.isOpen ? "1" : "0")};
   visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
-  transform: ${(props) =>
-    props.isOpen ? "translateX(0)" : "translateX(100%)"};
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.7);
@@ -100,7 +100,9 @@ const Overlay = styled.div`
 `;
 
 
-const SideMenuContainer = styled.div`
+const SideMenuContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   position: fixed;
   top: 0;
   right: 0;
@@ -141,7 +143,7 @@ const Nav = styled.nav`
 const StyledLink = styled(RouterLink)`
   color: white;
   text-decoration: none;
-  font-size: 1.45rem;
+  font-size: 1.25rem;
   font-family: var(--heading-font);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 3px 0;
@@ -151,7 +153,9 @@ const StyledLink = styled(RouterLink)`
   }
 `;
 
-const IconsContainer = styled.div`
+const IconsContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,0 +1,150 @@
+import React from 'react';
+import styled from 'styled-components';
+
+const professionals = [
+  {
+    name: 'DR. JUAN CARLOS DALLA LASTA',
+    specialty: 'Cirugía Plástica',
+    image: 'https://randomuser.me/api/portraits/men/45.jpg',
+  },
+  {
+    name: 'DRA. VALERIA BASTINO',
+    specialty: 'Dermatología',
+    image: 'https://randomuser.me/api/portraits/women/68.jpg',
+  },
+  {
+    name: 'DR. ELISEO VIDELA',
+    specialty: 'Flebología y Linfología',
+    image: 'https://randomuser.me/api/portraits/men/72.jpg',
+  },
+];
+
+
+function Team() {
+  return (
+    <Wrapper>
+      <Mujer2 src="/aboutUs/image(3).png" alt="Mujer de Frente" />
+      <Mujer src="/aboutUs/imagenMujer.png" alt="Mujer de Perfil" />
+      <TopText>¿Quiénes somos?</TopText>
+      <Heading>NUESTROS PROFESIONALES</Heading>
+      <Subheading>Un gran equipo con profesionales de primera, Lorem ipsum dolor, sit amet consectetur adipisicing elit.</Subheading>
+
+      <CardsContainer>
+        {professionals.map((pro, index) => (
+          <Card key={index}>
+            <ImageCircle>
+              <ProfileImage src={pro.image} alt={pro.name} />
+            </ImageCircle>
+            <Name>{pro.name}</Name>
+            <Specialty>{pro.specialty}</Specialty>
+          </Card>
+        ))}
+      </CardsContainer>
+    </Wrapper>
+  );
+}
+
+export default Team;
+
+// Styled-components
+
+const Wrapper = styled.section`
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #fff;
+  position: relative;
+`;
+
+const TopText = styled.h3`
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--terciary-color);
+    margin: 0;
+    font-family: var(--heading-font),sans-serif;
+`;
+
+const Heading = styled.h2`
+    font-size: 2.5rem;
+    margin: 0 0 1rem;
+    font-family: var(--heading-font);
+    transform: skew(-10deg);
+`;
+
+const Subheading = styled.p`
+  font-style: italic;
+  color: #555;
+  margin-bottom: 3rem;
+`;
+
+const CardsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3rem;
+`;
+
+const Card = styled.div`
+  width: 200px;
+  text-align: center;
+`;
+
+const ImageCircle = styled.div`
+  border: 6px solid var(--primary-color);
+  border-radius: 50%;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+`;
+
+const ProfileImage = styled.img`
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 50%;
+`;
+
+const Name = styled.h3`
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0.25rem;
+  font-family: "Saira";
+`;
+
+const Specialty = styled.p`
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #666;
+`;
+
+const Mujer = styled.img`
+    width: 130px;
+    height: auto;
+    border-radius: 10px;
+    position: absolute;
+    left: 1%;
+    top: 65%;
+
+    @media (max-width: 768px) {
+        width: 100px;
+        top: 80%;
+    }
+`;
+
+const Mujer2 = styled.img`
+    width: 120px;
+    height: auto;
+    border-radius: 10px;
+    position: absolute;
+    right: 2%;
+    top: 5%;
+
+    @media (max-width: 768px) {
+        width: 130px;
+        top: 0;
+        right: 0;
+    }
+`;

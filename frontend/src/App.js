@@ -7,6 +7,7 @@ import Nosotros from './pages/Nosotros';
 import Productos from './pages/Productos';
 import Promociones from './pages/Promociones';
 import Contacto from './pages/Contacto';
+import WhatsApp from './components/home/whatsApp-modal';
 import { Routes, Route, Link } from 'react-router-dom';
 
 function App() {
@@ -14,6 +15,8 @@ function App() {
   return (
     <>    
     <Header />
+       <WhatsApp />
+
        <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/nosotros" element={<Nosotros />} />
@@ -29,3 +32,4 @@ function App() {
 }
 
 export default App;
+

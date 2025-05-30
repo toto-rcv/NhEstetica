@@ -8,9 +8,9 @@ function Footer() {
   return (
     <FooterContainer>
       <TopSection>
-        <FigureLeft src='footer/caraconflor.png' alt="Logo" />
+        <ImagenMujer src='/footer/caraconflor.png' alt="Logo" />
         <LogoContainer>
-                <Logo src='logo.png' alt="Logo" />
+                <Logo src='/logo.png' alt="Logo" />
                 <TitleContainer>
                     <Title>
                         NH
@@ -58,7 +58,7 @@ function Footer() {
             </ul>
           </Column>
         </FooterNav>
-        <FigureRight src='footer/rosa.png' alt="Logo" />
+        <ImageRosa src='/footer/rosa.png' alt="Logo" />
       </TopSection>
 
       <BottomSection>
@@ -82,7 +82,7 @@ const FooterContainer = styled.footer`
   background: linear-gradient(
     90deg,
     rgba(224, 117, 212, 0.3) 0%,
-    var(--primary-color) 25%,
+    rgba(255, 121,177, 0.3) 25%,
     var(--secondary-color) 75%,
     rgba(224, 117, 212, 0.3) 100%
   );
@@ -90,6 +90,14 @@ const FooterContainer = styled.footer`
   color: #000;
   position: relative;
    overflow: hidden;
+
+   @media (min-width: 1450px) {
+      padding: 40px 16vw;
+   }
+
+   @media (min-width: 1900px) {
+      padding: 40px 16vw;
+   }
 `;
 
 
@@ -100,6 +108,7 @@ const TopSection = styled.div`
   gap: 40px;
   border-bottom: 1px solid rgba(0,0,0,0.4);
   padding-bottom: 30px;
+
 `;
 
 const LogoContainer = styled.div`
@@ -110,11 +119,19 @@ const LogoContainer = styled.div`
     align-content: flex-start;
     flex-wrap: wrap;
     margin: 1.33em 30px 0 0;
+
+  @media (max-width: 768px) {
+    flex-direction: row;
+  }
 `;
 
 const Logo = styled.img`
   width: 80px;
   object-fit: contain;
+
+  @media (max-width: 768px) {
+    width: 70px;
+  }
 
 `;
 
@@ -139,11 +156,19 @@ const Title = styled.div`
   span {
     font-style: italic;
   }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const FooterNav = styled.div`
   display: flex;
   gap: 40px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const Column = styled.div`
@@ -168,6 +193,12 @@ const Column = styled.div`
     color: var(--terciary-color);
   }
   }
+
+  @media (max-width: 768px) {
+    h4 {
+      margin: 10px 0px;
+    }
+  }
 `;
 
 const BottomSection = styled.div`
@@ -177,6 +208,12 @@ const BottomSection = styled.div`
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
+
+    @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+
 `;
 
 const SocialIcons = styled.div`
@@ -228,7 +265,7 @@ const Icons = styled.div`
     gap: 1rem;
 `;
 
-const FigureLeft = styled.img`
+const ImagenMujer = styled.img`
     object-fit: contain;
     position: absolute;
     left: 30px;
@@ -236,12 +273,24 @@ const FigureLeft = styled.img`
     width: 170px;
     transform: rotate(25deg);
     filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
+
+    @media (max-width: 768px) {
+      top: 95vh;
+      left: 69vw;
+      width: 100px;
+      transform: rotate(319deg) scaleX(-1);
+    }
 `;
 
-const FigureRight = styled.img`
+const ImageRosa = styled.img`
   object-fit: contain;
   position: absolute;
   top: 10vh;
   right: 25px;
   width: 110px;
+
+  @media (max-width: 768px) {
+    top: 27vh;
+    width: 90px;
+  }
 `;
