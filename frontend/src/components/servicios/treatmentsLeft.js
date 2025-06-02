@@ -1,163 +1,168 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
-function treatmentsLeft({ image, description, title }) {
+const TreatmentsLeft = ({ link, image, title, description }) => {
     return (
-        <ContentWrapper>
-            <ContentImage>
-                <Background image={image}>
-                    <Overlay />
-                    <ButtonWrapper>
-                        <Button>VER MÁS</Button>
-                    </ButtonWrapper>
-                </Background>
-            </ContentImage>
-            <ContentText>
-                <Title>{title}</Title>
-                <Content>{description}</Content>
-            </ContentText>
-        </ContentWrapper>
+        <Container>
+            <ContentWrapper>
+                <TextContent>
+                    <Title>{title}</Title>
+                    <Description>{description}</Description>
+                    <MobileButton to={`/${link}`}>Ver más</MobileButton>
+                </TextContent>
+                <ImageContainer>
+                    <Image src={image} alt={title} />
+                    <ButtonOverlay>
+                        <StyledLink to={`/${link}`}>Ver más</StyledLink>
+                    </ButtonOverlay>
+                </ImageContainer>
+            </ContentWrapper>
+        </Container>
     );
-}
+};
 
-export default treatmentsLeft;
+export default TreatmentsLeft;
+
+const Container = styled.div`
+    width: 100%;
+    padding: 2rem 0;
+`;
 
 const ContentWrapper = styled.div`
-    width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
-    position: relative;
-    padding: 5rem 0 1rem 0;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    gap: 2rem;
+
     @media (max-width: 768px) {
-        flex-direction: column;
-        height: auto;
+        flex-direction: column-reverse;
+        text-align: center;
+        padding: 0 1rem;
     }
 `;
-const ContentText = styled.div`
-    width: 40.5%; 
-    height: 360px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    position: relative;
-    flex-direction: column;
+
+const TextContent = styled.div`
+    flex: 1;
+    max-width: 600px;
+
     @media (max-width: 768px) {
-        width: 100%;
-        height: auto;
-        margin-left: auto;
-        margin-right: auto;
-    }
- `
-
-const Background = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-image: url(${(props) => props.image});
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10%;
-  
-  @media (max-width: 768px) {
-      width: 100%;
-      height: 270px; 
-      margin-left: auto;
-      margin-right: auto;
-  }
-`;
-
-const Overlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.15);
-  z-index: 1;
-  border-radius: 10%;
-`;
-
-const Content = styled.div`
-    color: var(--background-dark);
-    font-size: 1.35rem; 
-    z-index: 1;
-    font-family: var(--text-font), sans-serif;
-    align-items: center;
-    @media (max-width: 768px) {
-        width: 100%;
-        font-size: 1.8rem; 
-        padding: 2rem 0;
+        max-width: 100%;
     }
 `;
 
 const Title = styled.h2`
-    font-size: 1.98rem;
-    margin: 0 0 1.5rem;
+    font-size: 2rem;
     color: var(--terciary-color);
-    font-family: var(--heading-font), sans-serif;
-    @media (max-width: 768px) {
-        font-size: 1.8rem; 
-        text-align: center;
-    }
-`
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-family: 'Saira', sans-serif;
 
-const ContentImage = styled.div`
-    width: 27%;
-    height: 360px;
-    position: relative;
-    border-radius:10%;
     @media (max-width: 768px) {
-        width: 100%;
-        height: 270px;
-        margin-left: auto;
-        margin-right: auto;
+        font-size: 1.5rem;
     }
-    transition: transform 0.3s ease-in-out;
+`;
+
+const Description = styled.p`
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 768px) {
+        font-size: 0.9rem;
+    }
+`;
+
+const ImageContainer = styled.div`
+    flex: 1;
+    max-width: 500px;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+
+    @media (max-width: 768px) {
+        max-width: 100%;
+        height: 250px;
+    }
+`;
+
+const Image = styled.img`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+
     &:hover {
         transform: scale(1.05);
     }
 `;
 
-const ButtonWrapper = styled.div`
+const ButtonOverlay = styled.div`
     position: absolute;
-    top: 50%;
-    left: 50%;
-    z-index: 2;
-    transform: translate(-50%, -50%);
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    pointer-events: none;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+
+  
+
     @media (max-width: 768px) {
-        top: 80%;
+        display: none;
     }
 `;
 
-const Button = styled.button`
-  pointer-events: auto;
-  padding: 15px 30px;
-  font-size: 1.3rem;
-  background-color: transparent;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-decoration: none;
-  display: inline-block;
-  font-family: var(--heading-font);
-  font-weight: 600;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.9);
-  @media (max-width: 768px) {
-    padding: 12px 24px;
-    font-size: 0.95rem;
-  }
-  &:hover {
-    transform: scale(1.05);
-  }
+const StyledLink = styled(Link)`
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background-color: transparent;
+    color: white;
+    text-decoration: none;
+    border: 2px solid white;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        margin-top: 1rem;
+    }
+`;
+
+const MobileButton = styled(Link)`
+    display: none;
+    padding: 0.8rem 2rem;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+
+    &:hover {
+        background-color: var(--primary-color-dark);
+    }
+
+    @media (max-width: 768px) {
+        display: inline-block;
+    }
 `;

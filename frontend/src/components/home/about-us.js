@@ -1,8 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 function AboutUs() {
+    const location = useLocation();
+    const isNosotrosPage = location.pathname === '/nosotros';
+
     return (
         <Container>
             <ImageBox>               
@@ -11,7 +14,7 @@ function AboutUs() {
 
             <TextContent>
                 <SmallHeading>Tu especialista de estética</SmallHeading>
-                <MainHeading>SOBRE NOSOTROS</MainHeading>
+                <MainHeading>¿Quiénes somos?</MainHeading>
 
                 <SectionTitle>Here’s why you’ll love working with us:</SectionTitle>
                 <ul>
@@ -20,7 +23,7 @@ function AboutUs() {
                     <li><strong>Facial customization.</strong> Unique services and add-ons based on your skin goals.</li>
                 </ul>
 
-                <Button to= "/about">Ver más</Button>
+                {!isNosotrosPage && <Button to="/nosotros">Ver más</Button>}
             </TextContent>
         </Container>
     );
@@ -39,7 +42,8 @@ const Container = styled.div`
     @media (max-width: 768px) {
         flex-direction: column-reverse;
         text-align: center;
-        padding: 3rem
+        padding: 4rem 2rem;
+        gap: 3rem;
     }
 `;
 
@@ -61,6 +65,11 @@ const StyledImage = styled.img`
     display: block;
     object-fit: cover;
     border-radius: 70px;
+
+    @media (max-width: 768px) {
+       max-height: 380px;
+       aspect-ratio: 16/20;
+    }
 `;
 
 
@@ -83,6 +92,14 @@ const TextContent = styled.div`
             }
         }
     }
+
+      @media (max-width: 768px) {
+        ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: -webkit-center;
+        }  
+      }
 `;
 
 const SmallHeading = styled.h3`
@@ -91,6 +108,10 @@ const SmallHeading = styled.h3`
     color: var(--terciary-color);
     margin: 0;
     font-family: var(--heading-font),sans-serif;
+    
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
 `;
 
 const MainHeading = styled.h2`
@@ -98,6 +119,10 @@ const MainHeading = styled.h2`
     margin: 0 0 2rem;
     font-family: var(--heading-font);
     transform: skew(-10deg);
+
+      @media (max-width: 768px) {
+       font-size: 2.3rem;
+     }
 `;
 
 const SectionTitle = styled.h3`

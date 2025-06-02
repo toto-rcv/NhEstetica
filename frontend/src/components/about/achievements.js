@@ -13,7 +13,6 @@ function Achievements() {
           <SmallText>De experiencia</SmallText>
         </Content>
       </Item>
-      <Divider />
       <Item>
         <Icon><FontAwesomeIcon icon={faWandMagicSparkles} /></Icon>
         <Content>
@@ -21,7 +20,6 @@ function Achievements() {
           <SmallText>tratamientos</SmallText>
         </Content>
       </Item>
-      <Divider />
       <Item>
         <Icon><FontAwesomeIcon icon={faUserCheck} /></Icon>
         <Content>
@@ -33,32 +31,45 @@ function Achievements() {
   );
 }
 
+
 export default Achievements;
 
 const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   background: linear-gradient(
     90deg,
     rgba(224, 117, 212, 0.3) 0%,
-    rgba(255, 121,177, 0.3) 25%,
+    rgba(255, 121, 177, 0.3) 25%,
     var(--secondary-color) 75%,
     rgba(224, 117, 212, 0.3) 100%
   );
   padding: 3rem 8rem;
   gap: 2rem;
-  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    padding: 2rem 3rem;
+    gap: 0;
+  }
 `;
 
 const Item = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex: 1;
-  min-width: 200px;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
 `;
+
 
 const Icon = styled.div`
   color: var(--terciary-color);
@@ -79,6 +90,10 @@ const BigText = styled.div`
   font-weight: bold;
   color: var(--background-dark);
   font-family: "Saira", sans-serif;
+
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
 `;
 
 const SmallText = styled.div`

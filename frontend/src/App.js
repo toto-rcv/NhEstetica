@@ -9,6 +9,17 @@ import Promociones from './pages/Promociones';
 import Contacto from './pages/Contacto';
 import WhatsApp from './components/home/whatsApp-modal';
 import { Routes, Route, Link } from 'react-router-dom';
+import TratamientosCorporales from './pages/services/TratamientosCorporales';
+import TratamientosFaciales from './pages/services/TratamientosFaciales';
+import DepilacionLaser from './pages/services/DepilacionLaser';
+import Masajes from './pages/services/Masajes';
+
+const serviciosRoutes = [
+  { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
+  { path: 'TratamientosFaciales', element: <TratamientosFaciales /> },
+  { path: 'DepilacionLaser', element: <DepilacionLaser /> },
+  { path: 'Masajes', element: <Masajes /> },
+];
 
 function App() {
 
@@ -16,15 +27,18 @@ function App() {
     <>    
     <Header />
        <WhatsApp />
-
        <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/servicios" element={<Servicios />} />
         <Route path="/Productos" element={<Productos />} />
         <Route path="/promociones" element={<Promociones />} />
-        <Route path="/servicios" element={<Servicios />} />
         <Route path="/contacto" element={<Contacto />} />
+        
+        {serviciosRoutes.map(({ path, element }) => (
+          <Route key={path} path={`/servicios/${path}`} element={element} />
+        ))}
+
       </Routes>
     <Footer />
     </>

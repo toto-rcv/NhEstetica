@@ -22,6 +22,10 @@ const Background = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    height: 30vh;  
+  }
 `;
 
 const Overlay = styled.div`
@@ -31,18 +35,28 @@ const Overlay = styled.div`
   z-index: 1;
 `;
 
+
 const Content = styled.div`
-    position: absolute;
-    top: 45%;
-    left: 70%;
+  position: absolute;
+  top: 45%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  color: var(--background-dark);
+  font-size: 4rem;
+  text-shadow: 2px 2px 4px rgb(255 255 255 / 50%);
+  z-index: 1;
+  font-family: var(--heading-font), sans-serif;
+  font-weight: 600;
+
+  @media (max-width: 768px) {
+    top: 65%;
+    left: 50%;
+    width: 100%;
+    font-size: 2.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     transform: translate(-50%, -50%);
-    color: var(--background-dark);
-    font-size: 4rem;
-    text-shadow: 2px 2px 4px rgb(255 255 255 / 50%);
-    z-index: 1;
-    font-family: var(--heading-font), sans-serif;
-    font-weight: 600;
-    @media (max-width: 768px) {
-        font-size: 2rem;
-    }
+  }
 `;

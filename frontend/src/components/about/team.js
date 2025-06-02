@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import Slider from "react-slick";
+
 
 const professionals = [
   {
@@ -19,6 +21,24 @@ const professionals = [
   },
 ];
 
+const settings = {
+  dots: true,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 3,
+  slidesToScroll: 1,
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: { slidesToShow: 2 }
+    },
+    {
+      breakpoint: 768,
+      settings: { slidesToShow: 1 }
+    }
+  ]
+};
+
 
 function Team() {
   return (
@@ -28,18 +48,19 @@ function Team() {
       <TopText>¿Quiénes somos?</TopText>
       <Heading>NUESTROS PROFESIONALES</Heading>
       <Subheading>Un gran equipo con profesionales de primera, Lorem ipsum dolor, sit amet consectetur adipisicing elit.</Subheading>
-
-      <CardsContainer>
-        {professionals.map((pro, index) => (
-          <Card key={index}>
-            <ImageCircle>
-              <ProfileImage src={pro.image} alt={pro.name} />
-            </ImageCircle>
-            <Name>{pro.name}</Name>
-            <Specialty>{pro.specialty}</Specialty>
-          </Card>
-        ))}
-      </CardsContainer>
+      <SliderContainer>
+        <Slider {...settings}>
+          {professionals.map((pro, index) => (
+            <Card key={index}>
+              <ImageCircle>
+                <ProfileImage src={pro.image} alt={pro.name} />
+              </ImageCircle>
+              <Name>{pro.name}</Name>
+              <Specialty>{pro.specialty}</Specialty>
+            </Card>
+          ))}
+        </Slider>
+      </SliderContainer>
     </Wrapper>
   );
 }
@@ -61,6 +82,10 @@ const TopText = styled.h3`
     color: var(--terciary-color);
     margin: 0;
     font-family: var(--heading-font),sans-serif;
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
 `;
 
 const Heading = styled.h2`
@@ -68,20 +93,23 @@ const Heading = styled.h2`
     margin: 0 0 1rem;
     font-family: var(--heading-font);
     transform: skew(-10deg);
+
+    
+    @media (max-width: 768px) {
+      font-size: 2.3rem;
+    }
 `;
 
 const Subheading = styled.p`
   font-style: italic;
   color: #555;
   margin-bottom: 3rem;
+  
+    @media (max-width: 768px) {
+      margin-bottom: 1rem;
+    }
 `;
 
-const CardsContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 3rem;
-`;
 
 const Card = styled.div`
   width: 200px;
@@ -143,8 +171,23 @@ const Mujer2 = styled.img`
     top: 5%;
 
     @media (max-width: 768px) {
-        width: 130px;
-        top: 0;
+        width: 95px;
+        top: 10px;
         right: 0;
     }
+`;
+
+const SliderContainer = styled.div`
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 0;
+
+  .slick-slide {
+    display: flex;
+    justify-content: center;
+  }
+
+  .slick-dots li button:before {
+    color: var(--terciary-color);
+  }
 `;

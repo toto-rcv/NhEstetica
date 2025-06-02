@@ -27,6 +27,10 @@ const QuoteContainer = styled.div`
   );
   padding: 6rem 2rem;
   text-align: center;
+
+    @media (max-width: 768px) {
+      padding: 4rem 2rem;
+    }  
 `;
 
 const QuoteText = styled.p`
@@ -39,5 +43,10 @@ const QuoteText = styled.p`
 
   @media (min-width: 990px) {
     max-width: 65vw;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    line-height: 1.4;
   }
 `;

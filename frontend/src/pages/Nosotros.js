@@ -2,6 +2,7 @@ import React from 'react'
 import AboutUs from '../components/home/about-us';
 import Quote from '../components/about/quote';
 import Achievements from '../components/about/achievements';
+import Gallery from '../components/about/gallery';
 import Team from '../components/about/team';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
@@ -10,7 +11,7 @@ import Breadcrumb from "../components/breadcrumb";
 function Nosotros() {
   return (
     <>
-      <Breadcrumb image="/servicios/primerPlano.jpg" title="About Us" />
+      <Breadcrumb image="/servicios/primerPlano.jpg" title="Sobre Nosotros" />
       <ContainerAbout>
         <FadeIn delay={0.2}>
           <AboutUs />
@@ -25,7 +26,7 @@ function Nosotros() {
           <Achievements />
         </FadeIn>
         <FadeIn delay={0.6}>
-          <AboutUs />
+          <Gallery />
         </FadeIn>
       </ContainerAbout>
     </>

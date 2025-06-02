@@ -41,7 +41,7 @@ export default Slider;
 const SliderContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 700px;
+  height: 750px;
   overflow: hidden;
   margin: 0;
   padding: 0;
