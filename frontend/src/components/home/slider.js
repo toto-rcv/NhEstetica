@@ -5,9 +5,11 @@ import { Link as RouterLink } from "react-router-dom";
 function Slider({ isMenuOpen }) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const slides = [
-    "/slider/pepe.webp",
-    "/slider/estetica_dos.jpg",
-    "/slider/estetica_tres.webp",
+    'slider/Imagen_1.jpg',
+    'slider/Imagen_2.jpg',
+    'slider/Imagen_3.jpg',
+    'slider/Imagen_4.jpg',
+    'slider/Imagen_5.jpg',
   ];
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);

@@ -1,9 +1,12 @@
 import React from 'react'
+import Breadcrumb from '../../components/breadcrumb';
 
 function DepilacionLaser() {
   return (
-    <div>DepilacionLaser</div>
+    <>
+     <Breadcrumb image="/servicios/Depilacion_laser/Titular.jpg" title="Servicios" />
+    </>
   )
 }
 
-export default DepilacionLaser
+export default DepilacionLaser;
