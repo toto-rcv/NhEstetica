@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClockRotateLeft, faWandMagicSparkles, faUserCheck } from '@fortawesome/free-solid-svg-icons';
+import AnimatedNumber from './extensions/AnimatedNumber';
 
 function Achievements() {
   return (
@@ -9,21 +10,27 @@ function Achievements() {
       <Item>
         <Icon><FontAwesomeIcon icon={faClockRotateLeft} /></Icon>
         <Content>
-          <BigText>11 AÑOS</BigText>
+          <BigText>
+            <AnimatedNumber from={0} to={11} duration={3} separator="." /> AÑOS
+          </BigText>
           <SmallText>De experiencia</SmallText>
         </Content>
       </Item>
       <Item>
         <Icon><FontAwesomeIcon icon={faWandMagicSparkles} /></Icon>
         <Content>
-          <BigText>20+</BigText>
+          <BigText>
+            <AnimatedNumber from={0} to={20} duration={3} separator="." suffix="+" />
+          </BigText>
           <SmallText>tratamientos</SmallText>
         </Content>
       </Item>
       <Item>
         <Icon><FontAwesomeIcon icon={faUserCheck} /></Icon>
         <Content>
-          <BigText>35000+</BigText>
+          <BigText>
+            <AnimatedNumber from={0} to={35000} duration={1} separator="." suffix="+" />
+          </BigText>
           <SmallText>clientes satisfechos</SmallText>
         </Content>
       </Item>
@@ -31,9 +38,9 @@ function Achievements() {
   );
 }
 
-
 export default Achievements;
 
+// styled-components CORREGIDOS CON BACKTICKS
 const Container = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -69,7 +76,6 @@ const Item = styled.div`
     }
   }
 `;
-
 
 const Icon = styled.div`
   color: var(--terciary-color);

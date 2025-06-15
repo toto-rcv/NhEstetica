@@ -2,20 +2,35 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-const TreatmentsRight = ({ link, image, title, description }) => {
+const TreatmentsRight = ({ link, image, title, description, price, promoLink, showLine = false }) => {
+    const handleClick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleImageClick = () => {
+        handleClick();
+        window.location.href = `/${link}`;
+    };
+
     return (
         <Container>
             <ContentWrapper>
                 <ImageContainer>
-                    <Image src={image} alt={title} />
+                    <Image src={image} alt={title} onClick={handleImageClick} />
                     <ButtonOverlay>
-                        <StyledLink to={`/${link}`}>Ver más</StyledLink>
+                        <StyledLink to={`/${link}`} onClick={handleClick}>Ver más</StyledLink>
                     </ButtonOverlay>
                 </ImageContainer>
                 <TextContent>
-                    <Title>{title}</Title>
+                    <Title showLine={showLine}>{title}</Title>
                     <Description>{description}</Description>
-                    <MobileButton to={`/${link}`}>Ver más</MobileButton>
+                    <PriceContainer>
+                        <Price>{price}</Price>
+                        {promoLink && (
+                            <PromoLink href={promoLink} target="_blank" rel="noopener noreferrer">¡CONSULTA LAS PROMOS!</PromoLink>
+                        )}
+                    </PriceContainer>
+                    <MobileButton to={`/${link}`} onClick={handleClick}>Ver más</MobileButton>
                 </TextContent>
             </ContentWrapper>
         </Container>
@@ -48,6 +63,7 @@ const ContentWrapper = styled.div`
 const TextContent = styled.div`
     flex: 1;
     max-width: 600px;
+    text-align: center;
 
     @media (max-width: 768px) {
         max-width: 100%;
@@ -60,6 +76,28 @@ const Title = styled.h2`
     margin-bottom: 1rem;
     font-weight: 600;
     font-family: 'Saira', sans-serif;
+    position: relative;
+    padding-bottom: 1rem;
+
+    ${props => props.showLine && `
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 4px;
+            background: linear-gradient(
+                to right,
+                transparent 0%,
+                var(--primary-color) 15%,
+                var(--primary-color) 85%,
+                transparent 100%
+            );
+            border-radius: 2px;
+        }
+    `}
 
     @media (max-width: 768px) {
         font-size: 1.5rem;
@@ -71,9 +109,111 @@ const Description = styled.p`
     line-height: 1.6;
     color: var(--text-color);
     margin-bottom: 1.5rem;
+    text-align: left;
 
     @media (max-width: 768px) {
         font-size: 0.9rem;
+    }
+`;
+
+const PriceContainer = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin: 2.5rem 0;
+    flex-wrap: wrap;
+    position: relative;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+        justify-content: flex-start;
+        gap: 1rem;
+        margin: 2rem 0;
+        padding: 0 1rem;
+    }
+`;
+
+const Price = styled.div`
+    font-size: 1.8rem;
+    color: var(--terciary-color);
+    font-weight: 700;
+    font-family: 'Saira', sans-serif;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    padding: 0.5rem 0;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--secondary-color);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        color: var(--secondary-color);
+
+        &::after {
+            transform: scaleX(1);
+        }
+    }
+
+    @media (max-width: 768px) {
+        font-size: 1.5rem;
+    }
+`;
+
+const PromoLink = styled.a`
+    font-size: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 0.8rem 1.8rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 25px;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    z-index: 1;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--primary-color);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: -1;
+    }
+
+    &:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+
+        &::before {
+            transform: translateX(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        font-size: 0.9rem;
+        padding: 0.7rem 1.5rem;
+        width: auto;
+        text-align: center;
+        margin-top: 0.5rem;
     }
 `;
 
@@ -97,6 +237,7 @@ const Image = styled.img`
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    cursor: pointer;
 
     &:hover {
         transform: scale(1.05);

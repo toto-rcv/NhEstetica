@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
-function Breadcrumb({ image, title }) {
+function Breadcrumb({ image, title, position = 'right' }) {
   return (
     <Background image={image}>
       <Overlay />
-      <Content>{title}</Content>
+      <Content position={position}>{title}</Content>
     </Background>
   );
 }
@@ -35,11 +35,10 @@ const Overlay = styled.div`
   z-index: 1;
 `;
 
-
 const Content = styled.div`
   position: absolute;
   top: 45%;
-  left: 70%;
+  left: ${props => props.position === 'left' ? '30%' : '70%'};
   transform: translate(-50%, -50%);
   color: var(--background-dark);
   font-size: 4rem;
