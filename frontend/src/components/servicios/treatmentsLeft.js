@@ -2,14 +2,18 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-const TreatmentsLeft = ({ link, image, title, description, price, promoLink, showLine = false }) => {
+const TreatmentsLeft = ({ link, image, title, description, price, promoLink, showLine = false, customButtonText, customButtonLink }) => {
     const handleClick = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleImageClick = () => {
         handleClick();
-        window.location.href = `/servicios/${link}`;
+        if (customButtonLink) {
+            window.location.href = customButtonLink;
+        } else {
+            window.location.href = `/servicios/${link}`;
+        }
     };
 
     return (
@@ -24,12 +28,30 @@ const TreatmentsLeft = ({ link, image, title, description, price, promoLink, sho
                             <PromoLink href={promoLink} target="_blank" rel="noopener noreferrer">¡CONSULTA LAS PROMOS!</PromoLink>
                         )}
                     </PriceContainer>
-                    <MobileButton to={`/servicios/${link}`} onClick={handleClick}>Ver más</MobileButton>
+                    <MobileButton 
+                        to={customButtonLink || `/servicios/${link}`} 
+                        onClick={handleClick}
+                        as={customButtonLink ? 'a' : Link}
+                        href={customButtonLink}
+                        target={customButtonLink ? "_blank" : undefined}
+                        rel={customButtonLink ? "noopener noreferrer" : undefined}
+                    >
+                        {customButtonText || "Ver más"}
+                    </MobileButton>
                 </TextContent>
                 <ImageContainer>
                     <Image src={image} alt={title} onClick={handleImageClick} />
                     <ButtonOverlay>
-                        <StyledLink to={`/servicios/${link}`} onClick={handleClick}>Ver más</StyledLink>
+                        <StyledLink 
+                            to={customButtonLink || `/servicios/${link}`} 
+                            onClick={handleClick}
+                            as={customButtonLink ? 'a' : Link}
+                            href={customButtonLink}
+                            target={customButtonLink ? "_blank" : undefined}
+                            rel={customButtonLink ? "noopener noreferrer" : undefined}
+                        >
+                            {customButtonText || "Ver más"}
+                        </StyledLink>
                     </ButtonOverlay>
                 </ImageContainer>
             </ContentWrapper>
@@ -126,7 +148,7 @@ const PriceContainer = styled.div`
     justify-content: center;
 
     @media (max-width: 768px) {
-        justify-content: flex-start;
+        justify-content: center;
         gap: 1rem;
         margin: 2rem 0;
         padding: 0 1rem;
@@ -143,6 +165,7 @@ const Price = styled.div`
     display: inline-block;
     position: relative;
     padding: 0.5rem 0;
+    text-align: center;
 
     &::after {
         content: '';
@@ -184,6 +207,7 @@ const PromoLink = styled.a`
     overflow: hidden;
     background: transparent;
     z-index: 1;
+    text-align: center;
 
     &::before {
         content: '';
@@ -295,7 +319,8 @@ const MobileButton = styled(Link)`
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s ease;
-    margin-top: 1rem;
+    margin: 1rem auto;
+    text-align: center;
 
     &:hover {
         background-color: var(--primary-color-dark);

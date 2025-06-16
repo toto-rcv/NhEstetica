@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
-function Breadcrumb({ image, title, position = 'right' }) {
+function Breadcrumb({ image, title, position = 'right', titleColor }) {
   return (
     <Background image={image}>
       <Overlay />
-      <Content position={position}>{title}</Content>
+      <Content position={position} titleColor={titleColor}>{title}</Content>
     </Background>
   );
 }
@@ -40,9 +40,9 @@ const Content = styled.div`
   top: 45%;
   left: ${props => props.position === 'left' ? '30%' : '70%'};
   transform: translate(-50%, -50%);
-  color: var(--background-dark);
+  color: ${props => props.titleColor || 'var(--background-dark)'};
   font-size: 4rem;
-  text-shadow: 2px 2px 4px rgb(255 255 255 / 50%);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   z-index: 1;
   font-family: var(--heading-font), sans-serif;
   font-weight: 600;

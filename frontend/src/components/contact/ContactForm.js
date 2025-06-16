@@ -71,14 +71,14 @@ const Title = styled.h2`
 `;
 
 const FormContainer = styled.form`
-  border: 1px solid var(--primary-color);
-  border-radius: 10px;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
 `;
 
 const Input = styled.input`

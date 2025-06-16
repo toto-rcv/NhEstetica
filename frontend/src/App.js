@@ -13,6 +13,7 @@ import TratamientosCorporales from './pages/services/TratamientosCorporales';
 import TratamientosFaciales from './pages/services/TratamientosFaciales';
 import DepilacionLaser from './pages/services/DepilacionLaser';
 import Masajes from './pages/services/Masajes';
+import ProductDetail from './pages/products/ProductDetail'; 
 
 const serviciosRoutes = [
   { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
@@ -38,6 +39,7 @@ function App() {
         {serviciosRoutes.map(({ path, element }) => (
           <Route key={path} path={`/servicios/${path}`} element={element} />
         ))}
+         <Route path="/productos/:productName" element={<ProductDetail />} />
 
       </Routes>
     <Footer />

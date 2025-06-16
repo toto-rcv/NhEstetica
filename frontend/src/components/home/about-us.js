@@ -1,10 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 
 function AboutUs() {
     const location = useLocation();
+    const navigate = useNavigate();
     const isNosotrosPage = location.pathname === '/nosotros';
+
+    const handleClick = () => {
+        navigate('/nosotros');
+        window.scrollTo(0, 0);
+    };
 
     return (
         <Container>
@@ -16,14 +22,14 @@ function AboutUs() {
                 <SmallHeading>Tu especialista de estética</SmallHeading>
                 <MainHeading>¿Quiénes somos?</MainHeading>
 
-                <SectionTitle>Here’s why you’ll love working with us:</SectionTitle>
+                <SectionTitle>Por eso te encantará trabajar con nosotros:</SectionTitle>
                 <ul>
-                    <li><strong>Expert and compassionate care.</strong> Sabrina, your skincare specialist, has over 6 years of experience and is well versed in many treatments for all skin types. Learn more about her journey</li>
-                    <li><strong>Luxurious and advanced treatments.</strong> We offer a relaxing spa-like experience with advanced clinical treatment technology.</li>
-                    <li><strong>Facial customization.</strong> Unique services and add-ons based on your skin goals.</li>
+                    <li><strong>En NH Estética, entendemos la belleza como un reflejo del bienestar integral. </strong> Por eso, nuestro equipo de profesionales se dedica a ofrecer una atención personalizada y tratamientos de última generación, pensados para que te veas y te sientas increíble, desde adentro hacia afuera.</li>
+                    <li><strong>Descubrí el poder transformador</strong> de nuestros tratamientos y sentí la diferencia que hace un enfoque verdaderamente personalizado de la belleza y el bienestar.</li>
+                    <li><strong>Liberá tu belleza natural.</strong> y embarcate en un viaje de autocuidado con nuestra exclusiva selección de tratamientos. Desde masajes relajantes hasta cuidados faciales de última generación, todo pensado para vos.</li>
                 </ul>
 
-                {!isNosotrosPage && <Button to="/nosotros">Ver más</Button>}
+                {!isNosotrosPage && <Button onClick={handleClick}>Ver más</Button>}
             </TextContent>
         </Container>
     );
@@ -131,7 +137,7 @@ const SectionTitle = styled.h3`
     margin-bottom: 1rem;
 `;
 
-const Button = styled(RouterLink)`
+const Button = styled.button`
   padding: 15px 30px;
   font-size: 1rem;
   background-color: var(--terciary-color);

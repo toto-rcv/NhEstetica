@@ -4,11 +4,15 @@ import { Link as RouterLink } from 'react-router-dom';
 
 function AboutUs() {
     const services = [
-        { image: 'slider/pepe.webp', label: 'ESTÉTICA CORPORAL' },
-        { image: 'slider/estetica_dos.jpg', label: 'ESTÉTICA FACIAL' },
-        { image: 'slider/estetica_tres.webp', label: 'RELLENOS Y CORRECCIONES' },
-        { image: 'slider/fausto.png', label: 'DEPILACIÓN LÁSER' },
+        { image: './servicios/TratamientoCorporal.jpg', label: 'ESTÉTICA CORPORAL', href: '/servicios/TratamientosCorporales' },
+        { image: './servicios/TratamientoFaciales.jpg', label: 'ESTÉTICA FACIAL', href: '/servicios/TratamientosFaciales' },
+        { image: './servicios/Masajes.jpg', label: 'RELLENOS Y CORRECCIONES', href: '/servicios/Masajes' },
+        { image: './servicios/depilacion.jpg', label: 'DEPILACIÓN LÁSER', href: '/servicios/DepilacionLaser' },
     ];
+
+    const handleClick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <ServicesContainer>
@@ -16,10 +20,9 @@ function AboutUs() {
                 <SubTitle>¿Qué hacemos?</SubTitle>
                 <Title>MIRÁ NUESTROS SERVICIOS</Title>
                 <Description>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro sint atque explicabo rerum ratione vero, libero debitis alias velit magni harum dicta, 
-                    a, odit laborum obcaecati eveniet vel quam ducimus nulla. Quaerat, autem magnam. Porro sint atque
+                Descubre la diferencia que un enfoque personalizado de belleza y bienestar puede hacer. El personal experimentado de NH Estética ,se dedica a brindar un servicio excepcional y tratamientos personalizados para ayudarte a verte y sentirte lo mejor posible.
                 </Description>
-                <ServiceButton to="/services">Ver todos</ServiceButton>
+                <ServiceButton to="/services" onClick={handleClick}>Ver todos</ServiceButton>
                 
             </TextContainer>
 
@@ -29,6 +32,9 @@ function AboutUs() {
         key={i}
         image={service.image}
         className={i % 2 === 1 ? 'offset' : ''}
+        as={RouterLink}
+        to={service.href}
+        onClick={handleClick}
     >
         <CardOverlay />
         <CardContent>
