@@ -42,7 +42,7 @@ const TreatmentsLeft = ({ link, image, title, description, price, promoLink, sho
                 <ImageContainer>
                     <Image src={image} alt={title} onClick={handleImageClick} />
                     <ButtonOverlay>
-                        <StyledLink 
+                        <StyledLink
                             to={customButtonLink || `/servicios/${link}`} 
                             onClick={handleClick}
                             as={customButtonLink ? 'a' : Link}
