@@ -2,7 +2,7 @@ export const categories = ['Todo', 'Facial', 'Corporal', 'Cabello', 'Natural', '
 
 export const brands = ['Royal Bronze', 'Idraet', 'Skin Food'];
 
-export const products = [
+export const rawProducts  = [
   {
     id: 1,
     name: 'Crema Hidratante Facial',
@@ -14,6 +14,7 @@ export const products = [
     price: 25.99,
     isNatural: true,
     isVegan: true,
+    link: "/productos/Crema%20Hidratante%20Facial"
   },
   {
     id: 2,
@@ -112,3 +113,8 @@ export const products = [
     isVegan: true,
   },
 ];
+
+export const products = rawProducts.map(product => ({
+  ...product,
+  link: `/productos/${encodeURIComponent(product.name)}`
+}));

@@ -37,3 +37,7 @@ body.menu-open .slider-controls {
 .circular-gallery:active {
   cursor: grabbing;
 }
+
+.circular-gallery canvas {
+  cursor: pointer;
+}

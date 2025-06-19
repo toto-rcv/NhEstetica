@@ -4,11 +4,20 @@ import styled from "styled-components";
 import { products } from "../../data/products";
 import Breadcrumb from "../../components/breadcrumb";
 import CircularGallery from "../../components/extensions/CircullarGallery";
+import {useState, useEffect} from "react"
 
 function ProductDetail() {
   const { productName } = useParams();
   const decodedName = decodeURIComponent(productName);
   const product = products.find((p) => p.name === decodedName);
+ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+   useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   if (!product) {
     return (
@@ -43,10 +52,18 @@ function ProductDetail() {
         </Right>
       </DetailWrapper>
 
-      <CircularGalleryContainer
-        style={{ height: "600px", position: "relative" }}
+ <CircularGalleryContainer
+        style={{
+          height: isMobile ? "300px" : "600px",
+          position: "relative",
+        }}
       >
-        <CircularGallery bend={2} textColor="var(--text-color)" borderRadius={0.05} font="var(--heading-font)" />
+        <CircularGallery
+          bend={isMobile ? 0 : 2}
+          textColor="var(--text-color)"
+          borderRadius={0.05}
+          font="var(--heading-font)"
+        />
       </CircularGalleryContainer>
     </ProductContainer>
   );

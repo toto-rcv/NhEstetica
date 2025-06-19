@@ -42,7 +42,7 @@ function Productos() {
   });
   return (
     <>
-      <Breadcrumb image="/servicios/primerPlano.jpg" title="Productos" />
+      <Breadcrumb image="/breadcrumbs/oils-pexels.jpg" title="Productos" />
       <ProductContainer>
         <FadeIn delay={0.2}>
           <MainWrapper>

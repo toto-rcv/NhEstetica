@@ -11,7 +11,7 @@ import Breadcrumb from "../components/breadcrumb";
 function Nosotros() {
   return (
     <>
-      <Breadcrumb image="/servicios/primerPlano.jpg" title="Sobre Nosotros" />
+      <Breadcrumb image="/breadcrumbs/nosotros2.jpg" title="Sobre Nosotros" titleColor="white" textShadow={true}/>
       <ContainerAbout>
         <FadeIn delay={0.2}>
           <AboutUs />

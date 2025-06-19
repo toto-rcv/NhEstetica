@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Link as RouterLink } from "react-router-dom";
+import { useEffect } from "react";
 
 function Slider({ isMenuOpen }) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
@@ -16,6 +17,15 @@ function Slider({ isMenuOpen }) {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
+
+    React.useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000); // 5000ms = 5 segundos
+
+    return () => clearInterval(interval); // limpiar intervalo al desmontar
+  }, [nextSlide]);
+
 
   return (
     <SliderContainer>

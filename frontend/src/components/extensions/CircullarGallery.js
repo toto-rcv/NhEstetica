@@ -120,7 +120,8 @@ class Media {
     bend,
     textColor,
     borderRadius = 0,
-    font
+    font,
+    link
   }) {
     this.extra = 0
     this.geometry = geometry
@@ -138,6 +139,7 @@ class Media {
     this.borderRadius = borderRadius
     this.font = font
     this.createShader()
+    this.link = link;
     this.createMesh()
     this.createTitle()
     this.onResize()
@@ -159,7 +161,8 @@ class Media {
         void main() {
           vUv = uv;
           vec3 p = position;
-          p.z = (sin(p.x * 4.0 + uTime) * 1.5 + cos(p.y * 2.0 + uTime) * 1.5) * (0.1 + uSpeed * 0.5);
+          float wave = (sin(p.x * 4.0 + uTime) * 1.5 + cos(p.y * 2.0 + uTime) * 1.5);
+p.z = wave * clamp(uSpeed * 0.5, 0.0, 1.0);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
         }
       `,
@@ -328,7 +331,8 @@ class App {
   createMedias(items, bend = 1, textColor, borderRadius, font) {
       const galleryItems = products.map(product => ({
             image: product.image,
-            text: product.name
+            text: product.name,
+             link: product.link,
         }));
     this.mediasImages = galleryItems.concat(galleryItems)
     this.medias = this.mediasImages.map((data, index) => {
@@ -346,7 +350,8 @@ class App {
         bend,
         textColor,
         borderRadius,
-        font
+        font,
+        link: data.link,
       })
     })
   }
@@ -376,6 +381,47 @@ class App {
     const item = width * itemIndex
     this.scroll.target = this.scroll.target < 0 ? -item : item
   }
+
+getMeshUnderMouse(x, y) {
+  const rect = this.gl.canvas.getBoundingClientRect();
+  const px = ((x - rect.left) / rect.width) * 2 - 1;
+  const py = -((y - rect.top) / rect.height) * 2 + 1;
+
+  const worldX = px * this.viewport.width / 2;
+  const worldY = py * this.viewport.height / 2;
+
+  for (const media of this.medias) {
+    const { position, scale } = media.plane;
+    const bounds = {
+      left: position.x - scale.x / 2,
+      right: position.x + scale.x / 2,
+      top: position.y + scale.y / 2,
+      bottom: position.y - scale.y / 2
+    };
+
+    if (
+      worldX >= bounds.left &&
+      worldX <= bounds.right &&
+      worldY >= bounds.bottom &&
+      worldY <= bounds.top
+    ) {
+      return media;
+    }
+  }
+
+  return null;
+}
+
+onClick(e) {
+  const x = e.clientX;
+  const y = e.clientY;
+  const media = this.getMeshUnderMouse(x, y);
+  console.log("clicked media:", media); // 👈 agregalo
+  if (media && media.link) {
+    window.location.href = media.link;
+  }
+}
+
   onResize() {
     this.screen = {
       width: this.container.clientWidth,
@@ -423,6 +469,8 @@ class App {
     window.addEventListener('mouseup', this.boundOnTouchUp)
     window.addEventListener('touchstart', this.boundOnTouchDown)
     window.addEventListener('touchmove', this.boundOnTouchMove)
+    this.boundOnClick = this.onClick.bind(this);
+this.gl.canvas.addEventListener('click', this.boundOnClick);
     window.addEventListener('touchend', this.boundOnTouchUp)
   }
   destroy() {
@@ -430,6 +478,7 @@ class App {
     window.removeEventListener('resize', this.boundOnResize)
     window.removeEventListener('mousewheel', this.boundOnWheel)
     window.removeEventListener('wheel', this.boundOnWheel)
+    this.gl.canvas.removeEventListener('click', this.boundOnClick);
     window.removeEventListener('mousedown', this.boundOnTouchDown)
     window.removeEventListener('mousemove', this.boundOnTouchMove)
     window.removeEventListener('mouseup', this.boundOnTouchUp)

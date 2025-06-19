@@ -56,7 +56,7 @@ function Header() {
         </RouterLink>
         <NavContainer>
           <nav>
-            <StyledLink to="/">Home</StyledLink>
+            <StyledLink to="/">Inicio</StyledLink>
             <StyledLink to="/nosotros">Nosotros</StyledLink>
             <StyledLink to="/servicios">Servicios</StyledLink>
             <StyledLink to="/promociones">Promociones</StyledLink>

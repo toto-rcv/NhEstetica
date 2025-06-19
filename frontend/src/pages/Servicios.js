@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 function Servicios() {
   return (
     <>
-      <Breadcrumb image="/servicios/primerPlano.jpg" title="Servicios" />
+      <Breadcrumb image="/servicios/primerPlano.jpg" title="Servicios" titleColor="white" textShadow={true} />
       <BackgroundService>
         <FadeIn delay={0.2}>
           <Image src="/servicios/MujerLineal.png" alt="Servicios" />
