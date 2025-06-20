@@ -60,6 +60,10 @@ const Card = styled.div`
     transform: translateY(-5px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
   }
+
+  @media (max-width: 768px) {
+    padding: 1rem 2rem;
+  }
 `;
 const ProductImage = styled.img`
   width: 100%;
@@ -80,6 +84,10 @@ const ProductName = styled.h3`
   color: var(--text-color);
   margin: 0;
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const ViewMore = styled.span`
@@ -87,6 +95,8 @@ const ViewMore = styled.span`
   color: var(--terciary-color);
   margin-top: 0.5rem;   
   cursor: pointer;
+
+
 `;
 
 const LinkStyled = styled(Link)`
@@ -98,6 +108,10 @@ const LinkStyled = styled(Link)`
 
   &:hover {
     text-decoration: underline;
+  }
+
+      @media (max-width: 768px) {
+    font-size: 0.9rem;
   }
 `;
 

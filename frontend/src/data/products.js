@@ -2,6 +2,14 @@ export const categories = ['Todo', 'Facial', 'Corporal', 'Cabello', 'Natural', '
 
 export const brands = ['Royal Bronze', 'Idraet', 'Skin Food'];
 
+const genericBenefits = [
+  "Hidrata profundamente la piel",
+  "Mejora la textura y el brillo natural",
+  "Apto para todo tipo de piel",
+  "Fórmula liviana y de rápida absorción",
+  "No testeado en animales 🐰"
+];
+
 export const rawProducts  = [
   {
     id: 1,
@@ -10,11 +18,12 @@ export const rawProducts  = [
     brand: 'Royal Bronze',
     image: '/productos/autobronceante.jpg',
     subtitle: "Satisfacción absoluta con nuestro producto insignia",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit nesciunt deserunt totam pariatur sint enim, eius voluptatem! Eius suscipit ipsa quasi vel architecto, eum molestias iure a! Cupiditate temporibus molestiae et! Aspernatur repellendus corrupti quos facilis quibusdam molestiae at ex autem quia dolorem, quisquam non, aperiam cum enim illum amet, molestias asperiores. Quae, quis at.",
+    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dignissimos repellendus eligendi eum, tenetur aliquam nulla vero. Quisquam repudiandae neque eius minima accusantium sit consequatur beatae maiores dignissimos iste vero perferendis laborum modi adipisci explicabo, aspernatur suscipit aliquam minus praesentium id iusto! Incidunt repudiandae repellendus debitis nisi quidem nulla illum vel laborum mollitia! Perferendis iure eum architecto.",
     price: 25.99,
     isNatural: true,
     isVegan: true,
-    link: "/productos/Crema%20Hidratante%20Facial"
+    link: "/productos/Crema%20Hidratante%20Facial",
+    benefits: genericBenefits
   },
   {
     id: 2,
@@ -27,6 +36,7 @@ export const rawProducts  = [
     price: 19.5,
     isNatural: true,
     isVegan: false,
+    benefits: genericBenefits
   },
   {
     id: 3,
@@ -39,6 +49,7 @@ export const rawProducts  = [
     price: 18.0,
     isNatural: true,
     isVegan: true,
+    benefits: genericBenefits
   },
   {
     id: 4,
@@ -51,6 +62,7 @@ export const rawProducts  = [
     price: 21.0,
     isNatural: false,
     isVegan: true,
+    benefits: genericBenefits
   },
   {
     id: 5,
@@ -63,6 +75,7 @@ export const rawProducts  = [
     price: 22.75,
     isNatural: false,
     isVegan: false,
+    benefits: genericBenefits
   },
   {
     id: 6,
@@ -75,6 +88,7 @@ export const rawProducts  = [
     price: 17.2,
     isNatural: true,
     isVegan: true,
+    benefits: genericBenefits
   },
   {
     id: 7,
@@ -87,6 +101,7 @@ export const rawProducts  = [
     price: 16.9,
     isNatural: false,
     isVegan: true,
+    benefits: genericBenefits
   },
   {
     id: 8,
@@ -99,6 +114,7 @@ export const rawProducts  = [
     price: 24.5,
     isNatural: true,
     isVegan: true,
+    benefits: genericBenefits
   },
   {
     id: 9,
@@ -111,6 +127,7 @@ export const rawProducts  = [
     price: 24.5,
     isNatural: true,
     isVegan: true,
+    benefits: genericBenefits
   },
 ];
 

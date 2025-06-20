@@ -3,8 +3,17 @@ import styled from 'styled-components';
 import { Link as RouterLink } from 'react-router-dom';
 import { faFacebook, faWhatsapp, faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { products } from '../data/products';
 
 function Footer() {
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+const StyledLinkWithScroll = (props) => (
+  <StyledLink {...props} onClick={() => {
+    scrollToTop();
+    if (props.onClick) props.onClick(); // si recibe otro onClick, lo ejecuta también
+  }} />
+);
   return (
     <FooterContainer>
       <TopSection>
@@ -22,47 +31,77 @@ function Footer() {
             </LogoContainer>
 
         <FooterNav>
-          <Column>
-            <h4>MENÚ</h4>
-             <NavContainer>
-                <nav>
-                    <StyledLink to="/">Home</StyledLink>
-                    <StyledLink to="/nosotros">Nosotros</StyledLink>
-                    <StyledLink to="/servicios">Servicios</StyledLink>
-                    <StyledLink to="/promociones">Promociones</StyledLink>
-                    <StyledLink to="/productos">Productos</StyledLink>
-                    <StyledLink to="/contacto">Contacto</StyledLink>
-                </nav>
-            </NavContainer>
-          </Column>
-          <Column>
-            <h4>SERVICIOS</h4>
-            <ul>
-              <li>Tratamientos faciales</li>
-              <li>Tratamientos corporales</li>
-              <li>Tratamientos de depilación</li>
-              <li>Masajes</li>
-            </ul>
-          </Column>
-          <Column>
-            <h4>PRODUCTOS</h4>
-            <ul>
-              <li>Serum Libra</li>
-              <li>Gel Limpieza</li>
-              <li>Crema Libra</li>
-              <li>Crema Lidherma</li>
-              <li>Crema Idraet</li>
-              <li>Urucurm</li>
-              <li>Exfoliantes Py</li>
-              <li>Serum Brillos</li>
-            </ul>
-          </Column>
-        </FooterNav>
+  <Column>
+    <h4>MENÚ</h4>
+    <NavContainer>
+      <nav>
+        <StyledLinkWithScroll to="/">Home</StyledLinkWithScroll>
+        <StyledLinkWithScroll to="/nosotros">Nosotros</StyledLinkWithScroll>
+        <StyledLinkWithScroll to="/servicios">Servicios</StyledLinkWithScroll>
+        <StyledLinkWithScroll to="/promociones">Promociones</StyledLinkWithScroll>
+        <StyledLinkWithScroll to="/productos">Productos</StyledLinkWithScroll>
+        <StyledLinkWithScroll to="/contacto">Contacto</StyledLinkWithScroll>
+      </nav>
+    </NavContainer>
+  </Column>
+
+  <Column>
+    <h4>SERVICIOS</h4>
+    <NavContainer>
+<nav>
+  <StyledLinkWithScroll
+    to="/servicios/tratamientosFaciales"
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  >
+    Tratamientos depilación laser
+  </StyledLinkWithScroll>
+
+  <StyledLinkWithScroll
+    to="/servicios/tratamientosCorporales"
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  >
+    Tratamientos corporales
+  </StyledLinkWithScroll>
+
+  <StyledLinkWithScroll
+    to="/servicios/tratamientosFaciales"
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  >
+    Tratamientos faciales
+  </StyledLinkWithScroll>
+
+  <StyledLinkWithScroll
+    to="/servicios/masajes"
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  >
+    Masajes
+  </StyledLinkWithScroll>
+</nav>
+    </NavContainer>
+  </Column>
+
+  <Column>
+  <h4>PRODUCTOS</h4>
+  <NavContainer>
+    <nav>
+      {products.slice(0, 9).map((product) => (
+        <StyledLinkWithScroll
+          key={product.id}
+          to={product.link}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          {product.name}
+        </StyledLinkWithScroll>
+      ))}
+    </nav>
+  </NavContainer>
+</Column>
+</FooterNav>
         <ImageRosa src='/footer/rosa.png' alt="Logo" />
       </TopSection>
 
       <BottomSection>
-        <span>Desarrollado por los pibardos</span>
+        <span>Desarrollado por SurCode</span>
         <span>2025 - © Todos los derechos reservados.</span>
             <IconsContainer>
                 <Icons>

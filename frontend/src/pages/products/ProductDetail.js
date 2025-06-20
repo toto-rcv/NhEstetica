@@ -5,6 +5,7 @@ import { products } from "../../data/products";
 import Breadcrumb from "../../components/breadcrumb";
 import CircularGallery from "../../components/extensions/CircullarGallery";
 import {useState, useEffect} from "react"
+import { Link } from "react-router-dom";
 
 function ProductDetail() {
   const { productName } = useParams();
@@ -48,7 +49,15 @@ function ProductDetail() {
           </Brand>
           <Price>${product.price.toLocaleString()}</Price>
           <Description>{product.description}</Description>
-          <BuyButton href="/">COMPRAR</BuyButton>
+          {product.benefits && (
+  <BenefitsList>
+    {product.benefits.map((benefit, index) => (
+      <li key={index}>{benefit}</li>
+    ))}
+  </BenefitsList>
+)}
+
+          <BuyButton to="https://wa.me/5491168520606" target="_blank" rel="noopener noreferrer">COMPRAR</BuyButton>
         </Right>
       </DetailWrapper>
 
@@ -78,7 +87,7 @@ const ProductContainer = styled.section`
   overflow: hidden;
 
   @media (max-width: 768px) {
-    padding: 2rem 1rem;
+    padding: 2rem 0rem;
   }
 `;
 
@@ -89,11 +98,21 @@ const DetailWrapper = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   padding: 6rem 3rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    padding: 3rem 2rem;
+    align-items: center;
+  }
 `;
 
 const Left = styled.div`
   flex: 1;
   text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 2rem 0rem;
+  }
 `;
 
 const Right = styled.div`
@@ -105,6 +124,14 @@ const Image = styled.img`
   max-height: 60vh;
   border-radius: 20px;
   object-fit: contain;
+
+  
+  @media (max-width: 768px) {
+      max-height: 50vh;
+      aspect-ratio: 4/5;
+        object-fit: cover;
+
+  }
 `;
 
 const Title = styled.h2`
@@ -152,9 +179,13 @@ const Description = styled.p`
 
 const CircularGalleryContainer = styled.div`
   padding: 3rem 0;
+
+    @media (max-width: 768px) {
+    padding: 0rem;
+  }
 `;
 
-const BuyButton = styled.button`
+const BuyButton = styled(Link)`
   font-size: 1rem;
   color: var(--terciary-color);
   text-decoration: none;
@@ -170,7 +201,7 @@ const BuyButton = styled.button`
   z-index: 1;
   text-align: center;
   cursor: pointer;
-  margin-top: 3px;
+  display: inline-block;
 
   &::before {
     content: "";
@@ -196,10 +227,34 @@ const BuyButton = styled.button`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.9rem;
-    padding: 0.7rem 1.5rem;
+    font-size: 1.1rem;
+    padding: 0.9rem 1.8rem;
     width: auto;
     text-align: center;
     margin-top: 0.5rem;
+  }
+`;
+
+const BenefitsList = styled.ul`
+  list-style: none;
+  padding: 0;
+  padding: 1.1rem 0;
+  font-size: 1.2rem;
+  color: var(--text-color);
+
+  li {
+    margin-bottom: 0.6rem;
+    position: relative;
+    padding-left: 1.8rem;
+
+    &::before {
+      content: "✓";
+      position: absolute;
+      font-size: 1.4rem;
+      left: 0;
+      bottom: -3px;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
   }
 `;
