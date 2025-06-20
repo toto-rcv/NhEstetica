@@ -123,6 +123,7 @@ const Title = styled.h2`
 
     @media (max-width: 768px) {
         font-size: 1.5rem;
+        text-align: center;
     }
 `;
 
@@ -135,6 +136,7 @@ const Description = styled.p`
 
     @media (max-width: 768px) {
         font-size: 0.9rem;
+        text-align: center;
     }
 `;
 
@@ -148,10 +150,7 @@ const PriceContainer = styled.div`
     justify-content: center;
 
     @media (max-width: 768px) {
-        justify-content: center;
-        gap: 1rem;
-        margin: 2rem 0;
-        padding: 0 1rem;
+        display: none;
     }
 `;
 

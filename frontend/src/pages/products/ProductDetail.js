@@ -156,12 +156,12 @@ const CircularGalleryContainer = styled.div`
 
 const BuyButton = styled.button`
   font-size: 1rem;
-  color: var(--primary-color);
+  color: var(--terciary-color);
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
-  padding: 0.8rem 1.8rem;
-  border: 2px solid var(--primary-color);
+  padding: 0.8rem 2.2rem;
+  border: 2px solid var(--terciary-color);
   border-radius: 25px;
   white-space: nowrap;
   position: relative;
@@ -179,7 +179,7 @@ const BuyButton = styled.button`
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--primary-color);
+    background: var(--terciary-color);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     z-index: -1;

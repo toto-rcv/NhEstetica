@@ -5,10 +5,9 @@ function ExperienceQuote() {
   return (
     <QuoteContainer>
       <QuoteText>
-        “During my 6 years of experience in the beauty industry, I’ve worked with many types of
-        skin concerns, ranging from severe acne and congestion, ultra sensitive skin, rosacea, and
-        melasma just to name a few. By treating these various types of skin conditions on a daily
-        basis.”
+        “Durante mis 6 años de experiencia en la industria de la belleza, he trabajado con diversos problemas de la piel,
+         desde acné severo y congestión, piel ultrasensible, rosácea y melasma, por nombrar solo algunos.
+          Tratando estos diversos tipos de afecciones cutáneas a diario.”
       </QuoteText>
     </QuoteContainer>
   );

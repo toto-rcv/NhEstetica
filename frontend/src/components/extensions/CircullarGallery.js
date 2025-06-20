@@ -412,6 +412,15 @@ getMeshUnderMouse(x, y) {
   return null;
 }
 
+onMouseMove(e) {
+  const media = this.getMeshUnderMouse(e.clientX, e.clientY);
+  if (media && media.link) {
+    this.gl.canvas.style.cursor = 'pointer';
+  } else {
+    this.gl.canvas.style.cursor = 'default';
+  }
+}
+
 onClick(e) {
   const x = e.clientX;
   const y = e.clientY;
@@ -459,6 +468,8 @@ onClick(e) {
     this.boundOnResize = this.onResize.bind(this)
     this.boundOnWheel = this.onWheel.bind(this)
     this.boundOnTouchDown = this.onTouchDown.bind(this)
+    this.boundOnMouseMove = this.onMouseMove.bind(this);
+window.addEventListener('mousemove', this.boundOnMouseMove);
     this.boundOnTouchMove = this.onTouchMove.bind(this)
     this.boundOnTouchUp = this.onTouchUp.bind(this)
     window.addEventListener('resize', this.boundOnResize)
@@ -482,6 +493,7 @@ this.gl.canvas.addEventListener('click', this.boundOnClick);
     window.removeEventListener('mousedown', this.boundOnTouchDown)
     window.removeEventListener('mousemove', this.boundOnTouchMove)
     window.removeEventListener('mouseup', this.boundOnTouchUp)
+    window.removeEventListener('mousemove', this.boundOnMouseMove);
     window.removeEventListener('touchstart', this.boundOnTouchDown)
     window.removeEventListener('touchmove', this.boundOnTouchMove)
     window.removeEventListener('touchend', this.boundOnTouchUp)
