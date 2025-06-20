@@ -28,6 +28,7 @@ const Background = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     height: 30vh;  
@@ -46,6 +47,8 @@ const Content = styled.div`
   top: 45%;
   left: ${props => props.position === 'left' ? '30%' : '70%'};
   transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
   color: ${props => props.titleColor || 'var(--background-dark)'};
   font-size: 4rem;
   font-family: var(--heading-font), sans-serif;

@@ -5,19 +5,24 @@ import Slider from "react-slick";
 
 const professionals = [
   {
-    name: 'DR. JUAN CARLOS DALLA LASTA',
-    specialty: 'Cirugía Plástica',
-    image: 'https://randomuser.me/api/portraits/men/45.jpg',
+    name: 'Natalia',
+    image: '/team/Natalia.png',
   },
   {
-    name: 'DRA. VALERIA BASTINO',
-    specialty: 'Dermatología',
-    image: 'https://randomuser.me/api/portraits/women/68.jpg',
+    name: 'Rocío',
+    image: '/team/rocio.png',
   },
   {
-    name: 'DR. ELISEO VIDELA',
-    specialty: 'Flebología y Linfología',
-    image: 'https://randomuser.me/api/portraits/men/72.jpg',
+    name: 'Florencia',
+    image: '/team/florencia.png',
+  },
+  {
+    name: 'Epifanía',
+    image: '/team/epifania.png',
+  },
+  {
+    name: 'Mariana',
+    image: '/team/mariana.png',
   },
 ];
 
@@ -56,7 +61,6 @@ function Team() {
                 <ProfileImage src={pro.image} alt={pro.name} />
               </ImageCircle>
               <Name>{pro.name}</Name>
-              <Specialty>{pro.specialty}</Specialty>
             </Card>
           ))}
         </Slider>
@@ -140,12 +144,6 @@ const Name = styled.h3`
   font-weight: 700;
   margin: 0.5rem 0 0.25rem;
   font-family: "Saira";
-`;
-
-const Specialty = styled.p`
-  font-size: 0.9rem;
-  font-style: italic;
-  color: #666;
 `;
 
 const Mujer = styled.img`

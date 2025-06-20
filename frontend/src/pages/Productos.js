@@ -1,14 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import Breadcrumb from "../components/breadcrumb";
 import ProductsGrid from "../components/products/productsGrid";
 import { categories, brands, products as allProducts } from "../data/products";
+import { FaFilter } from "react-icons/fa";
 
 function Productos() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(9);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const loaderRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((prev) => prev + 3);
+            setIsLoadingMore(false);
+          }, 600); // Simula carga
+        }
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 1.0,
+      }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, []);
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;
@@ -40,13 +75,21 @@ function Productos() {
 
     return matchCategory && matchBrand && matchSearch;
   });
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+
   return (
     <>
       <Breadcrumb image="/breadcrumbs/oils-pexels.jpg" title="Productos" />
       <ProductContainer>
         <FadeIn delay={0.2}>
           <MainWrapper>
-            <Sidebar>
+            <MobileFilterToggle onClick={() => setShowMobileFilters((prev) => !prev)}>
+              <FaFilter style={{ marginRight: "0.5rem" }} />
+              {showMobileFilters ? "Ocultar" : "Filtrar"}
+            </MobileFilterToggle>
+
+            <Sidebar $isVisible={showMobileFilters}>
               <SearchBox
                 placeholder="Buscar productos..."
                 value={searchTerm}
@@ -86,7 +129,19 @@ function Productos() {
             </Sidebar>
 
             <ContentArea>
-              <ProductsGrid products={filteredProducts} />
+              <div>
+                <ProductsGrid products={visibleProducts} />
+                {isLoadingMore && <Spinner />}
+                {visibleCount < filteredProducts.length && (
+                  <div ref={loaderRef} style={{ height: "40px" }} />
+                )}
+                {visibleCount >= filteredProducts.length && filteredProducts.length > 0 && (
+                  <EndMessage></EndMessage>
+                )}
+                {filteredProducts.length === 0 && (
+                  <EndMessage>No se encontraron productos.</EndMessage>
+                )}
+              </div>
             </ContentArea>
           </MainWrapper>
         </FadeIn>
@@ -108,6 +163,38 @@ const FadeIn = ({ children, delay = 0 }) => (
   </motion.div>
 );
 
+// Spinner con framer-motion
+const Spinner = () => (
+  <motion.div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: "2rem",
+    }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    <motion.div
+      style={{
+        width: 30,
+        height: 30,
+        border: "4px solid var(--terciary-color)",
+        borderTop: "4px solid transparent",
+        borderRadius: "50%",
+      }}
+      animate={{ rotate: 360 }}
+      transition={{
+        repeat: Infinity,
+        ease: "linear",
+        duration: 1,
+      }}
+    />
+  </motion.div>
+);
+
+// Styled Components
 const ProductContainer = styled.section`
   background: var(--background-color);
   overflow: hidden;
@@ -115,7 +202,7 @@ const ProductContainer = styled.section`
   padding: 3rem 6rem;
 
   @media (max-width: 768px) {
-    padding: 3rem 2rem;
+    padding: 2rem 2rem;
   }
 `;
 
@@ -126,6 +213,25 @@ const MainWrapper = styled.div`
 
   @media (max-width: 768px) {
     flex-direction: column;
+    margin-top: 0;
+  }
+`;
+
+const MobileFilterToggle = styled.button`
+  display: none;
+  padding: 0.8rem 0.4rem;
+  background-color: var(--terciary-color);
+  color: white;
+  border: none;
+  max-width: 130px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: var(--text-font);
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    display: block;
+    align-self: left;
   }
 `;
 
@@ -137,6 +243,11 @@ const Sidebar = styled.aside`
 
   @media (max-width: 768px) {
     width: 100%;
+    display: ${({ $isVisible }) => ($isVisible ? "block" : "none")};
+    background-color: var(--background-color);
+    border-radius: 10px;
+    margin-top: 1rem;
+    padding: 20px 0;
   }
 
   label {
@@ -157,6 +268,10 @@ const ContentArea = styled.div`
   width: 88%;
   display: flex;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const SearchBox = styled.input`
@@ -170,8 +285,12 @@ const SearchBox = styled.input`
   font-family: var(--text-font);
 
   &:focus {
-    outline: 1px solid var(--terciary-color); // Add outline with terciary color
+    outline: 1px solid var(--terciary-color);
     border: 1px solid var(--terciary-color);
+  }
+
+  @media (max-width: 768px) {
+    max-width: 275px;
   }
 `;
 
@@ -185,4 +304,11 @@ const FilterTitle = styled.h4`
   font-weight: 600;
   color: var(--terciary-color);
   font-family: var(--heading-font);
+`;
+
+const EndMessage = styled.p`
+  margin-top: 2rem;
+  font-size: 1rem;
+  color: var(--text-color);
+  text-align: center;
 `;
