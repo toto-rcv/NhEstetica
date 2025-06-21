@@ -1,9 +1,14 @@
 import React from 'react'
+import styled from 'styled-components'
 
 function Promociones() {
   return (
-    <div>Promociones</div>
+    <ContainerPromotions>Promociones</ContainerPromotions>
   )
 }
 
 export default Promociones
+
+const ContainerPromotions = styled.div`
+  min-height: 80vh;
+`
