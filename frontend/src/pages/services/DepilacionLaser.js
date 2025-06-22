@@ -27,6 +27,7 @@ function DepilacionLaser() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/depiSopranoIce"
           />
         </FadeIn>
         <FadeIn delay={0.3}>
@@ -40,6 +41,7 @@ function DepilacionLaser() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/depilacionLaserBrazos"
           />
         </FadeIn>
         <FadeIn delay={0.4}>
@@ -54,6 +56,7 @@ function DepilacionLaser() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/depilacionLaserPiernas"
           />
         </FadeIn>
         <FadeIn delay={0.5}>
@@ -68,6 +71,7 @@ function DepilacionLaser() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/depilacionTiraDeCola"
           />
         </FadeIn>
         <FadeIn delay={0.6}>
@@ -82,6 +86,7 @@ function DepilacionLaser() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/depilacionLaserEspalda"
           />
         </FadeIn>
         <FadeIn delay={0.7}>
@@ -95,6 +100,7 @@ function DepilacionLaser() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/depilacionLaserPecho"
           />
         </FadeIn>
       </BackgroundService>

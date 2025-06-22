@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-const TreatmentsLeft = ({ link, image, title, description, price, promoLink, showLine = false, customButtonText, customButtonLink }) => {
+const TreatmentsLeft = ({ link, image, title, description, price, promoLink, showLine = false, customButtonText, customButtonLink, detailsLink }) => {
     const handleClick = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -22,12 +22,17 @@ const TreatmentsLeft = ({ link, image, title, description, price, promoLink, sho
                 <TextContent>
                     <Title showLine={showLine}>{title}</Title>
                     <Description>{description}</Description>
-                    <PriceContainer>
+                    <ActionsContainer>
                         <Price>{price}</Price>
-                        {promoLink && (
-                            <PromoLink href={promoLink} target="_blank" rel="noopener noreferrer">¡CONSULTA LAS PROMOS!</PromoLink>
-                        )}
-                    </PriceContainer>
+                        <ButtonRow>
+                            {promoLink && (
+                                <PromoLink href={promoLink} target="_blank" rel="noopener noreferrer">¡CONSULTA LAS PROMOS!</PromoLink>
+                            )}
+                            {detailsLink && (
+                                <DetailsButton to={detailsLink} onClick={handleClick}>VER DETALLES</DetailsButton>
+                            )}
+                        </ButtonRow>
+                    </ActionsContainer>
                     <MobileButton 
                         to={customButtonLink || `/servicios/${link}`} 
                         onClick={handleClick}
@@ -140,66 +145,41 @@ const Description = styled.p`
     }
 `;
 
-const PriceContainer = styled.div`
+const ActionsContainer = styled.div`
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 1.5rem;
     margin: 2.5rem 0;
-    flex-wrap: wrap;
-    position: relative;
-    justify-content: center;
+`;
 
-    @media (max-width: 768px) {
-        display: none;
-    }
+const ButtonRow = styled.div`
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
 `;
 
 const Price = styled.div`
-    font-size: 1.8rem;
-    color: var(--terciary-color);
+    font-size: 2.2rem;
+    color: var(--primary-color-dark);
     font-weight: 700;
     font-family: 'Saira', sans-serif;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    display: inline-block;
-    position: relative;
-    padding: 0.5rem 0;
     text-align: center;
 
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: var(--secondary-color);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-
-    &:hover {
-        transform: translateY(-2px);
-        color: var(--secondary-color);
-
-        &::after {
-            transform: scaleX(1);
-        }
-    }
-
     @media (max-width: 768px) {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
     }
 `;
 
 const PromoLink = styled.a`
     font-size: 1rem;
-    color: var(--primary-color);
+    color: var(--terciary-color);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     padding: 0.8rem 1.8rem;
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--terciary-color);
     border-radius: 25px;
     white-space: nowrap;
     position: relative;
@@ -215,7 +195,7 @@ const PromoLink = styled.a`
         left: 0;
         width: 100%;
         height: 100%;
-        background: var(--primary-color);
+        background: var(--terciary-color);
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: -1;
@@ -237,6 +217,51 @@ const PromoLink = styled.a`
         width: auto;
         text-align: center;
         margin-top: 0.5rem;
+    }
+`;
+
+const DetailsButton = styled(Link)`
+    font-size: 1rem;
+    color: var(--terciary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 0.8rem 1.8rem;
+    border: 2px solid var(--terciary-color);
+    border-radius: 25px;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    z-index: 1;
+    text-align: center;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--terciary-color);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: -1;
+    }
+
+    &:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+
+        &::before {
+            transform: translateX(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        font-size: 0.9rem;
+        padding: 0.7rem 1.5rem;
     }
 `;
 

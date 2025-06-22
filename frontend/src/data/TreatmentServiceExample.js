@@ -1,5 +1,5 @@
 import React from "react";
-import TreatmentService from "./treatmentservice";
+import TreatmentService from "../components/servicios/treatmentServiceSingle";
 
 const TreatmentServiceExample = () => {
     // Datos de ejemplo para diferentes servicios
@@ -44,7 +44,7 @@ const TreatmentServiceExample = () => {
             price: "$18.000",
             link: "tratamientos-corporales",
             imagePosition: "right",
-            customButtonText: "Reservar Turno",
+            customButtonText: "RESERVÁ TU TURNO",
             customButtonLink: "https://wa.me/1234567890"
         }
     ];

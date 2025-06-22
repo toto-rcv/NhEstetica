@@ -41,3 +41,11 @@ body.menu-open .slider-controls {
 .circular-gallery canvas {
   cursor: pointer;
 }
+
+
+.slick-track {
+  display: flex !important;
+}
+.slick-slide > div {
+  height: 100%;
+}

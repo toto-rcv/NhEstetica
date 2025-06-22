@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import testimonials from "./testimonialsData";
+import testimonials from "../../data/testimonials";
 import Slider from "react-slick";
 
 function Testimonials() {
@@ -31,7 +31,7 @@ function Testimonials() {
     slidesToScroll: 3,
     arrows: false,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 5000,
     responsive: [
       {
         breakpoint: 940,
@@ -67,18 +67,22 @@ function Testimonials() {
 
       <StyledSlider {...settings}>
         {testimonials.map((t, index) => (
-          <Card key={index}>
-            <Text>{t.text}</Text>
-            <StarRating rating={t.rating} />
-            <UserInfo>
-              <Avatar src={t.image} />
-              <UserDetails>
-                <Name>{t.name}</Name>
-                <Source>{t.source}</Source>
-              </UserDetails>
-              <QuoteMark>❞</QuoteMark>
-            </UserInfo>
-          </Card>
+          <SlideWrapper key={index}>
+            <Card>
+              <Text>
+              {t.text.split(" ").slice(0, 50).join(" ") + (t.text.split(" ").length > 50 ? "..." : "")}
+            </Text>
+              <StarRating rating={t.rating} />
+              <UserInfo>
+                <Avatar src={t.image} />
+                <UserDetails>
+                  <Name>{t.name}</Name>
+                  <Source>{t.source}</Source>
+                </UserDetails>
+                <QuoteMark>❞</QuoteMark>
+              </UserInfo>
+            </Card>
+          </SlideWrapper>
         ))}
       </StyledSlider>
     </Wrapper>
@@ -150,17 +154,19 @@ const CardsContainer = styled.div`
 const Card = styled.div`
   background: white;
   border-radius: 12px;
+  border: 2px solid var(--primary-color);
   padding: 25px;
   max-width: 390px;
-  flex: 1 1 300px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 
-      @media (max-width: 768px) {
-        max-width: 270px;
-    }
+  @media (max-width: 768px) {
+    max-width: 270px;
+  }
 `;
 
 const Text = styled.p`
@@ -219,9 +225,18 @@ const StyledSlider = styled(Slider)`
   max-width: 1588px;
   margin: 0 30px;
 
+  .slick-track {
+    display: flex !important;
+    align-items: stretch;
+  }
+
   .slick-slide {
     padding: 0 15px;
     box-sizing: border-box;
+  }
+
+  .slick-slide > div {
+    height: 100%;
   }
 
   .slick-dots {
@@ -275,4 +290,10 @@ const MujerPerfil = styled.img`
         width: 100px;
         top: 80%;
     }
+`;
+
+const SlideWrapper = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: stretch;
 `;

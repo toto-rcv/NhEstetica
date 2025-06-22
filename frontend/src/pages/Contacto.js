@@ -9,7 +9,7 @@ import ContactMap from "../components/contact/ContactMap";
 function Contacto() {
   return (
     <>
-    <Breadcrumb image="/servicios/primerPlano.jpg" title="Contacto" />
+    <Breadcrumb image="/breadcrumbs/contacto.jpg" title="Contacto" textShadow={true} titleColor="white"/>
       <ContainerContact>
           <FadeIn delay={0.2}>
             <ContactInformation />

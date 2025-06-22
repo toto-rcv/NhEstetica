@@ -2,10 +2,17 @@ import React from "react";
 import Masonry from "react-masonry-css";
 import styled from "styled-components";
 
-    const images = Array.from({ length: 9 }, (_, i) => {
-    const randomHeight = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
-    return `https://picsum.photos/300/${randomHeight}?random=${i + 1}`;
-});
+const images = [
+  "/galeria-nosotros/antesydespues.jpg",
+  "/galeria-nosotros/antesydespues2.jpg",
+  "/galeria-nosotros/antesydespues3.jpg",
+  "/galeria-nosotros/antesydespues4.jpg",
+  "/galeria-nosotros/antesydespues5.jpg",
+  "/galeria-nosotros/antesydespues6.jpg",
+  "/galeria-nosotros/antesydespues7.jpg",
+  "/galeria-nosotros/antesydespues8.jpg",
+  "/galeria-nosotros/antesydespues9.jpg"
+];
 
 const breakpointColumnsObj = {
   default: 3,
@@ -17,7 +24,7 @@ const Gallery = () => {
   return (
     <GalleryContainer>
       <Subtitle>Nuestro trabajo</Subtitle>
-      <Title>GALERÍA DE IMÁGENES</Title>
+      <Title>ANTES Y DESPUES</Title>
       <StyledMasonry
         breakpointCols={breakpointColumnsObj}
         className="my-masonry-grid"

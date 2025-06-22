@@ -2,19 +2,44 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import SideMenu from "./sideMenu";
 import HamburgerMenu from "./hamburgerMenu";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebook,
   faWhatsapp,
   faInstagram,
 } from "@fortawesome/free-brands-svg-icons";
+import { IoMdArrowDropdown } from "react-icons/io";
+import { useLocation } from "react-router-dom";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [showHeader, setShowHeader] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verificar si el usuario está logueado al cargar el componente
+    const loginStatus = localStorage.getItem('isLoggedIn');
+    const user = localStorage.getItem('username');
+    if (loginStatus === 'true' && user) {
+      setIsLoggedIn(true);
+      setUsername(user);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setUsername('');
+    navigate('/');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,6 +67,10 @@ function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+    useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location]);
+
   return (
     <FixedWrapper>
       <HeaderContainer visible={showHeader} scrolled={hasScrolled}>
@@ -58,10 +87,43 @@ function Header() {
           <nav>
             <StyledLink to="/">Inicio</StyledLink>
             <StyledLink to="/nosotros">Nosotros</StyledLink>
-            <StyledLink to="/servicios">Servicios</StyledLink>
+            <DropdownWrapper
+              onMouseEnter={() => setShowDropdown(true)}
+              onMouseLeave={() => setShowDropdown(false)}
+            >
+              <StyledLink to="/servicios">
+                Servicios <IoMdArrowDropdown />
+              </StyledLink>
+
+              {showDropdown && (
+                <>
+                  <HoverBridge />
+                  <DropdownContainer>
+                    <DropdownItem to="/servicios/DepilacionLaser" onClick={() => setShowDropdown(false)}>
+                      Depilación Láser
+                    </DropdownItem>
+                                      <DropdownItem to="/servicios/TratamientosCorporales" onClick={() => setShowDropdown(false)}>
+                      Corporales
+                    </DropdownItem>
+                    <DropdownItem to="/servicios/TratamientosFaciales" onClick={() => setShowDropdown(false)}>
+                      Faciales
+                    </DropdownItem>
+                    <DropdownItem to="/servicios/masajes" onClick={() => setShowDropdown(false)}>
+                      Masajes
+                    </DropdownItem>
+                  </DropdownContainer>
+                </>
+              )}
+            </DropdownWrapper>
             <StyledLink to="/promociones">Promociones</StyledLink>
             <StyledLink to="/productos">Productos</StyledLink>
             <StyledLink to="/contacto">Contacto</StyledLink>
+            {isLoggedIn && (
+              <UserSection>
+                <UserInfo>Hola, {username}</UserInfo>
+                <LogoutButton onClick={handleLogout}>Cerrar Sesión</LogoutButton>
+              </UserSection>
+            )}
           </nav>
         </NavContainer>
 
@@ -230,6 +292,8 @@ const StyledLink = styled(RouterLink)`
   margin: 0 0.9rem;
   font-weight: 500;
   position: relative;
+  display: flex;
+  align-items: center;
 
   &:hover {
     color: var(--terciary-color);
@@ -248,5 +312,77 @@ const StyledLink = styled(RouterLink)`
 
   &:hover::after {
     width: 95%;
+  }
+`;
+
+const DropdownWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const DropdownContainer = styled.div`
+  position: absolute;
+  top: calc(100% + 15px);
+  left: 0;
+  background: var(--background-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  border-radius: 8px;
+  z-index: 1000;
+  min-width: 180px;
+  padding: 0.5rem 0;
+  transition: opacity 0.2s ease;
+`;
+
+const DropdownItem = styled(RouterLink)`
+  display: block;
+  padding: 0.7rem 1rem;
+  text-decoration: none;
+  font-family: var(--heading-font);
+  font-size: 1.1rem;
+  color: var(--background-dark);
+
+  &:hover {
+    background-color: var(--terciary-color);
+    color: white;
+  }
+`;
+
+const HoverBridge = styled.div`
+  position: absolute;
+  top: 100%;
+  height: 15px;
+  width: 100%;
+  background: transparent;
+`;
+
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 10px;
+`;
+
+const UserInfo = styled.span`
+  font-family: var(--heading-font);
+  color: var(--background-dark);
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const LogoutButton = styled.button`
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
   }
 `;

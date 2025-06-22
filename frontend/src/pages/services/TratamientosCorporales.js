@@ -27,6 +27,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/lLipo"
                     />
                 </FadeIn>
                 <FadeIn delay={0.3}>
@@ -40,6 +41,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/mioUp"
                     />
                 </FadeIn>
                 <FadeIn delay={0.4}>
@@ -55,6 +57,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/cavix"
                     />
                 </FadeIn>
                 <FadeIn delay={0.5}>
@@ -68,6 +71,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/mesoterapiaCorporal"
                     />
                 </FadeIn>
                 <FadeIn delay={0.6}>
@@ -82,6 +86,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/mesoterapiaVc"
                     />
                 </FadeIn>
                 <FadeIn delay={0.7}>
@@ -95,6 +100,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/velaVelvetMax"
                     />
                 </FadeIn>
                 <FadeIn delay={0.8}>
@@ -109,6 +115,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/radiofrecuenciaCorporal"
                     />
                 </FadeIn>
                 <FadeIn delay={0.9}>
@@ -122,6 +129,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/vacumCorporal"
                     />
                 </FadeIn>
                 <FadeIn delay={1.0}>
@@ -136,6 +144,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/botasDePresoterapia"
                     />
                 </FadeIn>
                 <FadeIn delay={1.1}>
@@ -149,6 +158,7 @@ function TratamientosCorporales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/mesoCapilar"
                     />
                 </FadeIn>
             </BackgroundService>
