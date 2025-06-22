@@ -10,7 +10,7 @@ const testimonials = [
     name: 'Pilar Cañas',
     source: 'Reseña de Google',
     image: '/testimonials-icons/Pilar.png',
-    text: `Muy buena experiencias con Ellas!! En Estética NH, te ponen más bella y siempre contando con nuestra constancia!! Muy buena atención, rápida, exclusiva, de excelencia y calidad!! Gracias a las hermosas personas que nos hacen más bellas cada día y menos acomplejadas!! FELICES FIESTAS!! QUE EL NUEVO AÑO VENGA CON MUCHAS MÁS PERSONAS QUE  QUEREMOS DESLUMBRAR A NUESTROS AFECTOS!! UN ABRAZO PARA TODAS!! 🥂🍾🎄✨️🎄✨️🎄✨️`,
+    text: `Muy buena experiencias con Ellas!! En Estética NH, te ponen más bella y siempre contando con nuestra constancia!! Muy buena atención, rápida, exclusiva, de excelencia y calidad!! Gracias a las hermosas personas que nos hacen más bellas cada día y menos acomplejadas!! FELICES FIESTAS!!`,
     rating: 5
   },
   {

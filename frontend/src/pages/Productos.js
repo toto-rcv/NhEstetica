@@ -80,8 +80,10 @@ function Productos() {
 
   return (
     <>
-      <Breadcrumb image="/breadcrumbs/oils-pexels.jpg" title="Productos" />
+      <Breadcrumb image="/breadcrumbs/productos.jpg" title="Productos" titleColor="white" textShadow={true} />
       <ProductContainer>
+                <TopLeftImage src="/images/shape2.png" alt="Decoración izquierda" />
+        <BottomRightImage src="/images/birds.png" alt="Decoración derecha" />
         <FadeIn delay={0.2}>
           <MainWrapper>
             <MobileFilterToggle onClick={() => setShowMobileFilters((prev) => !prev)}>
@@ -199,6 +201,7 @@ const ProductContainer = styled.section`
   background: var(--background-color);
   overflow: hidden;
   text-align: center;
+  position: relative;
   padding: 3rem 6rem;
 
   @media (max-width: 768px) {
@@ -311,4 +314,44 @@ const EndMessage = styled.p`
   font-size: 1rem;
   color: var(--text-color);
   text-align: center;
+`;
+
+
+const TopLeftImage = styled.img`
+  position: absolute;
+  bottom: 0;
+  left: 30px;
+  max-width: 200px;
+  height: auto;
+  rotate: 80deg;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0px 4px 4px rgba(224, 117, 212, 0.5)); 
+  @media (max-width: 768px) {
+    width: 70px;
+    top: -50px;
+  }
+
+   @media (max-width: 916px) {
+    width: 140px;
+  }
+
+    @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const BottomRightImage = styled.img`
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  max-width: 200px;
+  height: auto;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0px 4px 4px rgba(224, 117, 212, 0.5));
+
+  @media (max-width: 1656px) {
+    display: none;
+  }
 `;

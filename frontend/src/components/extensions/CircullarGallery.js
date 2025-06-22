@@ -143,6 +143,9 @@ class Media {
     this.createMesh()
     this.createTitle()
     this.onResize()
+    this.isScrolling = false;
+    this.scrollStopTimeout = null;
+
   }
   createShader() {
     const texture = new Texture(this.gl, { generateMipmaps: false })
@@ -422,10 +425,12 @@ onMouseMove(e) {
 }
 
 onClick(e) {
+  if (this.isScrolling) return; // 👈 evita clics si el usuario está girando
+
   const x = e.clientX;
   const y = e.clientY;
   const media = this.getMeshUnderMouse(x, y);
-  console.log("clicked media:", media); // 👈 agregalo
+
   if (media && media.link) {
     window.location.href = media.link;
   }
@@ -451,19 +456,36 @@ onClick(e) {
     }
   }
   update() {
-    this.scroll.current = lerp(
-      this.scroll.current,
-      this.scroll.target,
-      this.scroll.ease
-    )
-    const direction = this.scroll.current > this.scroll.last ? 'right' : 'left'
-    if (this.medias) {
-      this.medias.forEach((media) => media.update(this.scroll, direction))
-    }
-    this.renderer.render({ scene: this.scene, camera: this.camera })
-    this.scroll.last = this.scroll.current
-    this.raf = window.requestAnimationFrame(this.update.bind(this))
+  this.scroll.current = lerp(
+    this.scroll.current,
+    this.scroll.target,
+    this.scroll.ease
+  );
+
+  const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
+
+  // Detectar si se está desplazando
+  const delta = Math.abs(this.scroll.current - this.scroll.last);
+  if (delta > 0.02) {
+    if (!this.isScrolling) this.isScrolling = true;
+    clearTimeout(this.scrollStopTimeout);
+    this.scrollStopTimeout = setTimeout(() => {
+      this.isScrolling = false;
+    }, 150); // espera para considerar que se detuvo
   }
+
+  // Actualizar los media items
+  if (this.medias) {
+    this.medias.forEach((media) => media.update(this.scroll, direction));
+  }
+
+  // Renderizar escena
+  this.renderer.render({ scene: this.scene, camera: this.camera });
+
+  this.scroll.last = this.scroll.current;
+  this.raf = window.requestAnimationFrame(this.update.bind(this));
+}
+
   addEventListeners() {
     this.boundOnResize = this.onResize.bind(this)
     this.boundOnWheel = this.onWheel.bind(this)

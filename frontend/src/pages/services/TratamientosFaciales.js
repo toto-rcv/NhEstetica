@@ -27,6 +27,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/electroporacion"
                     />
                 </FadeIn>
                 
@@ -41,6 +42,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/dermaplaning"
                     />
                 </FadeIn>
 
@@ -56,6 +58,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/dermapen"
                     />
                 </FadeIn>
 
@@ -70,6 +73,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/exosomas"
                     />
                 </FadeIn>
 
@@ -85,6 +89,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/radiofrecuenciaFacial"
                     />
                 </FadeIn>
 
@@ -99,6 +104,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/hydrafacial"
                     />
                 </FadeIn>
 
@@ -114,6 +120,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/laminado"
                     />
                 </FadeIn>
 
@@ -128,6 +135,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/perfilado"
                     />
                 </FadeIn>
 
@@ -143,6 +151,7 @@ function TratamientosFaciales() {
                         promoLink="https://wa.me/5491168520606"
                         customButtonText="Saca turno"
                         customButtonLink="https://wa.me/5491168520606"
+                        detailsLink="/servicios/vacumFacial"
                     />
                 </FadeIn>
             </BackgroundService>

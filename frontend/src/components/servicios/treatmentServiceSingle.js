@@ -58,7 +58,7 @@ const TreatmentService = ({
                     target={customButtonLink ? "_blank" : undefined}
                     rel={customButtonLink ? "noopener noreferrer" : undefined}
                 >
-                    {customButtonText}
+                    RESERVÁ TU TURNO
                 </StyledLink>
             </ButtonOverlay>
         </ImageContainer>
@@ -86,7 +86,7 @@ const TreatmentService = ({
                 target={customButtonLink ? "_blank" : undefined}
                 rel={customButtonLink ? "noopener noreferrer" : undefined}
             >
-                Reservá tu turno
+                RESERVÁ TU TURNO
             </ReserveButton>
             <MobileButton 
                 to={customButtonLink || (link ? `/servicios/${link}` : "#")} 
@@ -96,7 +96,7 @@ const TreatmentService = ({
                 target={customButtonLink ? "_blank" : undefined}
                 rel={customButtonLink ? "noopener noreferrer" : undefined}
             >
-                Reservá tu turno
+                RESERVÁ TU TURNO
             </MobileButton>
         </TextContent>
     );
@@ -278,7 +278,7 @@ const PriceContainer = styled.div`
 
 const Price = styled.div`
     font-size: 1.8rem;
-    color: var(--terciary-color);
+    color: var(--primary-color-dark);
     font-weight: 700;
     font-family: 'Saira', sans-serif;
     transition: all 0.3s ease;
@@ -316,12 +316,12 @@ const Price = styled.div`
 
 const PromoLink = styled.a`
     font-size: 1rem;
-    color: var(--primary-color);
+    color: var(--terciary-color);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     padding: 0.8rem 1.8rem;
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--terciary-color);
     border-radius: 25px;
     background: transparent;
     cursor: pointer;
@@ -336,7 +336,7 @@ const PromoLink = styled.a`
         left: -100%;
         width: 100%;
         height: 100%;
-        background: var(--primary-color);
+        background: var(--terciary-color);
         transition: left 0.3s ease;
         z-index: -1;
     }
@@ -421,8 +421,8 @@ const StyledLink = styled(Link)`
     border: 2px solid var(--primary-color);
 
     &:hover {
-        background: transparent;
-        color: var(--primary-color);
+        background: var(--background-color);
+        color: var(--primary-color-dark);
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
@@ -463,12 +463,12 @@ const MobileButton = styled(Link)`
 const ReserveButton = styled(Link)`
     display: inline-block;
     font-size: 1rem;
-    color: var(--primary-color);
+    color: var(--terciary-color);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     padding: 0.8rem 1.8rem;
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--terciary-color);
     border-radius: 25px;
     background: transparent;
     cursor: pointer;
@@ -483,7 +483,7 @@ const ReserveButton = styled(Link)`
         left: -100%;
         width: 100%;
         height: 100%;
-        background: var(--primary-color);
+        background: var(--terciary-color);
         transition: left 0.3s ease;
         z-index: -1;
     }

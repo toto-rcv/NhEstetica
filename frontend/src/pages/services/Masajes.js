@@ -27,6 +27,7 @@ function Masajes() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/maderoterapia"
           />
         </FadeIn>
         <FadeIn delay={0.3}>
@@ -40,6 +41,7 @@ function Masajes() {
             promoLink="https://wa.me/5491168520606"
             customButtonText="Saca turno"
             customButtonLink="https://wa.me/5491168520606"
+            detailsLink="/servicios/masajesReductores"
           />
         </FadeIn>
       </BackgroundService>
