@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "mi-proyecto",
   "version": "1.0.0",
   "private": true,
@@ -16,20 +15,5 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "ogl": "^1.0.11"
-=======
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0"
->>>>>>> ad90b3a (cambios en productos)
   }
 }

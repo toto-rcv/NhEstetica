@@ -169,27 +169,18 @@ const BackgroundService = styled.div`
     }
 `;
 
-const FadeIn = styled(motion.div)`
-    margin-bottom: 2rem;
-    position: relative;
-
-    &::after {
-        content: '';
-        display: block;
-        border-bottom: 1px solid #ccc;
-        width: 75%;
-        margin: 2rem auto 0;
-    }
-
-    @media (max-width: 768px) {
-        margin-bottom: 1rem;
-        
-        &::after {
-            width: 90%;
-            margin: 1rem auto 0;
-        }
-    }
-`;
+const FadeIn = ({ children, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, ease: 'easeOut', delay }}
+    style={{ marginBottom: '2rem', position: 'relative' }}
+  >
+    {children}
+    <div style={{ borderBottom: '1px solid #ccc', marginTop: '2rem', width: '75%', marginLeft: 'auto', marginRight: 'auto' }} />
+  </motion.div>
+);
 
 const Image = styled.img`
     position: absolute;

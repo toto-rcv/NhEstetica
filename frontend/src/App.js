@@ -13,13 +13,15 @@ import TratamientosCorporales from './pages/services/TratamientosCorporales';
 import TratamientosFaciales from './pages/services/TratamientosFaciales';
 import DepilacionLaser from './pages/services/DepilacionLaser';
 import Masajes from './pages/services/Masajes';
-import ProductDetail from './pages/products/ProductDetail'; 
+import ProductDetail from './pages/products/ProductDetail';
+import DepiSopranoIce from './pages/services/treatmentsService/depiSopranoIce';
 
 const serviciosRoutes = [
   { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
   { path: 'TratamientosFaciales', element: <TratamientosFaciales /> },
   { path: 'DepilacionLaser', element: <DepilacionLaser /> },
   { path: 'Masajes', element: <Masajes /> },
+  { path: 'depiSopranoIce', element: <DepiSopranoIce /> },
 ];
 
 function App() {

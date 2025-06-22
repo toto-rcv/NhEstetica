@@ -19,7 +19,7 @@ function TratamientosFaciales() {
                     <Image src="/servicios/MujerLineal.png" alt="Servicios" className="mujer-lineal" />
                     <TreatmentsLeft
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/electroporacion.jpg"
                         title="ELECTROPORACIÓN"
                         showLine={true}
                         description="Tratamiento facial avanzado que utiliza pulsos eléctricos para abrir temporalmente los poros y permitir una mejor penetración de los principios activos. Ideal para hidratación profunda, rejuvenecimiento y tratamiento de arrugas finas."
@@ -33,7 +33,7 @@ function TratamientosFaciales() {
                 <FadeIn delay={0.3}>
                     <TreatmentsRight
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/dermaplaning.jpg"
                         title="DERMAPLANING"
                         showLine={true}
                         description="Tratamiento de exfoliación física que elimina el vello facial y las células muertas de la piel. Mejora la textura, reduce las líneas finas y permite una mejor penetración de los productos. Resulta en una piel más suave y radiante."
@@ -48,7 +48,7 @@ function TratamientosFaciales() {
                     <ImageEspalda src="/servicios/mujerLinealEspalda.png" alt="Servicios" style={{ position: 'absolute', top: '5rem', left: '5px', width: '150px', height: 'auto' }} />
                     <TreatmentsLeft
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/dermapen.jpg"
                         title="DERMAPEN"
                         showLine={true}
                         description="Tratamiento de microagujas que estimula la producción natural de colágeno y elastina. Ideal para reducir arrugas, cicatrices y mejorar la textura de la piel. Promueve la regeneración celular y el rejuvenecimiento facial."
@@ -62,7 +62,7 @@ function TratamientosFaciales() {
                 <FadeIn delay={0.5}>
                     <TreatmentsRight
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/exosomas.avif"
                         title="EXOSOMAS"
                         showLine={true}
                         description="Tratamiento regenerativo que utiliza vesículas extracelulares para estimular la renovación celular. Mejora la elasticidad, reduce las arrugas y promueve una piel más joven y saludable. Ideal para rejuvenecimiento facial."
@@ -77,7 +77,7 @@ function TratamientosFaciales() {
                     <Image src="/servicios/flor.png" alt="Servicios" className="floral-image" style={{ position: 'absolute', top: '20rem', right: '5px', width: '150px', height: 'auto' }} />
                     <TreatmentsLeft
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/radiofrecuencia.jpg"
                         title="RADIOFRECUENCIA"
                         showLine={true}
                         description="Tratamiento que utiliza ondas electromagnéticas para estimular la producción de colágeno y elastina. Efectivo para tensar la piel, reducir arrugas y mejorar la firmeza facial. Ideal para rejuvenecimiento no invasivo."
@@ -91,7 +91,7 @@ function TratamientosFaciales() {
                 <FadeIn delay={0.7}>
                     <TreatmentsRight
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/hydrafacial.jpg"
                         title="HYDRAFACIAL"
                         showLine={true}
                         description="Tratamiento facial avanzado que combina limpieza profunda, exfoliación, extracción, hidratación y antioxidantes. Mejora la textura, reduce las líneas finas y proporciona una piel más radiante y saludable."
@@ -106,7 +106,7 @@ function TratamientosFaciales() {
                     <ImageEspalda src="/servicios/MujerSombrero.png" alt="Servicios" style={{ position: 'absolute', top: '20rem', left: '5px', width: '150px', height: 'auto' }} />
                     <TreatmentsLeft
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/laminado.jpg"
                         title="LAMINADO"
                         showLine={true}
                         description="Tratamiento que combina diferentes técnicas para mejorar la apariencia de la piel. Incluye limpieza profunda, exfoliación y aplicación de productos específicos para lograr una piel más suave, luminosa y rejuvenecida."
@@ -120,7 +120,7 @@ function TratamientosFaciales() {
                 <FadeIn delay={0.9}>
                     <TreatmentsRight
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/perfilado.jpg"
                         title="PERFILADO"
                         showLine={true}
                         description="Tratamiento que define y mejora los contornos faciales. Combina técnicas de masaje y productos específicos para tonificar y reafirmar la piel. Ideal para mejorar la definición del rostro y reducir la flacidez."
@@ -135,7 +135,7 @@ function TratamientosFaciales() {
                     <Image src="/servicios/MujerConCopa.png" alt="Servicios" className="MujerConCopa" />
                     <TreatmentsLeft
                         link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/TratamientoFaciales.jpg"
+                        image="/servicios/Tratamiento_Facial/vacum.jpg"
                         title="VACUM"
                         showLine={true}
                         description="Tratamiento que utiliza succión controlada para mejorar la circulación y la oxigenación de la piel. Efectivo para reducir la hinchazón, mejorar la textura y promover la regeneración celular. Ideal para complementar otros tratamientos faciales."
@@ -163,27 +163,18 @@ const BackgroundService = styled.div`
     }
 `;
 
-const FadeIn = styled(motion.div)`
-    margin-bottom: 2rem;
-    position: relative;
-
-    &::after {
-        content: '';
-        display: block;
-        border-bottom: 1px solid #ccc;
-        width: 75%;
-        margin: 2rem auto 0;
-    }
-
-    @media (max-width: 768px) {
-        margin-bottom: 1rem;
-        
-        &::after {
-            width: 90%;
-            margin: 1rem auto 0;
-        }
-    }
-`;
+const FadeIn = ({ children, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, ease: 'easeOut', delay }}
+    style={{ marginBottom: '2rem', position: 'relative' }}
+  >
+    {children}
+    <div style={{ borderBottom: '1px solid #ccc', marginTop: '2rem', width: '75%', marginLeft: 'auto', marginRight: 'auto' }} />
+  </motion.div>
+);
 
 const Image = styled.img`
     position: absolute;
