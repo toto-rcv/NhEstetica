@@ -10,6 +10,17 @@ const genericBenefits = [
   "No testeado en animales 🐰"
 ];
 
+const solarBenefits = [
+  "Protección de amplio espectro UVA y UVB ☀️",
+  "Vehículo de toque seco, no deja sensación grasa",
+  "Efecto matificante para controlar el brillo",
+  "Textura ligera y de rápida absorción",
+  "Fácil de aplicar en rostro y cuerpo",
+  "Resistente al agua 💧",
+  "Enriquecido con antioxidantes que protegen la piel"
+];
+
+
 export const rawProducts = [
   {
     id: 1,
@@ -37,31 +48,56 @@ Este producto está especialmente formulado para:
     benefits: genericBenefits
   },
   {
-    id: 2,
-    name: 'Aceite Corporal de Almendras',
-    category: 'Corporal',
-    brand: 'Idraet',
-    image: '/productos/avocado.jpg',
-    subtitle: "Satisfacción absoluta con nuestro producto insignia",
-    description: 'Aceite suave para nutrir la piel seca.',
-    price: 19.5,
-    isNatural: true,
-    isVegan: false,
-    benefits: genericBenefits
-  },
-  {
-    id: 3,
-    name: 'Shampoo Fortalecedor',
-    category: 'Cabello',
-    brand: 'Skin Food',
-    image: '/productos/zine.jpg',
-    subtitle: "Satisfacción absoluta con nuestro producto insignia",
-    description: 'Shampoo natural para fortalecer el cabello.',
-    price: 18.0,
-    isNatural: true,
-    isVegan: true,
-    benefits: genericBenefits
-  },
+  id: 2,
+  name: 'Serum Libra Colágeno',
+  category: 'Facial',
+  brand: 'Libra',
+  image: '/productos/serum-libra.png',
+  subtitle: "Refuerza tu piel desde adentro con colágeno activo",
+  description: `
+**Reafirmá, nutrí y protegé tu piel** con nuestro *Serum Libra con Colágeno*.
+
+Este tratamiento intensivo está formulado para:
+
+- Mejorar la elasticidad y firmeza del rostro  
+- Suavizar líneas de expresión y prevenir arrugas  
+- Hidratar profundamente sin dejar sensación grasa  
+- Promover la regeneración celular y el aspecto saludable  
+
+🌿 Ideal para pieles maduras o con primeros signos de envejecimiento.  
+💧 Se absorbe rápidamente, dejando una textura sedosa y luminosa.
+  `,
+  price: 19.5,
+  isNatural: true,
+  isVegan: false,
+  link: "/productos/Serum%20Libra%20Colageno",
+  benefits: genericBenefits
+},
+{
+  id: 3,
+  name: 'Radiant C Lightening Face Cream',
+  category: 'Facial',
+  brand: 'Lidherma',
+  image: '/productos/crema-lidherma.png',
+  subtitle: "Luminosidad, nutrición y acción despigmentante en una sola crema",
+  description: `
+**Crema facial multifuncional** con textura cremosa y activos inteligentes que se adaptan a diferentes necesidades de la piel.
+
+Indicada para:
+
+- Tratamientos antiage y antioxidantes  
+- Protocolos despigmentantes y post-solares  
+- Pieles opacas, con manchas o signos de estrés  
+
+💡 Su fórmula rica y versátil permite integrarla en múltiples rutinas profesionales o de uso diario.
+  `,
+  price: 18.0,
+  isNatural: true,
+  isVegan: true,
+  link: "/productos/crema-lidherma.png",
+  benefits: solarBenefits
+},
+
   {
     id: 4,
     name: 'Mascarilla Facial Detox',

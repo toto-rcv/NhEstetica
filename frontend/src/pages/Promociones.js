@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import Slider from "react-slick";
@@ -6,6 +6,8 @@ import Breadcrumb from "../components/breadcrumb";
 import promotions from "../data/promotions";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 function Promociones() {
   const settings = {
@@ -13,24 +15,24 @@ function Promociones() {
     infinite: true,
     speed: 500,
     arrows: false,
-    slidesToShow: 1,
+    slidesToShow: 3,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 5000,
-  };
-
-  const sliderPromos = promotions.filter((p) => p.ubication === "slider");
-  const gridPromos = promotions.filter((p) => p.ubication === "grid");
-
-  const allImages = [...sliderPromos, ...gridPromos].map((p) => p.image);
-
-  const [photoIndex, setPhotoIndex] = React.useState(0);
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  const openModal = (src) => {
-    const index = allImages.findIndex((img) => img === src);
-    setPhotoIndex(index);
-    setIsOpen(true);
+    autoplaySpeed: 4000,
+    responsive: [
+      {
+        breakpoint: 1620,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
   };
 
   return (
@@ -48,47 +50,16 @@ function Promociones() {
           alt="Decoración derecha"
         />
 
-        <RowLayout>
-          <LeftColumn>
-            <StyledSlider {...settings}>
-              {sliderPromos.map((promo, index) => (
-                <PromotionWrapper
-                  key={index}
-                  onClick={() => openModal(promo.image)}
-                >
-                  <PromotionImage src={promo.image} alt={promo.name} />
-                </PromotionWrapper>
-              ))}
-            </StyledSlider>
-          </LeftColumn>
-
-          <RightColumn>
-            <GridContainer>
-              {gridPromos.map((promo, i) => (
-                <GridItem
-                  key={i}
-                  $position={promo.position}
-                  onClick={() => openModal(promo.image)}
-                >
-                  <img src={promo.image} alt={promo.name} />
-                </GridItem>
-              ))}
-            </GridContainer>
-          </RightColumn>
-        </RowLayout>
+        <Slider {...settings}>
+          {promotions.map((promo, index) => (
+            <Slide key={index}>
+              <FadeIn>
+                <PromoImage src={promo.image} alt={promo.title} />
+              </FadeIn>
+            </Slide>
+          ))}
+        </Slider>
       </ContainerPromociones>
-
-      {isOpen && (
-        <Lightbox
-          open={isOpen}
-          close={() => setIsOpen(false)}
-          slides={allImages.map((src) => ({ src }))}
-          index={photoIndex}
-          on={{
-            view: ({ index }) => setPhotoIndex(index),
-          }}
-        />
-      )}
     </>
   );
 }
@@ -111,12 +82,34 @@ const FadeIn = ({ children, delay = 0 }) => (
 const ContainerPromociones = styled.div`
   background: var(--background-color);
   position: relative;
-  min-height: 60vh;
-  padding: 3rem 12rem;
+  padding: 3rem 4rem;
+
+  @media (max-width: 1024px) {
+    padding: 3rem 2rem;
+  }
 
   @media (max-width: 768px) {
-    padding: 3rem 2rem;
+    padding: 2rem 1rem;
+  }
+`;
 
+const Slide = styled.div`
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+`;
+const PromoImage = styled.img`
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  cursor: pointer;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.03);
   }
 `;
 
@@ -124,7 +117,7 @@ const TopLeftImage = styled.img`
   position: absolute;
   top: 20px;
   left: 30px;
-  max-width: 200px;
+  max-width: 150px;
   height: auto;
   z-index: 1;
   pointer-events: none;
@@ -147,98 +140,4 @@ const BottomRightImage = styled.img`
   @media (max-width: 768px) {
     display: none;
   }
-`;
-
-const PromotionWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const PromotionImage = styled.img`
-  width: 100%;
-  height: 115vh;
-  border-radius: 10px;
-  object-fit: contain;
-
-  @media (max-width: 768px) {
-    height: 100%;
-    max-height: 65vh;
-  object-fit: contain;
-
-  }
-`;
-
-const GridContainer = styled.div`
-  display: grid;
-  gap: 20px;
-  grid-template-columns: 1fr;
-`;
-
-const GridItem = styled.div`
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-
-  img {
-    width: 100%;
-    height: ${({ $position }) =>
-      $position === "horizontal" ? "55vh" : "80vh"};
-    object-fit: cover;
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-  }
-
-  &:hover img {
-    transform: scale(1.05);
-  }
-`;
-
-const RowLayout = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-  gap: 2rem;
-  margin-top: 3rem;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const LeftColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  
-  @media (max-width: 768px) {
-    align-items: center;
-  }
-`;
-
-const RightColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
-const StyledSlider = styled(Slider)`
-  width: 100%;
-  max-width: 48vw;
-
-  .slick-dots {
-    bottom: -25px;
-  }
-
-  .slick-dots li button:before {
-    color: var(--terciary-color);
-  }
-
-  
-  @media (max-width: 768px) {
-  max-width: 100vw;
-    
-  }
-
 `;
