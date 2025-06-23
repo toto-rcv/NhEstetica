@@ -22,7 +22,7 @@ function AboutUs() {
                 <Description>
                 Descubre la diferencia que un enfoque personalizado de belleza y bienestar puede hacer. El personal experimentado de NH Estética ,se dedica a brindar un servicio excepcional y tratamientos personalizados para ayudarte a verte y sentirte lo mejor posible.
                 </Description>
-                <ServiceButton to="/services" onClick={handleClick}>Ver todos</ServiceButton>
+                <ServiceButton to="/servicios" onClick={handleClick}>Ver todos</ServiceButton>
                 
             </TextContainer>
 

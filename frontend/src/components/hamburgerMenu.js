@@ -34,7 +34,7 @@ const Hamburger = styled.div.withConfig({
     transition: all 0.3s ease;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: flex;
   }
 

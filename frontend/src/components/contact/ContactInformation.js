@@ -90,7 +90,7 @@ const Card = styled.div`
   justify-content: center;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
 
-  @media (min-width: 768px) {
+  @media (min-width: 1200px) {
     &:last-child, &:first-child {
         position: relative;
         top: -25px;

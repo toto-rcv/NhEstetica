@@ -2,15 +2,10 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import SideMenu from "./sideMenu";
 import HamburgerMenu from "./hamburgerMenu";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFacebook,
-  faWhatsapp,
-  faInstagram,
-} from "@fortawesome/free-brands-svg-icons";
+import { faFacebook, faWhatsapp, faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { useLocation } from "react-router-dom";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +19,6 @@ function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verificar si el usuario está logueado al cargar el componente
     const loginStatus = localStorage.getItem('isLoggedIn');
     const user = localStorage.getItem('username');
     if (loginStatus === 'true' && user) {
@@ -47,14 +41,7 @@ function Header() {
 
       if (currentScrollY > 100) {
         setHasScrolled(true);
-
-        if (currentScrollY < lastScrollY) {
-          // Scroll up
-          setShowHeader(true);
-        } else {
-          // Scroll down
-          setShowHeader(false);
-        }
+        setShowHeader(currentScrollY < lastScrollY);
       } else {
         setHasScrolled(false);
         setShowHeader(false);
@@ -67,7 +54,7 @@ function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-    useEffect(() => {
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location]);
 
@@ -94,7 +81,6 @@ function Header() {
               <StyledLink to="/servicios">
                 Servicios <IoMdArrowDropdown />
               </StyledLink>
-
               {showDropdown && (
                 <>
                   <HoverBridge />
@@ -102,7 +88,7 @@ function Header() {
                     <DropdownItem to="/servicios/DepilacionLaser" onClick={() => setShowDropdown(false)}>
                       Depilación Láser
                     </DropdownItem>
-                                      <DropdownItem to="/servicios/TratamientosCorporales" onClick={() => setShowDropdown(false)}>
+                    <DropdownItem to="/servicios/TratamientosCorporales" onClick={() => setShowDropdown(false)}>
                       Corporales
                     </DropdownItem>
                     <DropdownItem to="/servicios/TratamientosFaciales" onClick={() => setShowDropdown(false)}>
@@ -129,35 +115,14 @@ function Header() {
 
         <IconsContainer isOpen={isOpen}>
           <Icons>
-            <a
-              href="https://w.app/chlxyz"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon
-                icon={faWhatsapp}
-                style={{ color: "var(--terciary-color)" }}
-              />
+            <a href="https://w.app/chlxyz" target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon icon={faWhatsapp} style={{ color: "var(--terciary-color)" }} />
             </a>
-            <a
-              href="https://www.instagram.com/nhesteticaposadas/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon
-                icon={faInstagram}
-                style={{ color: "var(--terciary-color)" }}
-              />
+            <a href="https://www.instagram.com/nhesteticaposadas/" target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon icon={faInstagram} style={{ color: "var(--terciary-color)" }} />
             </a>
-            <a
-              href="https://www.facebook.com/nh.estetica/?locale=es_LA"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon
-                icon={faFacebook}
-                style={{ color: "var(--terciary-color)" }}
-              />
+            <a href="https://www.facebook.com/nh.estetica/?locale=es_LA" target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon icon={faFacebook} style={{ color: "var(--terciary-color)" }} />
             </a>
           </Icons>
         </IconsContainer>
@@ -171,6 +136,8 @@ function Header() {
 
 export default Header;
 
+// === STYLES ===
+
 const FixedWrapper = styled.div`
   position: fixed;
   top: 0;
@@ -178,7 +145,6 @@ const FixedWrapper = styled.div`
   right: 0;
   z-index: 900;
 `;
-
 
 const HeaderContainer = styled.header.withConfig({
   shouldForwardProp: (prop) => prop !== "visible" && prop !== "scrolled",
@@ -189,28 +155,20 @@ const HeaderContainer = styled.header.withConfig({
   align-items: center;
   justify-content: space-between;
   max-height: 60px;
-  background: linear-gradient(
-    90deg,
-    #f6d8f2 0%,
-    #f6d8f2 25%,
-    #f6d8f2 75%,
-    #f6d8f2 100%
-  );
+  background: linear-gradient(90deg, #f6d8f2 0%, #f6d8f2 100%);
   border-bottom: 1px solid #eee;
-
-  transform: ${(props) =>
-    props.scrolled
-      ? props.visible
-        ? "translateY(0)"
-        : "translateY(-100%)"
-      : "translateY(0)"};
+  transform: ${(props) => (props.scrolled ? (props.visible ? "translateY(0)" : "translateY(-100%)") : "translateY(0)")};
   opacity: ${(props) => (props.scrolled ? (props.visible ? 1 : 0) : 1)};
-
   transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     padding: 1rem 1.5rem;
   }
+
+    
+    @media (min-width: 1024px) and (max-width: 1200px) {
+      padding: 1rem 2rem;
+    }
 `;
 
 const NavContainer = styled.div`
@@ -220,7 +178,7 @@ const NavContainer = styled.div`
     transition: all 0.4s ease;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: none;
   }
 `;
@@ -233,7 +191,7 @@ const IconsContainer = styled.div.withConfig({
   justify-content: center;
   margin-left: 20px;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: ${(props) => (props.isOpen ? "flex" : "none")};
     margin-top: -10px;
     margin-bottom: 1rem;
@@ -253,7 +211,7 @@ const Title = styled.h1`
   margin: 0 2px;
   font-weight: 700;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     font-size: 28px;
   }
 `;
@@ -264,7 +222,7 @@ const TitleContainer = styled.div`
   align-items: center;
   justify-content: center;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     flex-direction: row;
   }
 `;
@@ -273,7 +231,7 @@ const LogoContainer = styled.div`
   display: flex;
   gap: 5px;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     gap: 12px;
   }
 `;
@@ -313,6 +271,11 @@ const StyledLink = styled(RouterLink)`
   &:hover::after {
     width: 95%;
   }
+
+    @media (min-width: 1024px) and (max-width: 1200px) {
+      font-size: 17px;
+      margin: 0 3px;
+    }
 `;
 
 const DropdownWrapper = styled.div`
@@ -380,7 +343,7 @@ const LogoutButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  
+
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);

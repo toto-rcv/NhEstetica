@@ -34,7 +34,7 @@ function Testimonials() {
     autoplaySpeed: 5000,
     responsive: [
       {
-        breakpoint: 940,
+        breakpoint: 768,
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
@@ -70,8 +70,9 @@ function Testimonials() {
           <SlideWrapper key={index}>
             <Card>
               <Text>
-              {t.text.split(" ").slice(0, 50).join(" ") + (t.text.split(" ").length > 50 ? "..." : "")}
-            </Text>
+                {t.text.split(" ").slice(0, 50).join(" ") +
+                  (t.text.split(" ").length > 50 ? "..." : "")}
+              </Text>
               <StarRating rating={t.rating} />
               <UserInfo>
                 <Avatar src={t.image} />
@@ -100,10 +101,9 @@ const Wrapper = styled.section`
   align-items: center;
   position: relative;
 
-      @media (max-width: 768px) {
-        padding: 90px 20px;
-    }
-
+  @media (max-width: 768px) {
+    padding: 90px 20px;
+  }
 `;
 
 const TopText = styled.div`
@@ -111,11 +111,9 @@ const TopText = styled.div`
   display: flex;
   flex-direction: column;
 
-      @media (max-width: 768px) {
-        gap: 20px;
-    }
-
-  
+  @media (max-width: 768px) {
+    gap: 20px;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -126,9 +124,9 @@ const Subtitle = styled.p`
   margin: 0 !important;
   font-family: var(--heading-font), sans-serif;
 
-      @media (max-width: 768px) {
-        font-size: 1.3rem;
-    }
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
 `;
 
 const Title = styled.h2`
@@ -139,16 +137,9 @@ const Title = styled.h2`
   font-family: var(--heading-font), sans-serif;
   transform: skew(-10deg);
 
-    @media (max-width: 768px) {
-        font-size: 2rem;
-    }
-`;
-
-const CardsContainer = styled.div`
-  display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
-  justify-content: center;
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const Card = styled.div`
@@ -166,6 +157,10 @@ const Card = styled.div`
 
   @media (max-width: 768px) {
     max-width: 270px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1200px) {
+    max-width: 320px;
   }
 `;
 
@@ -233,6 +228,8 @@ const StyledSlider = styled(Slider)`
   .slick-slide {
     padding: 0 15px;
     box-sizing: border-box;
+          display: flex;
+      justify-content: center;
   }
 
   .slick-slide > div {
@@ -262,34 +259,34 @@ const Star = styled.span`
 `;
 
 const MujerFrente = styled.img`
-    width: 160px;
-    height: auto;
-    border-radius: 10px;
-    position: absolute;
-    right: 2%;
-    top: 5%;
-    filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
+  width: 160px;
+  height: auto;
+  border-radius: 10px;
+  position: absolute;
+  right: 2%;
+  top: 5%;
+  filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
 
-    @media (max-width: 768px) {
-        width: 130px;
-        top: 0;
-        right: 0;
-    }
+  @media (max-width: 768px) {
+    width: 130px;
+    top: 0;
+    right: 0;
+  }
 `;
 
 const MujerPerfil = styled.img`
-    width: 120px;
-    height: auto;
-    border-radius: 10px;
-    position: absolute;
-    left: 1%;
-    filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
-    top: 70%;
+  width: 120px;
+  height: auto;
+  border-radius: 10px;
+  position: absolute;
+  left: 1%;
+  filter: drop-shadow(5px 5px 10px rgba(224, 117, 212, 1));
+  top: 70%;
 
-      @media (max-width: 768px) {
-        width: 100px;
-        top: 80%;
-    }
+  @media (max-width: 768px) {
+    width: 100px;
+    top: 80%;
+  }
 `;
 
 const SlideWrapper = styled.div`

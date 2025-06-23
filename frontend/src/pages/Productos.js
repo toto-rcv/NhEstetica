@@ -207,6 +207,11 @@ const ProductContainer = styled.section`
   @media (max-width: 768px) {
     padding: 2rem 2rem;
   }
+
+  
+    @media (min-width: 768px) and (max-width: 1200px) {
+      padding: 2rem 1rem;
+    }
 `;
 
 const MainWrapper = styled.div`
@@ -320,10 +325,9 @@ const EndMessage = styled.p`
 const TopLeftImage = styled.img`
   position: absolute;
   bottom: 0;
-  left: 30px;
+  right: 30px;
   max-width: 200px;
   height: auto;
-  rotate: 80deg;
   z-index: 1;
   pointer-events: none;
   filter: drop-shadow(0px 4px 4px rgba(224, 117, 212, 0.5)); 
@@ -337,6 +341,11 @@ const TopLeftImage = styled.img`
   }
 
     @media (max-width: 768px) {
+    display: none;
+  }
+
+  
+  @media (max-width: 1700px) {
     display: none;
   }
 `;
@@ -354,4 +363,5 @@ const BottomRightImage = styled.img`
   @media (max-width: 1656px) {
     display: none;
   }
+
 `;

@@ -1,6 +1,6 @@
 export const categories = ['Todo', 'Facial', 'Corporal', 'Cabello', 'Natural', 'Vegano'];
 
-export const brands = ['Royal Bronze', 'Idraet', 'Skin Food'];
+export const brands = ['Libra', 'Royal Bronze', 'Idraet', 'Skin Food'];
 
 const genericBenefits = [
   "Hidrata profundamente la piel",
@@ -10,18 +10,29 @@ const genericBenefits = [
   "No testeado en animales 🐰"
 ];
 
-export const rawProducts  = [
+export const rawProducts = [
   {
     id: 1,
-    name: 'Crema Hidratante Facial',
+    name: 'Gel de Limpieza Facial',
     category: 'Facial',
-    brand: 'Royal Bronze',
-    image: '/productos/autobronceante.jpg',
-    subtitle: "Satisfacción absoluta con nuestro producto insignia",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dignissimos repellendus eligendi eum, tenetur aliquam nulla vero. Quisquam repudiandae neque eius minima accusantium sit consequatur beatae maiores dignissimos iste vero perferendis laborum modi adipisci explicabo, aspernatur suscipit aliquam minus praesentium id iusto! Incidunt repudiandae repellendus debitis nisi quidem nulla illum vel laborum mollitia! Perferendis iure eum architecto.",
+    brand: 'Libra',
+    image: '/productos/Gel-limpieza-facial.png',
+    subtitle: "Limpieza profunda y frescura diaria para tu piel",
+    description: `
+**Descubrí una piel más limpia, suave y equilibrada** con nuestro *Gel de Limpieza Facial Libra*.
+
+Este producto está especialmente formulado para:
+
+- Eliminar impurezas, exceso de grasa y restos de maquillaje  
+- Limpiar sin resecar ni irritar  
+- Dejar una sensación de frescura desde la primera aplicación  
+- Ayudar a mantener los poros limpios y la piel libre de imperfecciones  
+
+✅ *Recomendado para todo tipo de piel, incluso las más sensibles.*
+    `,
     price: 25.99,
     isNatural: true,
-    isVegan: true,
+    isVegan: false,
     link: "/productos/Crema%20Hidratante%20Facial",
     benefits: genericBenefits
   },

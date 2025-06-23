@@ -14,6 +14,7 @@ const ProductsGrid = ({ products }) => {
               <ProductImage src={product.image} alt={product.name} />
             </LinkStyled>
             <ProductName>{product.name}</ProductName>
+            <ProductBrand>{product.brand}</ProductBrand>
             <LinkStyled to={`/productos/${encodeURIComponent(product.name)}`}>
               Ver más →
             </LinkStyled>
@@ -39,6 +40,7 @@ const GridContainer = styled.div`
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
+
 `;
 
 
@@ -90,21 +92,23 @@ const ProductName = styled.h3`
   }
 `;
 
-const ViewMore = styled.span`
+const ProductBrand = styled.p`
   font-size: 1.1rem;
-  color: var(--terciary-color);
-  margin-top: 0.5rem;   
-  cursor: pointer;
+  color: var(--primary-color-dark);
+  margin: 7px 0 10px;
+  font-weight: 400;
 
-
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const LinkStyled = styled(Link)`
   font-size: 1.1rem;
   color: var(--terciary-color);
-  margin-top: 0.5rem;
   cursor: pointer;
   text-decoration: none;
+  font-weight: 600;
 
   &:hover {
     text-decoration: underline;

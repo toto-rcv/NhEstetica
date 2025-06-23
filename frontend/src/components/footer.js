@@ -148,6 +148,11 @@ const TopSection = styled.div`
   border-bottom: 1px solid rgba(0,0,0,0.4);
   padding-bottom: 30px;
 
+    @media (max-width: 768px){
+        flex-direction: column;
+    }
+
+
 `;
 
 const LogoContainer = styled.div`
@@ -315,10 +320,23 @@ const ImagenMujer = styled.img`
 
     @media (max-width: 768px) {
       top: 95vh;
-      left: 69vw;
+      left: 79vw;
       width: 100px;
       transform: rotate(319deg) scaleX(-1);
     }
+
+      @media (min-width:768px) and (max-width: 1200px) {
+      top: 41vh;
+      left: 0;
+      width: 130px;
+    }
+
+     @media (min-width:1200px) and (max-width: 1400px) {
+      top: 12vh;
+      left: 0;
+      width: 140px;
+    }
+    
 `;
 
 const ImageRosa = styled.img`

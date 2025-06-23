@@ -75,7 +75,6 @@ const StyledMasonry = styled(Masonry)`
   margin-top: 20px;
   overflow: hidden;
   border-radius: 20px;
-  max-height: 130vh;
 
   & .my-masonry-grid_column {
     padding-left: 1rem;

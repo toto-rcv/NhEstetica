@@ -6,6 +6,7 @@ import Breadcrumb from "../../components/breadcrumb";
 import CircularGallery from "../../components/extensions/CircullarGallery";
 import {useState, useEffect} from "react"
 import { Link } from "react-router-dom";
+import ReactMarkdown from 'react-markdown';
 
 function ProductDetail() {
   const { productName } = useParams();
@@ -48,7 +49,9 @@ function ProductDetail() {
             {product.brand} - {product.category}
           </Brand>
           <Price>${product.price.toLocaleString()}</Price>
-          <Description>{product.description}</Description>
+         <Description>
+  <ReactMarkdown>{product.description}</ReactMarkdown>
+</Description>
           {product.benefits && (
   <BenefitsList>
     {product.benefits.map((benefit, index) => (
@@ -98,6 +101,7 @@ const DetailWrapper = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   padding: 6rem 3rem;
+  align-items: center;
 
   @media (max-width: 768px) {
     flex-direction: column-reverse;

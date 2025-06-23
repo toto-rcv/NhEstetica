@@ -135,6 +135,11 @@ const TopLeftImage = styled.img`
     width: 70px;
     top: -50px;
   }
+
+  @media (min-width: 768px) and (max-width: 1200px) {
+    max-width: 120px;
+    bottom: -30px;
+}
 `;
 
 const BottomRightImage = styled.img`
@@ -150,4 +155,9 @@ const BottomRightImage = styled.img`
   @media (max-width: 768px) {
     display: none;
   }
+
+  @media (min-width: 768px) and (max-width: 1200px) {
+    max-width: 80px;
+    bottom: -30px;
+}
 `;
