@@ -5,7 +5,7 @@ const TablasRedirect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate('/tablas/inicio', { replace: true });
+    navigate('/admin/inicio');
   }, [navigate]);
 
   return null;

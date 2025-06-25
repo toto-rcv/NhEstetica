@@ -158,18 +158,17 @@ function Login() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('¡Login exitoso!');
-        
-        // Guardar token y datos del usuario en localStorage
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.user.username);
-        localStorage.setItem('isLoggedIn', 'true');
-        
-        // Mostrar modal de bienvenida
-        setLoggedInUser(data.user.username);
-        setShowModal(true);
-        
-      } else {
+  setSuccess('¡Login exitoso!');
+  
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('username', data.user.username);
+  localStorage.setItem('isLoggedIn', 'true');
+  
+  setLoggedInUser(data.user.username);
+  
+  // Redirigir al panel de administración
+  navigate('/admin');
+} else {
         setError(data.message || 'Error al iniciar sesión');
       }
     } catch (err) {

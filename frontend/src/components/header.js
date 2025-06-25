@@ -35,6 +35,10 @@ function Header() {
     navigate('/');
   };
 
+  const handleGoToAdmin= () => {
+    navigate('/admin/inicio');
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -108,6 +112,7 @@ function Header() {
               <UserSection>
                 <UserInfo>Hola, {username}</UserInfo>
                 <LogoutButton onClick={handleLogout}>Cerrar Sesión</LogoutButton>
+                <AdminButton onClick={handleGoToAdmin}>Ir al admin</AdminButton>
               </UserSection>
             )}
           </nav>
@@ -115,7 +120,7 @@ function Header() {
 
         <IconsContainer isOpen={isOpen}>
           <Icons>
-            <a href="https://w.app/chlxyz" target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.link/56ou29" target="_blank" rel="noopener noreferrer">
               <FontAwesomeIcon icon={faWhatsapp} style={{ color: "var(--terciary-color)" }} />
             </a>
             <a href="https://www.instagram.com/nhesteticaposadas/" target="_blank" rel="noopener noreferrer">
@@ -163,6 +168,7 @@ const HeaderContainer = styled.header.withConfig({
 
   @media (max-width: 1024px) {
     padding: 1rem 1.5rem;
+      align-items: center;
   }
 
     
@@ -176,6 +182,8 @@ const NavContainer = styled.div`
     display: flex;
     gap: 1.5rem;
     transition: all 0.4s ease;
+      align-items: center;
+
   }
 
   @media (max-width: 1024px) {
@@ -334,7 +342,24 @@ const UserInfo = styled.span`
 `;
 
 const LogoutButton = styled.button`
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+  }
+`;
+
+const AdminButton = styled.button`
+  background: var(--terciary-color);
   color: white;
   border: none;
   padding: 8px 16px;

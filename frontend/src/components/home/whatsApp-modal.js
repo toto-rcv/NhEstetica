@@ -40,7 +40,7 @@ function WhatsApp() {
             </HeaderConteiner>
             <Text>Si tienes curiosidad acerca de mis servicios o estás listo para reservar una sesión, ¡no dudes en ponerte en contacto conmigo!</Text>
             {/* Aquí puedes poner más contenido */}
-            <TextOpen href='https://wa.me/5491168520606'>¡Abrir Chat!</TextOpen>
+            <TextOpen href='https://wa.me/5491168520606' target="_blank">¡Abrir Chat!</TextOpen>
           </ModalContent>
         </Backdrop>
       )}

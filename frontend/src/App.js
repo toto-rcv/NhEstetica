@@ -9,7 +9,7 @@ import Promociones from './pages/Promociones';
 import Contacto from './pages/Contacto';
 import Login from './pages/Login';
 import WhatsApp from './components/home/whatsApp-modal';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import TratamientosCorporales from './pages/services/TratamientosCorporales';
 import TratamientosFaciales from './pages/services/TratamientosFaciales';
 import DepilacionLaser from './pages/services/DepilacionLaser';
@@ -18,12 +18,12 @@ import ProductDetail from './pages/products/ProductDetail';
 import TreatmentDetailPage from './pages/services/TreatmentDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Importar páginas de tablas
-import InicioTablas from './pages/tablas/inicio';
-import Caja from './pages/tablas/caja';
-import Clientes from './pages/tablas/clientes';
-import Ventas from './pages/tablas/ventas';
-import Personal from './pages/tablas/personal';
+// Importar páginas de admin
+import InicioAdmin from './pages/admin/inicio';
+import Caja from './pages/admin/caja';
+import Clientes from './pages/admin/clientes';
+import Ventas from './pages/admin/ventas';
+import Personal from './pages/admin/personal';
 import TablasRedirect from './components/tablas/TablasRedirect';
 
 const serviciosRoutes = [
@@ -33,13 +33,15 @@ const serviciosRoutes = [
   { path: 'Masajes', element: <Masajes /> },
 ];
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <>    
-    <Header />
-       <WhatsApp />
-       <Routes>
+    <>
+      {!isAdminRoute && <Header />}
+      {!isAdminRoute && <WhatsApp />}
+      <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/login" element={<Login />} />
         <Route path="/nosotros" element={<Nosotros />} />
@@ -54,42 +56,46 @@ function App() {
          <Route path="/productos/:productName" element={<ProductDetail />} />
          <Route path="/servicios/:treatmentId" element={<TreatmentDetailPage />} />
 
-        {/* Rutas protegidas de tablas */}
-        <Route path="/tablas" element={
+        {/* Rutas protegidas de admin */}
+        <Route path="/admin" element={
           <ProtectedRoute>
             <TablasRedirect />
           </ProtectedRoute>
         } />
-        <Route path="/tablas/inicio" element={
+        <Route path="/admin/inicio" element={
           <ProtectedRoute>
-            <InicioTablas />
+            <InicioAdmin />
           </ProtectedRoute>
         } />
-        <Route path="/tablas/caja" element={
+        <Route path="/admin/caja" element={
           <ProtectedRoute>
             <Caja />
           </ProtectedRoute>
         } />
-        <Route path="/tablas/clientes" element={
+        <Route path="/admin/clientes" element={
           <ProtectedRoute>
             <Clientes />
           </ProtectedRoute>
         } />
-        <Route path="/tablas/ventas" element={
+        <Route path="/admin/ventas" element={
           <ProtectedRoute>
             <Ventas />
           </ProtectedRoute>
         } />
-        <Route path="/tablas/personal" element={
+        <Route path="/admin/personal" element={
           <ProtectedRoute>
             <Personal />
           </ProtectedRoute>
         } />
 
       </Routes>
-    <Footer />
+      {!isAdminRoute && <Footer />}
     </>
   );
+}
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;

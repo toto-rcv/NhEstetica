@@ -98,14 +98,14 @@ const StyledLinkWithScroll = (props) => (
 </Column>
 </FooterNav>
         <ImageRosa src='/footer/rosa.png' alt="Logo" />
-      </TopSection>
+      </TopSection> 
 
       <BottomSection>
         <span>Desarrollado por SurCode</span>
         <span>2025 - © Todos los derechos reservados.</span>
             <IconsContainer>
                 <Icons>
-                    <a href='https://w.app/chlxyz' target="_blank"> <FontAwesomeIcon icon={faWhatsapp} style={{ color: "var(--background-dark)" }} /> </a>
+                    <a href='https://wa.link/56ou29' target="_blank"> <FontAwesomeIcon icon={faWhatsapp} style={{ color: "var(--background-dark)" }} /> </a>
                     <a href='https://www.instagram.com/nhesteticaposadas/' target="_blank"> <FontAwesomeIcon icon={faInstagram} style={{ color: "var(--background-dark)" }} /> </a>
                     <a href='https://www.facebook.com/nh.estetica/?locale=es_LA' target="_blank"> <FontAwesomeIcon icon={faFacebook} style={{ color: "var(--background-dark)" }} /> </a>
                 </Icons>

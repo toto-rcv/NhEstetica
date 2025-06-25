@@ -52,7 +52,7 @@ function Team() {
       <Mujer src="/aboutUs/imagenMujer.png" alt="Mujer de Perfil" />
       <TopText>¿Quiénes somos?</TopText>
       <Heading>NUESTROS PROFESIONALES</Heading>
-      <Subheading>Un gran equipo con profesionales de primera, Lorem ipsum dolor, sit amet consectetur adipisicing elit.</Subheading>
+      <Subheading>Un equipo comprometido con la excelencia médica y el bienestar de cada paciente.</Subheading>
       <SliderContainer>
         <Slider {...settings}>
           {professionals.map((pro, index) => (

@@ -1,0 +1,6 @@
+USE nhestetica_db;
+
+CREATE TABLE IF NOT EXISTS ventas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  
+); 
