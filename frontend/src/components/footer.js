@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link as RouterLink } from 'react-router-dom';
 import { faFacebook, faWhatsapp, faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { products } from '../data/products';
+import { rawProducts } from '../data/products';
 
 function Footer() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const [products, setProducts] = useState([]);
+  useEffect(() => { rawProducts().then(setProducts); }, []);
 
 const StyledLinkWithScroll = (props) => (
   <StyledLink {...props} onClick={() => {

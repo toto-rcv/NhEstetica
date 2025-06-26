@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const TablaVentas = ({
+const TablaVentasTratamientos = ({
   ventas,
   clientes,
   onDelete,
@@ -118,7 +118,7 @@ const TablaVentas = ({
   </Table>
 );
 
-export default TablaVentas;
+export default TablaVentasTratamientos;
 
 // Estilos
 const Table = styled.table`

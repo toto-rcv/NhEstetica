@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import Breadcrumb from "../components/breadcrumb";
 import ProductsGrid from "../components/products/productsGrid";
-import { categories, brands, products as allProducts } from "../data/products";
+import { categories, brands, rawProducts as fetchRawProducts } from "../data/products";
 import { FaFilter } from "react-icons/fa";
 
 function Productos() {
@@ -13,8 +13,19 @@ function Productos() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [visibleCount, setVisibleCount] = useState(9);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const loaderRef = useRef(null);
+
+  useEffect(() => {
+    fetchRawProducts()
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -63,7 +74,7 @@ function Productos() {
     setSearchTerm(e.target.value);
   };
 
-  const filteredProducts = allProducts.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const matchCategory =
       selectedCategories.length === 0 ||
       selectedCategories.includes(product.category);
@@ -132,7 +143,7 @@ function Productos() {
 
             <ContentArea>
               <div>
-                <ProductsGrid products={visibleProducts} />
+                <ProductsGrid products={visibleProducts} loading={loading} />
                 {isLoadingMore && <Spinner />}
                 {visibleCount < filteredProducts.length && (
                   <div ref={loaderRef} style={{ height: "40px" }} />
@@ -140,7 +151,7 @@ function Productos() {
                 {visibleCount >= filteredProducts.length && filteredProducts.length > 0 && (
                   <EndMessage></EndMessage>
                 )}
-                {filteredProducts.length === 0 && (
+                {filteredProducts.length === 0 && !loading && (
                   <EndMessage>No se encontraron productos.</EndMessage>
                 )}
               </div>

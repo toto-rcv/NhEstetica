@@ -2,7 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-const ProductsGrid = ({ products }) => {
+const ProductsGrid = ({ products, loading = false }) => {
+  if (loading) {
+    return (
+      <GridContainer>
+        <LoadingMessage>Cargando productos...</LoadingMessage>
+      </GridContainer>
+    );
+  }
+
   return (
     <GridContainer>
       {products.length === 0 ? (
@@ -10,12 +18,12 @@ const ProductsGrid = ({ products }) => {
       ) : (
         products.map((product, index) => (
           <Card key={index}>
-            <LinkStyled to={`/productos/${encodeURIComponent(product.name)}`}>
+            <LinkStyled to={`/productos/${product.id}`}>
               <ProductImage src={product.image} alt={product.name} />
             </LinkStyled>
             <ProductName>{product.name}</ProductName>
             <ProductBrand>{product.brand}</ProductBrand>
-            <LinkStyled to={`/productos/${encodeURIComponent(product.name)}`}>
+            <LinkStyled to={`/productos/${product.id}`}>
               Ver más →
             </LinkStyled>
           </Card>
@@ -122,6 +130,14 @@ const LinkStyled = styled(Link)`
 
 
 const NoResults = styled.p`
+  grid-column: 1 / -1;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  text-align: center;
+  margin-top: 2rem;
+`;
+
+const LoadingMessage = styled.p`
   grid-column: 1 / -1;
   font-size: 1.2rem;
   color: var(--text-color);

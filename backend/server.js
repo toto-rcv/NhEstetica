@@ -10,9 +10,11 @@ app.use(express.json());
 
 // Rutas
 app.use('/api', require('./routes/auth.router'));
-app.use('/api/clientes', require('./routes/clientes.routes'));
-app.use('/api/personal', require('./routes/personal.routes'));
-app.use('/api/ventas', require('./routes/ventas.router'));
+app.use('/api/clientes', require('./routes/clientes.router'));
+app.use('/api/personal', require('./routes/personal.router'));
+app.use('/api/ventas/tratamientos', require('./routes/ventas.tratamientos.router'));
+app.use('/api/ventas/productos', require('./routes/ventas.productos.router'));
+app.use('/api/productos', require('./routes/productos.router'));
 
 async function startServer() {
   await testConnection();

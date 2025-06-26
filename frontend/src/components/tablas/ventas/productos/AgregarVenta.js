@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Modal from 'react-modal';
-import ClienteAutocomplete from './extensions/ClienteAutocomplete';
+import ProductoAutocomplete from './extensions/ProductoAutocomplete';
+import ClienteAutocomplete from '../tratamientos/extensions/ClienteAutocomplete';
 
 Modal.setAppElement('#root');
 
-const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
+const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const abrirModal = () => {
-    if (!nuevaVenta.id) {
-      setModalIsOpen(true);
-    }
+    if (!nuevaVenta.id) setModalIsOpen(true);
   };
 
-  const cerrarModal = () => {
-    setModalIsOpen(false);
-  };
+  const cerrarModal = () => setModalIsOpen(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,10 +22,10 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
   };
 
   useEffect(() => {
-    if (nuevaVenta.id && modalIsOpen) {
-      cerrarModal();
-    }
+    if (nuevaVenta.id && modalIsOpen) cerrarModal();
   }, [nuevaVenta]);
+
+  const productoSeleccionado = productos.find(p => p.id === parseInt(nuevaVenta.producto_id));
 
   return (
     <>
@@ -37,7 +34,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={cerrarModal}
-        contentLabel="Formulario Venta"
+        contentLabel="Formulario Venta Producto"
         style={modalStyles}
       >
         <Form onSubmit={handleSubmit}>
@@ -45,26 +42,16 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
             <CerrarBtn type="button" onClick={cerrarModal}>✖</CerrarBtn>
           </Header>
 
-          <h3>Agregar nueva venta</h3>
+          <h3>Agregar nueva venta de producto</h3>
 
           <InputsRow>
-            <input
-              type="text"
-              name="tratamiento"
-              placeholder="Tratamiento"
-              value={nuevaVenta.tratamiento}
+            <ProductoAutocomplete
+              value={nuevaVenta.producto_id}
               onChange={onChange}
-              required
             />
-
-            <input
-              type="text"
-              name="sesiones"
-              placeholder="Sesiones"
-              value={nuevaVenta.sesiones}
-              onChange={onChange}
-              required
-            />
+            {productoSeleccionado && (
+              <span><strong>Marca:</strong> {productoSeleccionado.marca}</span>
+            )}
 
             <input
               type="number"
@@ -86,7 +73,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
               required
             />
 
-            <ClienteAutocomplete
+             <ClienteAutocomplete
               clientes={clientes}
               value={nuevaVenta.cliente_id}
               onChange={onChange}
@@ -101,7 +88,6 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
 };
 
 export default VentaForm;
-
 
 const Form = styled.form`
   padding: 1rem;

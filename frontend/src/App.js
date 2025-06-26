@@ -22,9 +22,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import InicioAdmin from './pages/admin/inicio';
 import Caja from './pages/admin/caja';
 import Clientes from './pages/admin/clientes';
-import Ventas from './pages/admin/ventas';
+import VentasTratamientos from './pages/admin/ventasTratamientos';
+import VentasProductos from './pages/admin/ventasProductos';
 import Personal from './pages/admin/personal';
 import TablasRedirect from './components/tablas/TablasRedirect';
+import ProductosAdmin from './pages/admin/productos';
 
 const serviciosRoutes = [
   { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
@@ -49,12 +51,12 @@ function AppContent() {
         <Route path="/Productos" element={<Productos />} />
         <Route path="/promociones" element={<Promociones />} />
         <Route path="/contacto" element={<Contacto />} />
-        
+
         {serviciosRoutes.map(({ path, element }) => (
           <Route key={path} path={`/servicios/${path}`} element={element} />
         ))}
-         <Route path="/productos/:productName" element={<ProductDetail />} />
-         <Route path="/servicios/:treatmentId" element={<TreatmentDetailPage />} />
+        <Route path="/productos/:id" element={<ProductDetail />} />
+        <Route path="/servicios/:treatmentId" element={<TreatmentDetailPage />} />
 
         {/* Rutas protegidas de admin */}
         <Route path="/admin" element={
@@ -77,14 +79,24 @@ function AppContent() {
             <Clientes />
           </ProtectedRoute>
         } />
-        <Route path="/admin/ventas" element={
+        <Route path="/admin/ventas/tratamientos" element={
           <ProtectedRoute>
-            <Ventas />
+            <VentasTratamientos />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/ventas/productos" element={
+          <ProtectedRoute>
+            <VentasProductos />
           </ProtectedRoute>
         } />
         <Route path="/admin/personal" element={
           <ProtectedRoute>
             <Personal />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/productos" element={
+          <ProtectedRoute>
+            <ProductosAdmin />
           </ProtectedRoute>
         } />
 

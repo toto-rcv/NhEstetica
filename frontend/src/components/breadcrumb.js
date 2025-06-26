@@ -7,7 +7,7 @@ function Breadcrumb({ image, title, position = 'right', titleColor, textShadow =
       <Overlay />
       <Content
         position={position}
-        titleColor={titleColor}
+        $titleColor={titleColor}
         $textShadow={textShadow}
       >
         {title}
@@ -49,7 +49,7 @@ const Content = styled.div`
   transform: translate(-50%, -50%);
   width: 100%;
   text-align: center;
-  color: ${props => props.titleColor || 'var(--background-dark)'};
+  color: ${props => props.$titleColor || 'var(--background-dark)'};
   font-size: 4rem;
   font-family: var(--heading-font), sans-serif;
   font-weight: 600;

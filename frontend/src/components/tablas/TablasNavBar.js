@@ -1,25 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 const TablasNavBar = () => {
   const location = useLocation();
+  const [ventasOpen, setVentasOpen] = useState(false);
+
+  const handleVentasHover = (open) => () => setVentasOpen(open);
 
   const navItems = [
     { path: '/admin/inicio', label: 'Inicio' },
     { path: '/admin/caja', label: 'Caja' },
     { path: '/admin/clientes', label: 'Clientes' },
-    { path: '/admin/ventas', label: 'Ventas' },
-    { path: '/admin/personal', label: 'Personal' }
+    { path: '/admin/personal', label: 'Personal' },
+    { path: '/admin/productos', label: 'Productos' },
   ];
 
   return (
     <NavContainer>
       <NavList>
         <FrontLink to="/">Ver Web</FrontLink>
+
         {navItems.map((item) => (
           <NavItem key={item.path}>
-            <NavLink 
+            <NavLink
               to={item.path}
               className={location.pathname === item.path ? 'active' : ''}
             >
@@ -27,12 +31,39 @@ const TablasNavBar = () => {
             </NavLink>
           </NavItem>
         ))}
+
+        {/* VENTAS Dropdown */}
+        <DropdownItem
+          onMouseEnter={handleVentasHover(true)}
+          onMouseLeave={handleVentasHover(false)}
+        >
+          <NavLink
+          >
+            Ventas ▾
+          </NavLink>
+          {ventasOpen && (
+            <DropdownMenu>
+              <DropdownLink
+                to="/admin/ventas/productos"
+                className={location.pathname === '/admin/ventas/productos' ? 'active' : ''}
+              >
+                Productos
+              </DropdownLink>
+              <DropdownLink
+                to="/admin/ventas/tratamientos"
+                className={location.pathname === '/admin/ventas/tratamientos' ? 'active' : ''}
+              >
+                Tratamientos
+              </DropdownLink>
+            </DropdownMenu>
+          )}
+        </DropdownItem>
       </NavList>
     </NavContainer>
   );
 };
 
-export default TablasNavBar; 
+export default TablasNavBar;
 
 
 const NavContainer = styled.nav`
@@ -81,3 +112,38 @@ const NavLink = styled(Link)`
 const FrontLink = styled(NavLink)`
   background: var(--terciary-color);
 `
+
+const DropdownItem = styled.li`
+  position: relative;
+`;
+
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--background-color);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+`;
+
+const DropdownLink = styled(Link)`
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  transition: background 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+  }
+`;

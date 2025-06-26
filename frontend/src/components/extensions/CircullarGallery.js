@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import {
   Renderer,
   Camera,
@@ -8,7 +8,7 @@ import {
   Program,
   Texture,
 } from 'ogl'
-import { products } from "../../data/products";
+import { rawProducts } from '../../data/products';
 
 function debounce(func, wait) {
   let timeout
@@ -194,11 +194,28 @@ p.z = wave * clamp(uSpeed * 0.5, 0.0, 1.0);
           vec4 color = texture2D(tMap, uv);
           
           float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
-          if(d > 0.0) {
-            discard;
-          }
           
-          gl_FragColor = vec4(color.rgb, 1.0);
+          // Colores para degradado rosa a blanco (solo para áreas transparentes)
+          vec3 bgColor1 = vec3(0.95, 0.75, 0.85); // Rosa suave superior
+          vec3 bgColor3 = vec3(1.0, 0.95, 0.98); // Blanco con toque rosa inferior
+          vec3 bgGradient = mix(bgColor1, bgColor3, vUv.y);
+          
+          // Suavizar la transición en los bordes para evitar líneas negras
+          float smoothEdge = smoothstep(0.0, 0.01, -d);
+          
+          if(d > 0.0) {
+            // Fuera del área principal - completamente transparente
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+          } else {
+            // Dentro del área principal
+            if(color.a < 0.1) {
+              // Si la imagen es transparente, mostrar fondo rosa
+              gl_FragColor = vec4(bgGradient, smoothEdge);
+            } else {
+              // Mostrar la imagen con transparencia suavizada en los bordes
+              gl_FragColor = vec4(color.rgb, color.a * smoothEdge);
+            }
+          }
         }
       `,
       uniforms: {
@@ -214,10 +231,11 @@ p.z = wave * clamp(uSpeed * 0.5, 0.0, 1.0);
     const img = new Image()
     img.crossOrigin = "anonymous"
     img.src = this.image
-    img.onload = () => {
-      texture.image = img
-      this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight]
-    }
+img.onload = () => {
+  texture.image = img
+  texture.needsUpdate = true // <--- Agrega esto
+  this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight]
+}
   }
   createMesh() {
     this.plane = new Mesh(this.gl, {
@@ -332,12 +350,7 @@ class App {
     })
   }
   createMedias(items, bend = 1, textColor, borderRadius, font) {
-      const galleryItems = products.map(product => ({
-            image: product.image,
-            text: product.name,
-             link: product.link,
-        }));
-    this.mediasImages = galleryItems.concat(galleryItems)
+    this.mediasImages = items.concat(items)
     this.medias = this.mediasImages.map((data, index) => {
       return new Media({
         geometry: this.planeGeometry,
@@ -354,7 +367,7 @@ class App {
         textColor,
         borderRadius,
         font,
-        link: data.link,
+        link: `/productos/${data.id}`,
       })
     })
   }
@@ -528,18 +541,36 @@ this.gl.canvas.addEventListener('click', this.boundOnClick);
 export default function CircularGallery({
   items,
   bend = 3,
-  textColor = "#ffffff",
-  borderRadius = 0.05,
+  textColor = "#8B5A8B",
+  borderRadius = 0.08,
   font = "bold 30px Figtree"
 }) {
   const containerRef = useRef(null)
+  const [galleryItems, setGalleryItems] = useState([]);
+  
   useEffect(() => {
-    const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font })
+    rawProducts().then((products) => {
+      // Mapear los productos para que coincidan con la estructura esperada
+      const mappedItems = products.map(product => ({
+        image: product.image,
+        text: product.name, // Usar 'name' como 'text'
+        link: `/productos/${product.id}`,
+        // Mantener otras propiedades si las necesitas
+        ...product
+      }));
+      setGalleryItems(mappedItems);
+    });
+  }, []);
+  
+  useEffect(() => {
+    if (galleryItems.length === 0) return;
+    const app = new App(containerRef.current, { items: galleryItems, bend, textColor, borderRadius, font })
     return () => {
       app.destroy()
     }
-  }, [items, bend, textColor, borderRadius, font])
+  }, [galleryItems, bend, textColor, borderRadius, font])
+  
   return (
-    <div className='circular-gallery' ref={containerRef} />
-  )
+    <div className='circular-gallery' ref={containerRef} />
+  )
 }

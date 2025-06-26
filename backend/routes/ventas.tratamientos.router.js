@@ -6,7 +6,7 @@ const {
   createVenta,
   updateVenta,
   deleteVenta
-} = require('../controllers/ventas.controller');
+} = require('../controllers/ventas.tratamientos.controller');
 
 // Todas las ventas
 router.get('/', getVentas);

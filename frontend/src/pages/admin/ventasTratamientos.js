@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import TablasLayout from '../../components/tablas/TablasLayout';
-import TablaVentas from '../../components/tablas/ventas/TablaVentas';
-import VentaForm from '../../components/tablas/ventas/AgregarVenta';
+import TablaVentasTratamientos from '../../components/tablas/ventas/tratamientos/TablaVentasTratamientos';
+import VentaForm from '../../components/tablas/ventas/tratamientos/AgregarVenta';
 
-const Ventas = () => {
+const VentasTratamientos = () => {
   const [ventas, setVentas] = useState([]);
 const [clientes, setClientes] = useState([]);
 const [loading, setLoading] = useState(true);
@@ -19,12 +19,14 @@ const [nuevaVenta, setNuevaVenta] = useState({
 const [ventaEditada, setVentaEditada] = useState(null);
 const [ventaEditandoId, setVentaEditandoId] = useState(null);
 
-
 useEffect(() => {
+  fetchData();
+}, []);
+
   const fetchData = async () => {
     try {
       const [ventasRes, clientesRes] = await Promise.all([
-        fetch('http://localhost:5000/api/ventas', {
+        fetch('http://localhost:5000/api/ventas/tratamientos', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -52,8 +54,6 @@ useEffect(() => {
     }
   };
 
-  fetchData();
-}, []);
 
 
 
@@ -67,7 +67,7 @@ const handleAgregarVenta = async (e) => {
   setMensaje('');
 
   try {
-    const res = await fetch('http://localhost:5000/api/ventas', {
+    const res = await fetch('http://localhost:5000/api/ventas/tratamientos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ const handleAgregarVenta = async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      setVentas(prev => [...prev, { ...nuevaVenta, id: data.id || Date.now() }]);
+      await fetchData(); // ✅ Recarga completa
       setMensaje('Venta registrada correctamente ✅');
       setNuevaVenta({
         tratamiento: '',
@@ -96,11 +96,12 @@ const handleAgregarVenta = async (e) => {
   }
 };
 
+
 const handleEliminarVenta = async (id) => {
   if (!window.confirm('¿Estás seguro de que querés eliminar esta venta?')) return;
 
   try {
-    const res = await fetch(`http://localhost:5000/api/ventas/${id}`, {
+    const res = await fetch(`http://localhost:5000/api/ventas/tratamientos/${id}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -108,7 +109,7 @@ const handleEliminarVenta = async (id) => {
     });
 
     if (res.ok) {
-      setVentas(prev => prev.filter(v => v.id !== id));
+      await fetchData(); // ✅ Recarga completa
       setMensaje('Venta eliminada correctamente ✅');
     } else {
       const data = await res.json();
@@ -118,6 +119,7 @@ const handleEliminarVenta = async (id) => {
     setMensaje('Error de red al eliminar venta');
   }
 };
+
 
 const iniciarEdicion = (venta) => {
   setVentaEditandoId(venta.id);
@@ -136,7 +138,7 @@ const cancelarEdicion = () => {
 
 const guardarEdicion = async () => {
   try {
-    const res = await fetch(`http://localhost:5000/api/ventas/${ventaEditandoId}`, {
+    const res = await fetch(`http://localhost:5000/api/ventas/tratamientos/${ventaEditandoId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -148,9 +150,7 @@ const guardarEdicion = async () => {
     const data = await res.json();
 
     if (res.ok) {
-      setVentas(prev =>
-        prev.map(v => (v.id === ventaEditandoId ? { ...v, ...ventaEditada } : v))
-      );
+      await fetchData(); // 👈 Recarga completa desde backend
       setMensaje('Venta actualizada correctamente ✅');
       cancelarEdicion();
     } else {
@@ -162,12 +162,13 @@ const guardarEdicion = async () => {
 };
 
 
+
   return (
     <TablasLayout title="Gestión de Ventas">
       <Container>
-        <Title>Gestión de Ventas</Title>
+        <Title>Gestión de Ventas de Tratamientos</Title>
         <Text>
-          Aquí podrás gestionar las ventas y transacciones del establecimiento.
+          Aquí podrás gestionar las ventas y transacciones de tratamientos del establecimiento.
         </Text>
         <VentaForm
           nuevaVenta={nuevaVenta}
@@ -179,7 +180,7 @@ const guardarEdicion = async () => {
         {loading ? (
           <p>Cargando ventas...</p>
         ) : (
-          <TablaVentas
+          <TablaVentasTratamientos
             ventas={ventas}
             clientes={clientes}
             onDelete={handleEliminarVenta}
@@ -190,6 +191,7 @@ const guardarEdicion = async () => {
             editandoId={ventaEditandoId}
             ventaEditada={ventaEditada}
           />
+         
         )}
 
       </Container>
@@ -197,7 +199,7 @@ const guardarEdicion = async () => {
   );
 };
 
-export default Ventas; 
+export default VentasTratamientos; 
 
 const Container = styled.div`
   text-align: left;

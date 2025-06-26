@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { products } from "../../data/products";
+import { productosService } from '../../services/productosService';
 import Breadcrumb from "../../components/breadcrumb";
 import CircularGallery from "../../components/extensions/CircullarGallery";
 import {useState, useEffect} from "react"
@@ -9,11 +9,12 @@ import { Link } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
 
 function ProductDetail() {
-  const { productName } = useParams();
-  const decodedName = decodeURIComponent(productName);
-  const product = products.find((p) => p.name === decodedName);
- const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-   useEffect(() => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  useEffect(() => {
     function handleResize() {
       setIsMobile(window.innerWidth < 768);
     }
@@ -21,14 +22,50 @@ function ProductDetail() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!product) {
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        setError(null);
+        const productData = await productosService.getProductoById(id);
+        if (productData) {
+          // Transformar los datos del backend al formato esperado por el frontend
+          const transformedProduct = {
+            id: productData.id,
+            name: productData.nombre,
+            category: productData.categoria || '',
+            brand: productData.marca || '',
+            image: productData.imagen || '',
+            subtitle: productData.subtitle || '',
+            description: productData.descripcion || '',
+            price: productData.precio,
+            isNatural: productData.isNatural ?? false,
+            isVegan: productData.isVegan ?? false,
+            benefits: productData.benefits || [],
+          };
+          setProduct(transformedProduct);
+        } else {
+          setError('Producto no encontrado');
+        }
+      } catch (error) {
+        console.error('Error loading product:', error);
+        setError('Error al cargar el producto');
+      }
+    };
+    loadProduct();
+  }, [id]);
+
+  if (error) {
     return (
       <ProductContainer>
         <DetailWrapper>
-          <h2>Producto no encontrado</h2>
+          <h2>{error}</h2>
         </DetailWrapper>
       </ProductContainer>
     );
+  }
+
+  if (!product) {
+    return null; // No mostrar nada mientras se carga
   }
 
   return (
@@ -50,7 +87,13 @@ function ProductDetail() {
           </Brand>
           <Price>${product.price.toLocaleString()}</Price>
          <Description>
-  <ReactMarkdown>{product.description}</ReactMarkdown>
+  <ReactMarkdown
+    components={{
+      p: ({ children }) => <span>{children}</span>,
+    }}
+  >
+    {product.description}
+  </ReactMarkdown>
 </Description>
           {product.benefits && (
   <BenefitsList>
@@ -175,7 +218,7 @@ const Price = styled.p`
   font-weight: 700;
 `;
 
-const Description = styled.p`
+const Description = styled.div`
   font-size: 1.2rem;
   color: var(--text-color);
   line-height: 1.6;
