@@ -24,21 +24,41 @@ const solarBenefits = [
 
 // Exporta una función asíncrona para obtener los productos desde la API
 export async function rawProducts() {
-  const response = await fetch('http://localhost:5000/api/productos');
-  if (!response.ok) throw new Error('Error al obtener productos');
-  const data = await response.json();
-  return data.map((p) => ({
-    id: p.id,
-    name: p.nombre,
-    category: p.categoria || '',
-    brand: p.marca || '',
-    image: p.imagen || '',
-    subtitle: p.subtitle || '', // No existe en backend, dejar vacío o poner un valor por defecto
-    description: p.descripcion || '',
-    price: p.precio,
-    isNatural: p.isNatural ?? false, // No existe en backend, por defecto false
-    isVegan: p.isVegan ?? false, // No existe en backend, por defecto false
-    benefits: p.benefits || [], // No existe en backend, por defecto array vacío
-    link: `/productos/${encodeURIComponent(p.nombre)}`,
-  }));
+  try {
+    const response = await fetch('http://localhost:5000/api/productos');
+    if (!response.ok) throw new Error('Error al obtener productos');
+    const data = await response.json();
+    
+    console.log('📦 Productos del backend:', data);
+    
+    return data.map((p, index) => {
+      // Asegurar que siempre haya un ID válido
+      const productId = p.id || `product-${index + 1}`;
+      
+      console.log(`🔍 Producto ${index + 1}:`, {
+        originalId: p.id,
+        finalId: productId,
+        nombre: p.nombre
+      });
+      
+      return {
+        id: productId,
+        name: p.nombre,
+        category: p.categoria || '',
+        brand: p.marca || '',
+        image: p.imagen || '',
+        subtitle: p.subtitle || '',
+        description: p.descripcion || '',
+        price: p.precio,
+        isNatural: p.isNatural ?? false,
+        isVegan: p.isVegan ?? false,
+        benefits: p.benefits || [],
+        link: `/productos/${productId}`,
+      };
+    });
+  } catch (error) {
+    console.error('❌ Error fetching products:', error);
+    // Retornar array vacío en caso de error
+    return [];
+  }
 }

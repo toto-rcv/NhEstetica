@@ -97,9 +97,9 @@ const Clientes = () => {
   const [nuevoCliente, setNuevoCliente] = useState({
   nombre: '',
   apellido: '',
+  direccion: '',
   email: '',
   telefono: '',
-  direccion: '',
   antiguedad: 0
 });
 

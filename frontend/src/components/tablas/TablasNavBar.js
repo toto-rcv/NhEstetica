@@ -4,24 +4,65 @@ import styled from 'styled-components';
 
 const TablasNavBar = () => {
   const location = useLocation();
-  const [ventasOpen, setVentasOpen] = useState(false);
+const [openDropdown, setOpenDropdown] = useState(null);
 
-  const handleVentasHover = (open) => () => setVentasOpen(open);
+const handleDropdownHover = (label, isOpen) => () => {
+  setOpenDropdown(isOpen ? label : null);
+};
+
+
 
   const navItems = [
-    { path: '/admin/inicio', label: 'Inicio' },
-    { path: '/admin/caja', label: 'Caja' },
-    { path: '/admin/clientes', label: 'Clientes' },
-    { path: '/admin/personal', label: 'Personal' },
-    { path: '/admin/productos', label: 'Productos' },
-  ];
+  { path: '/admin/inicio', label: 'Inicio' },
+  { path: '/admin/caja', label: 'Caja', dropdown: [
+    {path: '/admin/caja', label: 'Ingresos/Egresos'},
+    {path: '/admin/comisiones', label: 'Comisiones'}
+  ]},
+  { path: '/admin/clientes', label: 'Clientes' },
+  { path: '/admin/personal', label: 'Personal' },
+  { path: '/admin/productos', label: 'Productos' },
+  { path: '/admin/tratamientos', label: 'Tratamientos' },
+  {
+    label: 'Ventas',
+    dropdown: [
+      { path: '/admin/ventas/productos', label: 'Productos' },
+      { path: '/admin/ventas/tratamientos', label: 'Tratamientos' },
+    ]
+  }
+];
+
 
   return (
     <NavContainer>
       <NavList>
         <FrontLink to="/">Ver Web</FrontLink>
+        {navItems.map((item) => {
+        if (item.dropdown) {
+          return (
+            <DropdownItem
+              key={item.label}
+              onMouseEnter={handleDropdownHover(item.label, true)}
+              onMouseLeave={handleDropdownHover(item.label, false)}
+            >
+              <NavLink as="div">{item.label} ▾</NavLink>
+              {openDropdown === item.label && (
+                <DropdownMenu>
+                  {item.dropdown.map((subItem) => (
+                    <DropdownLink
+                      key={subItem.path}
+                      to={subItem.path}
+                      className={location.pathname === subItem.path ? 'active' : ''}
+                    >
+                      {subItem.label}
+                    </DropdownLink>
+                  ))}
+                </DropdownMenu>
+              )}
+            </DropdownItem>
+          );
+        }
 
-        {navItems.map((item) => (
+        return (
           <NavItem key={item.path}>
             <NavLink
               to={item.path}
@@ -30,34 +71,10 @@ const TablasNavBar = () => {
               {item.label}
             </NavLink>
           </NavItem>
-        ))}
+        );
+      })}
 
-        {/* VENTAS Dropdown */}
-        <DropdownItem
-          onMouseEnter={handleVentasHover(true)}
-          onMouseLeave={handleVentasHover(false)}
-        >
-          <NavLink
-          >
-            Ventas ▾
-          </NavLink>
-          {ventasOpen && (
-            <DropdownMenu>
-              <DropdownLink
-                to="/admin/ventas/productos"
-                className={location.pathname === '/admin/ventas/productos' ? 'active' : ''}
-              >
-                Productos
-              </DropdownLink>
-              <DropdownLink
-                to="/admin/ventas/tratamientos"
-                className={location.pathname === '/admin/ventas/tratamientos' ? 'active' : ''}
-              >
-                Tratamientos
-              </DropdownLink>
-            </DropdownMenu>
-          )}
-        </DropdownItem>
+
       </NavList>
     </NavContainer>
   );

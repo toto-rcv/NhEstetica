@@ -25,8 +25,7 @@ exports.getClienteById = async (req, res) => {
 
 exports.createCliente = async (req, res) => {
   try {
-    const { nombre, apellido, direccion, telefono, email, antiguedad } = req.body;
-    const imagen = req.file ? req.file.filename : null;
+    const { nombre, apellido, direccion, telefono, email, antiguedad, imagen } = req.body;
 
     if (!nombre || !apellido) {
       return res.status(400).json({ message: 'Nombre y apellido son requeridos' });
@@ -34,9 +33,9 @@ exports.createCliente = async (req, res) => {
 
     await pool.execute(
       `INSERT INTO clientes 
-       (nombre, apellido, direccion, telefono, email, antiguedad, imagen, fecha_inscripcion, estado)
-       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'Activo')`,
-      [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, imagen]
+       (nombre, apellido, direccion, telefono, email, antiguedad, imagen, fecha_inscripcion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, imagen || null]
     );
 
     res.status(201).json({ message: 'Cliente creado exitosamente' });
@@ -45,6 +44,7 @@ exports.createCliente = async (req, res) => {
     res.status(500).json({ message: 'Error al crear cliente' });
   }
 };
+
 
 exports.updateCliente = async (req, res) => {
   try {

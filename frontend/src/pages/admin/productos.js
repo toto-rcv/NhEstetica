@@ -3,12 +3,14 @@ import styled from 'styled-components';
 import TablasLayout from '../../components/tablas/TablasLayout';
 import EditableTable, { EditTableButton } from '../../components/tablas/EditableTable';
 import { productosService } from '../../services/productosService';
+import AddProductoModal from '../../components/tablas/productos/AddProductoModal';
 
 const Productos = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadProductos();
@@ -163,6 +165,11 @@ const Productos = () => {
 
   return (
     <TablasLayout title="Gestión de Productos">
+      <AddProductoModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={async () => { setShowAddModal(false); await loadProductos(); }}
+      />
       {isSaving && (
         <div style={{ 
           position: 'fixed', 
@@ -186,6 +193,11 @@ const Productos = () => {
         addRowText={null}
         onDeleteRow={handleDeleteRow}
         onUpdateRow={handleUpdateProducto}
+        customButtons={
+          <EditTableButton style={{ background: '#28a745', color: 'white' }} onClick={() => setShowAddModal(true)}>
+            Agregar Producto
+          </EditTableButton>
+        }
       />
     </TablasLayout>
   );

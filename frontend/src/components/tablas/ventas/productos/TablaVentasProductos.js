@@ -22,6 +22,10 @@ const TablaVentasProductos = ({
         <th>Precio</th>
         <th>Ganancia</th>
         <th>Cliente</th>
+        <th>Forma de Pago</th>
+        <th>Cuotas</th>
+        <th>Observación</th>
+        <th>Fecha</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -52,7 +56,9 @@ const TablaVentasProductos = ({
                 nombreProducto
               )}
             </td>
+
             <td>{marcaProducto}</td>
+
             <td>
               {enEdicion ? (
                 <input
@@ -65,6 +71,7 @@ const TablaVentasProductos = ({
                 `$${venta.costo}`
               )}
             </td>
+
             <td>
               {enEdicion ? (
                 <input
@@ -77,11 +84,13 @@ const TablaVentasProductos = ({
                 `$${venta.precio}`
               )}
             </td>
+
             <td>
               {!enEdicion &&
                 `$${(venta.precio - venta.costo).toFixed(2)}`
               }
             </td>
+
             <td>
               {enEdicion ? (
                 <select
@@ -100,6 +109,59 @@ const TablaVentasProductos = ({
                 `${venta.cliente_nombre || ''} ${venta.cliente_apellido || ''}`
               )}
             </td>
+
+            <td>
+              {enEdicion ? (
+                <select
+                  name="forma_de_pago"
+                  value={ventaEditada?.forma_de_pago || ''}
+                  onChange={onEditChange}
+                >
+                  <option value="">Seleccionar forma de pago...</option>
+                  <option value="efectivo">Efectivo</option>
+                  <option value="tarjeta">Tarjeta</option>
+                  <option value="transferencia">Transferencia</option>
+                </select>
+              ) : (
+                venta.forma_de_pago || "-"
+              )}
+            </td>
+
+
+            <td>
+              {enEdicion ? (
+                <input
+                  type="number"
+                  name="cuotas"
+                  value={ventaEditada?.cuotas || ''}
+                  onChange={onEditChange}
+                  min={1}
+                />
+              ) : (
+                venta.cuotas || "-"
+              )}
+            </td>
+
+            <td>
+              {enEdicion ? (
+                <input
+                  type="text"
+                  name="observacion"
+                  value={ventaEditada?.observacion || ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                venta.observacion || "-"
+              )}
+            </td>
+
+            <td>
+              {new Date(venta.fecha).toLocaleString("es-AR", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+              })}
+            </td>
+
             <td>
               {enEdicion ? (
                 <>
@@ -121,7 +183,6 @@ const TablaVentasProductos = ({
 );
 
 export default TablaVentasProductos;
-
 
 // Estilos
 const Table = styled.table`
@@ -167,9 +228,11 @@ const Button = styled.button`
   border: none;
   padding: 6px 10px;
   margin-right: 5px;
+  margin-bottom: 6px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-family: "Raleway";
 
   &:hover {
     opacity: 0.8;

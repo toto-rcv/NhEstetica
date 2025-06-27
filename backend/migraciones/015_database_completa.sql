@@ -1,0 +1,145 @@
+CREATE DATABASE IF NOT EXISTS nhestetica_db;
+
+USE nhestetica_db;
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS clientes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    direccion VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    antiguedad INT DEFAULT 0 COMMENT 'Antigüedad en días',
+    fecha_inscripcion DATE,
+    imagen VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS productos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    precio BIGINT NOT NULL,
+    subtitulo VARCHAR(150),
+    marca VARCHAR(100),
+    descripcion TEXT,
+    imagen VARCHAR(255),
+    categoria VARCHAR(100),
+    `natural` BOOLEAN DEFAULT FALSE,
+    vegano BOOLEAN DEFAULT FALSE,
+    beneficios TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tratamientos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    precio BIGINT NOT NULL,
+    descripcion TEXT,
+    categoria VARCHAR(100),
+    imagen VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ventas_productos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    costo BIGINT NOT NULL,
+    precio BIGINT NOT NULL,
+    fecha DATE,
+    forma_de_pago VARCHAR(255),
+    cuotas INT,
+    observacion VARCHAR(255),
+
+    cliente_id BIGINT NOT NULL,
+    producto_id BIGINT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS ventas_tratamientos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    sesiones BIGINT NOT NULL,
+    precio BIGINT NOT NULL,
+    forma_de_pago VARCHAR(255),
+    vencimiento DATE,
+    fecha DATE,
+    cuotas INT,
+    observacion VARCHAR(255),
+
+    cliente_id BIGINT NOT NULL,
+    tratamiento_id BIGINT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (tratamiento_id) REFERENCES tratamientos(id)
+);
+
+CREATE TABLE IF NOT EXISTS personal (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    apellido VARCHAR(255) NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(255)  NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    cargo VARCHAR(255),
+    especialidad VARCHAR(255),
+    comision BIGINT COMMENT 'En %',
+    comision_fija BIGINT COMMENT 'BONOS O PREMIOS',
+    sueldo BIGINT,
+    imagen VARCHAR(255),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS comisiones (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    id_venta_tratamiento BIGINT NOT NULL,
+    id_personal BIGINT NOT NULL,
+    fecha DATE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_personal) REFERENCES personal(id),
+    FOREIGN KEY (id_venta_tratamiento) REFERENCES ventas_tratamientos(id)
+);
+
+CREATE TABLE IF NOT EXISTS caja (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    tipo VARCHAR(100) NOT NULL COMMENT 'EGRESO O INGRESO',
+    detalle VARCHAR(255),
+    cantidad BIGINT NOT NULL,
+    forma_de_pago VARCHAR(255),
+    ciudadania VARCHAR(255),
+    importe BIGINT NOT NULL,
+    fecha DATE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+INSERT IGNORE INTO users (username, password) VALUES ('user', '123');
+
+SHOW TABLES;

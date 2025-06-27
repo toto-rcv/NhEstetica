@@ -19,11 +19,12 @@ export default TablasLayout;
 const LayoutContainer = styled.div`
   min-height: 100vh;
   background: #f8f9fa;
+  font-family: "Raleway";
 `;
 
 const MainContent = styled.main`
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding-top: 1rem;
 `;

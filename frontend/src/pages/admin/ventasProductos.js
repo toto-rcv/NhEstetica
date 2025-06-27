@@ -12,10 +12,14 @@ const VentasProductos = () => {
   const [mensaje, setMensaje] = useState('');
 
   const [nuevaVenta, setNuevaVenta] = useState({
-    producto_id: '',
-    costo: '',
-    precio: '',
-    cliente_id: ''
+  producto_id: '',
+  costo: '',
+  precio: '',
+  cliente_id: '',
+  fecha: '',
+  forma_de_pago: '',
+  cuotas: '',
+  observacion: ''
   });
 
   const [ventaEditada, setVentaEditada] = useState(null);
@@ -89,7 +93,11 @@ useEffect(() => {
           producto_id: '',
           costo: '',
           precio: '',
-          cliente_id: ''
+          cliente_id: '',
+          fecha: '',
+          forma_de_pago: '',
+          cuotas: '',
+          observacion: ''
         });
       } else {
         setMensaje(data.message || 'Error al registrar venta');

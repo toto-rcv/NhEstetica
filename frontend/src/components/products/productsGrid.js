@@ -11,23 +11,49 @@ const ProductsGrid = ({ products, loading = false }) => {
     );
   }
 
+  console.log('🎯 ProductsGrid recibió productos:', products);
+
   return (
     <GridContainer>
       {products.length === 0 ? (
         <NoResults>No se encontraron productos.</NoResults>
       ) : (
-        products.map((product, index) => (
-          <Card key={index}>
-            <LinkStyled to={`/productos/${product.id}`}>
-              <ProductImage src={product.image} alt={product.name} />
-            </LinkStyled>
-            <ProductName>{product.name}</ProductName>
-            <ProductBrand>{product.brand}</ProductBrand>
-            <LinkStyled to={`/productos/${product.id}`}>
-              Ver más →
-            </LinkStyled>
-          </Card>
-        ))
+        products.map((product, index) => {
+          // Validar que el producto tenga un ID válido y no sea temporal
+          const isValidProduct = product && 
+                                product.id && 
+                                product.id !== 'undefined' && 
+                                !String(product.id).startsWith('product-');
+          
+          console.log(`🎯 Producto ${index + 1} (${product.name}):`, {
+            id: product.id,
+            isValid: isValidProduct,
+            link: isValidProduct ? `/productos/${product.id}` : 'No link'
+          });
+          
+          return (
+            <Card key={index}>
+              {isValidProduct ? (
+                <LinkStyled to={`/productos/${product.id}`}>
+                  <ProductImage src={product.image} alt={product.name} />
+                </LinkStyled>
+              ) : (
+                <ProductImage src={product.image} alt={product.name} />
+              )}
+              <ProductName>{product.name}</ProductName>
+              <ProductBrand>{product.brand}</ProductBrand>
+              {isValidProduct ? (
+                <LinkStyled to={`/productos/${product.id}`}>
+                  Ver más →
+                </LinkStyled>
+              ) : (
+                <span style={{ color: '#999', fontSize: '1.1rem' }}>
+                  Sin detalles disponibles
+                </span>
+              )}
+            </Card>
+          );
+        })
       )}
     </GridContainer>
   );

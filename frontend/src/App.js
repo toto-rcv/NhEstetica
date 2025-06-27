@@ -27,6 +27,8 @@ import VentasProductos from './pages/admin/ventasProductos';
 import Personal from './pages/admin/personal';
 import TablasRedirect from './components/tablas/TablasRedirect';
 import ProductosAdmin from './pages/admin/productos';
+import TratamientosAdmin from './pages/admin/tratamientos';
+import ComisionesAdmin from './pages/admin/comisiones';
 
 const serviciosRoutes = [
   { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
@@ -99,6 +101,18 @@ function AppContent() {
             <ProductosAdmin />
           </ProtectedRoute>
         } />
+        <Route path="/admin/tratamientos" element={
+          <ProtectedRoute>
+            <TratamientosAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/comisiones" element={
+          <ProtectedRoute>
+            <ComisionesAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<div>Ruta no encontrada</div>} />
+
 
       </Routes>
       {!isAdminRoute && <Footer />}

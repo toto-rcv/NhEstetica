@@ -8,16 +8,25 @@ exports.getAllProductos = async (req, res) => {
     let params = [];
 
     if (query) {
-      sql += ' WHERE nombre LIKE ? OR marca LIKE ? OR subtitle LIKE ?';
+      sql += ' WHERE nombre LIKE ? OR marca LIKE ? OR subtitulo LIKE ?';
       params = [`%${query}%`, `%${query}%`, `%${query}%`];
     }
 
     const [results] = await db.pool.query(sql, params);
     
-    // Convertir benefits de JSON string a array si existe
+    // Mapear campos de la base de datos a los nombres esperados por el frontend
     const productos = results.map(producto => ({
-      ...producto,
-      benefits: producto.benefits ? JSON.parse(producto.benefits) : []
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      subtitle: producto.subtitulo,
+      descripcion: producto.descripcion,
+      imagen: producto.imagen,
+      categoria: producto.categoria,
+      marca: producto.marca,
+      isNatural: producto.natural,
+      isVegan: producto.vegano,
+      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : []
     }));
     
     res.json(productos);
@@ -34,10 +43,22 @@ exports.getProductoById = async (req, res) => {
     if (results.length === 0) return res.status(404).json({ message: 'Producto no encontrado' });
     
     const producto = results[0];
-    // Convertir benefits de JSON string a array si existe
-    producto.benefits = producto.benefits ? JSON.parse(producto.benefits) : [];
+    // Mapear campos de la base de datos a los nombres esperados por el frontend
+    const productoMapeado = {
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      subtitle: producto.subtitulo,
+      descripcion: producto.descripcion,
+      imagen: producto.imagen,
+      categoria: producto.categoria,
+      marca: producto.marca,
+      isNatural: producto.natural,
+      isVegan: producto.vegano,
+      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : []
+    };
     
-    res.json(producto);
+    res.json(productoMapeado);
   } catch (err) {
     res.status(500).json({ message: 'Error al obtener producto', error: err });
   }
@@ -69,7 +90,7 @@ exports.createProducto = async (req, res) => {
     const [result] = await db.pool.query(
       `INSERT INTO productos (
         nombre, precio, descripcion, imagen, categoria, marca, 
-        subtitle, isNatural, isVegan, benefits
+        subtitulo, \`natural\`, vegano, beneficios
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nombre, precio, descripcion, imagen, categoria, marca,
@@ -110,7 +131,7 @@ exports.updateProducto = async (req, res) => {
     await db.pool.query(
       `UPDATE productos SET 
         nombre=?, precio=?, descripcion=?, imagen=?, categoria=?, marca=?,
-        subtitle=?, isNatural=?, isVegan=?, benefits=?
+        subtitulo=?, \`natural\`=?, vegano=?, beneficios=?
        WHERE id=?`,
       [
         nombre, precio, descripcion, imagen, categoria, marca,
@@ -135,10 +156,22 @@ exports.getProductoByNombre = async (req, res) => {
     if (results.length === 0) return res.status(404).json({ message: 'Producto no encontrado' });
     
     const producto = results[0];
-    // Convertir benefits de JSON string a array si existe
-    producto.benefits = producto.benefits ? JSON.parse(producto.benefits) : [];
+    // Mapear campos de la base de datos a los nombres esperados por el frontend
+    const productoMapeado = {
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      subtitle: producto.subtitulo,
+      descripcion: producto.descripcion,
+      imagen: producto.imagen,
+      categoria: producto.categoria,
+      marca: producto.marca,
+      isNatural: producto.natural,
+      isVegan: producto.vegano,
+      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : []
+    };
     
-    res.json(producto);
+    res.json(productoMapeado);
   } catch (err) {
     res.status(500).json({ message: 'Error al obtener producto', error: err });
   }

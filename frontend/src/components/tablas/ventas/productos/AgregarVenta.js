@@ -79,6 +79,42 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               onChange={onChange}
             />
 
+            <input
+            type="date"
+            name="fecha"
+            value={nuevaVenta.fecha}
+            onChange={onChange}
+            placeholder="Fecha"
+          />
+
+          <select
+            name="forma_de_pago"
+            value={nuevaVenta.forma_de_pago}
+            onChange={onChange}
+          >
+            <option value="">Seleccioná una forma de pago</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Contado">Contado</option>
+            <option value="Debito">Débito</option>
+          </select>
+
+          <input
+            type="number"
+            name="cuotas"
+            value={nuevaVenta.cuotas}
+            onChange={onChange}
+            placeholder="Cuotas"
+            disabled={nuevaVenta.forma_de_pago !== 'Debito'}
+            min="1"
+          />
+
+          <input
+            type="text"
+            name="observacion"
+            value={nuevaVenta.observacion}
+            onChange={onChange}
+            placeholder="Observaciones"
+          />
             <button type="submit">Agregar</button>
           </InputsRow>
         </Form>
