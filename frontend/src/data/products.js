@@ -25,21 +25,13 @@ const solarBenefits = [
 // Exporta una función asíncrona para obtener los productos desde la API
 export async function rawProducts() {
   try {
-    const response = await fetch('http://localhost:5000/api/productos');
+    const response = await fetch('/api/productos');
     if (!response.ok) throw new Error('Error al obtener productos');
     const data = await response.json();
-    
-    console.log('📦 Productos del backend:', data);
     
     return data.map((p, index) => {
       // Asegurar que siempre haya un ID válido
       const productId = p.id || `product-${index + 1}`;
-      
-      console.log(`🔍 Producto ${index + 1}:`, {
-        originalId: p.id,
-        finalId: productId,
-        nombre: p.nombre
-      });
       
       return {
         id: productId,

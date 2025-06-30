@@ -4,6 +4,7 @@ import styled from 'styled-components';
 const TablaVentasTratamientos = ({
   ventas,
   clientes,
+  tratamientos,
   onDelete,
   onEditStart,
   onEditChange,
@@ -17,77 +18,132 @@ const TablaVentasTratamientos = ({
       <tr>
         <th>Tratamiento</th>
         <th>Sesiones</th>
-        <th>Costo</th>
         <th>Precio</th>
-        <th>Ganancia</th>
+        <th>Forma de Pago</th>
+        <th>Vencimiento</th>
+        <th>Cuotas</th>
+        <th>Observación</th>
         <th>Cliente</th>
+        <th>Fecha</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       {ventas.map((venta) => {
         const enEdicion = venta.id === editandoId;
+
+        // Buscar nombre tratamiento y cliente para mostrar en vista
+        const tratamientoNombre = tratamientos.find(t => t.id === venta.tratamiento_id)?.nombre || '';
+        const clienteNombre = clientes.find(c => c.id === venta.cliente_id)?.nombre || '';
+        const clienteApellido = clientes.find(c => c.id === venta.cliente_id)?.apellido || '';
+
         return (
           <tr key={venta.id}>
             <td>
               {enEdicion ? (
-                <input
-                  name="tratamiento"
-                  value={ventaEditada?.tratamiento || ''}
+                <select
+                  name="tratamiento_id"
+                  value={ventaEditada.tratamiento_id || ''}
                   onChange={onEditChange}
-                />
+                >
+                  <option value="">Seleccionar tratamiento</option>
+                  {tratamientos.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nombre}
+                    </option>
+                  ))}
+                </select>
               ) : (
-                venta.tratamiento
+                tratamientoNombre
               )}
             </td>
+
             <td>
               {enEdicion ? (
                 <input
+                  type="number"
                   name="sesiones"
-                  value={ventaEditada?.sesiones || ''}
+                  value={ventaEditada.sesiones || ''}
                   onChange={onEditChange}
                 />
               ) : (
                 venta.sesiones
               )}
             </td>
+
             <td>
               {enEdicion ? (
                 <input
-                  name="costo"
                   type="number"
-                  value={ventaEditada?.costo || 0}
-                  onChange={onEditChange}
-                />
-              ) : (
-                `$${venta.costo}`
-              )}
-            </td>
-            <td>
-              {enEdicion ? (
-                <input
                   name="precio"
-                  type="number"
-                  value={ventaEditada?.precio || 0}
+                  value={ventaEditada.precio || ''}
                   onChange={onEditChange}
                 />
               ) : (
-                `$${venta.precio}`
+                `$${venta.precio || 0}`
               )}
             </td>
+
             <td>
-              {!enEdicion && (
-                `$${(venta.precio - venta.costo) * parseInt(venta.sesiones || 0)}`
+              {enEdicion ? (
+                <input
+                  type="text"
+                  name="forma_de_pago"
+                  value={ventaEditada.forma_de_pago || ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                venta.forma_de_pago || '-'
               )}
             </td>
+
+            <td>
+              {enEdicion ? (
+                <input
+                  type="date"
+                  name="vencimiento"
+                  value={ventaEditada.vencimiento ? ventaEditada.vencimiento.split('T')[0] : ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                venta.vencimiento ? venta.vencimiento.split('T')[0] : '-'
+              )}
+            </td>
+
+            <td>
+              {enEdicion ? (
+                <input
+                  type="number"
+                  name="cuotas"
+                  value={ventaEditada.cuotas || ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                venta.cuotas || 0
+              )}
+            </td>
+
+            <td>
+              {enEdicion ? (
+                <input
+                  type="text"
+                  name="observacion"
+                  value={ventaEditada.observacion || ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                venta.observacion || '-'
+              )}
+            </td>
+
             <td>
               {enEdicion ? (
                 <select
                   name="cliente_id"
-                  value={ventaEditada?.cliente_id || ''}
+                  value={ventaEditada.cliente_id || ''}
                   onChange={onEditChange}
                 >
-                  <option value="">Seleccionar...</option>
+                  <option value="">Seleccionar cliente</option>
                   {clientes.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.nombre} {c.apellido}
@@ -95,9 +151,22 @@ const TablaVentasTratamientos = ({
                   ))}
                 </select>
               ) : (
-                `${venta.nombre || ''} ${venta.apellido || ''}`
+                `${clienteNombre} ${clienteApellido}`
               )}
             </td>
+            <td>
+              {enEdicion ? (
+                <input
+                  type="date"
+                  name="fecha"
+                  value={ventaEditada.fecha ? ventaEditada.fecha.split('T')[0] : ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                venta.fecha ? venta.fecha.split('T')[0] : '-'
+              )}
+            </td>
+
             <td>
               {enEdicion ? (
                 <>
@@ -120,7 +189,6 @@ const TablaVentasTratamientos = ({
 
 export default TablaVentasTratamientos;
 
-// Estilos
 const Table = styled.table`
   width: 100%;
   margin-top: 2rem;

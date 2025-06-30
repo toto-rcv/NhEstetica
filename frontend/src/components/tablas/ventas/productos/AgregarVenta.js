@@ -72,6 +72,15 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               onChange={onChange}
               required
             />
+            <input
+              type="number"
+              name="cantidad"
+              placeholder="Cantidad"
+              min="1"
+              value={nuevaVenta.cantidad}
+              onChange={onChange}
+              required
+            />
 
              <ClienteAutocomplete
               clientes={clientes}

@@ -12,6 +12,7 @@ const initialState = {
   isNatural: false,
   isVegan: false,
   benefits: '',
+  modoUso: '',
   imagen: ''
 };
 
@@ -66,7 +67,7 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
     formData.append('image', file);
     
     try {
-      const response = await fetch('http://localhost:5000/api/upload/image', {
+      const response = await fetch('/api/upload/image', {
         method: 'POST',
         body: formData,
       });
@@ -106,12 +107,18 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
       const benefitsArray = form.benefits 
         ? form.benefits.split('.').map(b => b.trim()).filter(b => b)
         : [];
+
+      // Procesar modo de uso
+      const modoUsoArray = form.modoUso 
+        ? form.modoUso.split('.').map(m => m.trim()).filter(m => m)
+        : [];
       
       const productoData = {
         ...form,
         precio: parseFloat(form.precio),
         imagen: imagePath,
-        benefits: benefitsArray
+        benefits: benefitsArray,
+        modoUso: modoUsoArray
       };
       
       await productosService.createProducto(productoData);
@@ -192,6 +199,16 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
                 value={form.benefits} 
                 onChange={handleChange}
                 placeholder="Separá cada beneficio con un punto (.)"
+              />
+            </Field>
+            
+            <Field>
+              <Label>Modo de Uso</Label>
+              <TextArea 
+                name="modoUso" 
+                value={form.modoUso} 
+                onChange={handleChange}
+                placeholder="Separá cada paso con un punto (.)"
               />
             </Field>
             

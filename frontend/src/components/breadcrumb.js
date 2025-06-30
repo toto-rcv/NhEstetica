@@ -3,10 +3,10 @@ import styled from "styled-components";
 
 function Breadcrumb({ image, title, position = 'right', titleColor, textShadow = true }) {
   return (
-    <Background image={image}>
+    <Background $image={image}>
       <Overlay />
       <Content
-        position={position}
+        $position={position}
         $titleColor={titleColor}
         $textShadow={textShadow}
       >
@@ -22,7 +22,7 @@ const Background = styled.div`
   position: relative;
   width: 100%;
   height: 550px;
-  background-image: url(${(props) => props.image});
+  background-image: url(${(props) => props.$image});
   background-size: cover;
   background-position: center;
   display: flex;
@@ -45,7 +45,7 @@ const Overlay = styled.div`
 const Content = styled.div`
   position: absolute;
   top: 45%;
-  left: ${props => props.position === 'left' ? '30%' : '70%'};
+  left: ${props => props.$position === 'left' ? '30%' : '70%'};
   transform: translate(-50%, -50%);
   width: 100%;
   text-align: center;

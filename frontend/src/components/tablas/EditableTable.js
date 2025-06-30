@@ -84,18 +84,13 @@ const EditableTable = ({
     if (editingCell) {
       const newData = [...data];
       const rowData = newData[editingCell.rowIndex];
-      
-      // Actualizar el valor en los datos locales
       rowData[editingCell.columnId] = editValue;
-      
-      // Si es un empleado existente (tiene ID), usar la función de actualización
       if (rowData.id && onUpdateRow) {
         onUpdateRow(rowData.id, rowData);
       } else {
-        // Si es una fila nueva, usar la función de cambio de datos
         onDataChange(newData);
       }
-      
+      // No salimos del modo edición ni limpiamos editingCell aquí
       setEditingCell(null);
       setEditValue('');
     }
@@ -104,7 +99,14 @@ const EditableTable = ({
   const handleAddRow = () => {
     const newRow = columns.reduce((acc, column) => {
       if (column.accessorKey && column.accessorKey !== 'actions') {
-        acc[column.accessorKey] = '';
+        // Inicializar valores por defecto según el tipo de columna
+        if (column.accessorKey === 'benefits' || column.accessorKey === 'modoUso') {
+          acc[column.accessorKey] = [];
+        } else if (column.accessorKey === 'isNatural' || column.accessorKey === 'isVegan') {
+          acc[column.accessorKey] = false;
+        } else {
+          acc[column.accessorKey] = '';
+        }
       }
       return acc;
     }, {});
@@ -131,8 +133,8 @@ const EditableTable = ({
 
   const toggleEditMode = () => {
     setIsEditingMode(!isEditingMode);
-    // Limpiar cualquier celda que esté siendo editada al cambiar modo
-    if (editingCell) {
+    // Limpiar cualquier celda que esté siendo editada solo al salir de edición
+    if (isEditingMode) {
       setEditingCell(null);
       setEditValue('');
     }
@@ -215,7 +217,7 @@ const EditableTable = ({
                         cell.column.id === 'fechaContratacion' ? (
                           <EditableCell
                             type="date"
-                            value={editValue}
+                            value={editValue ?? ''}
                             onChange={handleCellChange}
                             onBlur={handleCellBlur}
                             onKeyPress={(e) => {
@@ -227,7 +229,7 @@ const EditableTable = ({
                           />
                         ) : (
                           <EditableCell
-                            value={editValue}
+                            value={editValue ?? ''}
                             onChange={handleCellChange}
                             onBlur={handleCellBlur}
                             onKeyPress={(e) => {
@@ -256,7 +258,7 @@ const EditableTable = ({
 export default EditableTable; 
 
 const TableContainer = styled.div`
-  background: white;
+  background: var(--background-color);
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;

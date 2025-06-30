@@ -26,7 +26,8 @@ exports.getAllProductos = async (req, res) => {
       marca: producto.marca,
       isNatural: producto.natural,
       isVegan: producto.vegano,
-      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : []
+      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : [],
+      modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     }));
     
     res.json(productos);
@@ -55,7 +56,8 @@ exports.getProductoById = async (req, res) => {
       marca: producto.marca,
       isNatural: producto.natural,
       isVegan: producto.vegano,
-      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : []
+      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : [],
+      modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     };
     
     res.json(productoMapeado);
@@ -76,7 +78,8 @@ exports.createProducto = async (req, res) => {
     subtitle, 
     isNatural, 
     isVegan, 
-    benefits 
+    benefits,
+    modoUso
   } = req.body;
   
   if (!nombre || !precio) {
@@ -87,21 +90,24 @@ exports.createProducto = async (req, res) => {
     // Convertir benefits de array a JSON string si existe
     const benefitsJson = benefits && Array.isArray(benefits) ? JSON.stringify(benefits) : null;
     
+    // Convertir modoUso de array a JSON string si existe
+    const modoUsoJson = modoUso && Array.isArray(modoUso) ? JSON.stringify(modoUso) : null;
+    
     const [result] = await db.pool.query(
       `INSERT INTO productos (
         nombre, precio, descripcion, imagen, categoria, marca, 
-        subtitulo, \`natural\`, vegano, beneficios
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        subtitulo, \`natural\`, vegano, beneficios, modo_uso
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nombre, precio, descripcion, imagen, categoria, marca,
-        subtitle, isNatural || false, isVegan || false, benefitsJson
+        subtitle, isNatural || false, isVegan || false, benefitsJson, modoUsoJson
       ]
     );
     
     res.status(201).json({ 
       id: result.insertId, 
       nombre, precio, descripcion, imagen, categoria, marca,
-      subtitle, isNatural: isNatural || false, isVegan: isVegan || false, benefits
+      subtitle, isNatural: isNatural || false, isVegan: isVegan || false, benefits, modoUso
     });
   } catch (err) {
     res.status(500).json({ message: 'Error al crear producto', error: err });
@@ -121,27 +127,31 @@ exports.updateProducto = async (req, res) => {
     subtitle, 
     isNatural, 
     isVegan, 
-    benefits 
+    benefits,
+    modoUso
   } = req.body;
   
   try {
     // Convertir benefits de array a JSON string si existe
     const benefitsJson = benefits && Array.isArray(benefits) ? JSON.stringify(benefits) : null;
     
+    // Convertir modoUso de array a JSON string si existe
+    const modoUsoJson = modoUso && Array.isArray(modoUso) ? JSON.stringify(modoUso) : null;
+    
     await db.pool.query(
       `UPDATE productos SET 
         nombre=?, precio=?, descripcion=?, imagen=?, categoria=?, marca=?,
-        subtitulo=?, \`natural\`=?, vegano=?, beneficios=?
+        subtitulo=?, \`natural\`=?, vegano=?, beneficios=?, modo_uso=?
        WHERE id=?`,
       [
         nombre, precio, descripcion, imagen, categoria, marca,
-        subtitle, isNatural || false, isVegan || false, benefitsJson, id
+        subtitle, isNatural || false, isVegan || false, benefitsJson, modoUsoJson, id
       ]
     );
     
     res.json({ 
       id, nombre, precio, descripcion, imagen, categoria, marca,
-      subtitle, isNatural: isNatural || false, isVegan: isVegan || false, benefits
+      subtitle, isNatural: isNatural || false, isVegan: isVegan || false, benefits, modoUso
     });
   } catch (err) {
     res.status(500).json({ message: 'Error al actualizar producto', error: err });
@@ -168,7 +178,8 @@ exports.getProductoByNombre = async (req, res) => {
       marca: producto.marca,
       isNatural: producto.natural,
       isVegan: producto.vegano,
-      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : []
+      benefits: producto.beneficios ? JSON.parse(producto.beneficios) : [],
+      modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     };
     
     res.json(productoMapeado);

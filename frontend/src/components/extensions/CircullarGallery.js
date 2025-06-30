@@ -31,28 +31,46 @@ function autoBind(instance) {
   })
 }
 
-function createTextTexture(gl, text, font = "bold 30px monospace", color = "black") {
+function createTextTexture(gl, text, font = "bold 30px 'Saira', sans-serif", color = "black") {
   const canvas = document.createElement("canvas")
   const context = canvas.getContext("2d")
-  context.font = font
+
+  const fontSize = 40
+  const fontFamily = font.replace(/\d+px/, `${fontSize}px`)
+
+  context.font = fontFamily
   const metrics = context.measureText(text)
   const textWidth = Math.ceil(metrics.width)
-  const textHeight = Math.ceil(parseInt(font, 10) * 1.2)
-  canvas.width = textWidth + 20
-  canvas.height = textHeight + 20
-  context.font = font
+  const textHeight = Math.ceil(fontSize * 1.5)
+
+  canvas.width = textWidth + 60
+  canvas.height = textHeight + 60
+
+  context.font = fontFamily
   context.fillStyle = color
   context.textBaseline = "middle"
   context.textAlign = "center"
-  context.clearRect(0, 0, canvas.width, canvas.height)
+
+  context.shadowColor = 'rgba(0, 0, 0, 0.7)'
+  context.shadowBlur = 10
+  context.shadowOffsetX = 0
+  context.shadowOffsetY = 3
+
   context.fillText(text, canvas.width / 2, canvas.height / 2)
+
+  context.shadowBlur = 0
+  context.shadowOffsetY = 0
+  context.globalCompositeOperation = 'source-atop';
+  context.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  context.fillText(text, canvas.width / 2, canvas.height / 2 - 1);
+
   const texture = new Texture(gl, { generateMipmaps: false })
   texture.image = canvas
   return { texture, width: canvas.width, height: canvas.height }
 }
 
 class Title {
-  constructor({ gl, plane, renderer, text, textColor = "#545050", font = "30px sans-serif" }) {
+  constructor({ gl, plane, renderer, text, textColor = "#545050", font = "bold 30px 'Saira', sans-serif" }) {
     autoBind(this)
     this.gl = gl
     this.plane = plane
@@ -63,9 +81,11 @@ class Title {
     this.createMesh()
   }
   createMesh() {
+    const formattedText = this.text.charAt(0).toUpperCase() + this.text.slice(1).toLowerCase()
+
     const { texture, width, height } = createTextTexture(
       this.gl,
-      this.text,
+      formattedText,
       this.font,
       this.textColor
     )
@@ -97,10 +117,10 @@ class Title {
     })
     this.mesh = new Mesh(this.gl, { geometry, program })
     const aspect = width / height
-    const textHeight = this.plane.scale.y * 0.15
+    const textHeight = this.plane.scale.y * 0.25
     const textWidth = textHeight * aspect
     this.mesh.scale.set(textWidth, textHeight, 1)
-    this.mesh.position.y = -this.plane.scale.y * 0.5 - textHeight * 0.5 - 0.05
+    this.mesh.position.y = -this.plane.scale.y * 0.6
     this.mesh.setParent(this.plane)
   }
 }
@@ -231,11 +251,11 @@ p.z = wave * clamp(uSpeed * 0.5, 0.0, 1.0);
     const img = new Image()
     img.crossOrigin = "anonymous"
     img.src = this.image
-img.onload = () => {
-  texture.image = img
-  texture.needsUpdate = true // <--- Agrega esto
-  this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight]
-}
+    img.onload = () => {
+      texture.image = img
+      texture.needsUpdate = true
+      this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight]
+    }
   }
   createMesh() {
     this.plane = new Mesh(this.gl, {
@@ -398,56 +418,56 @@ class App {
     this.scroll.target = this.scroll.target < 0 ? -item : item
   }
 
-getMeshUnderMouse(x, y) {
-  const rect = this.gl.canvas.getBoundingClientRect();
-  const px = ((x - rect.left) / rect.width) * 2 - 1;
-  const py = -((y - rect.top) / rect.height) * 2 + 1;
+  getMeshUnderMouse(x, y) {
+    const rect = this.gl.canvas.getBoundingClientRect();
+    const px = ((x - rect.left) / rect.width) * 2 - 1;
+    const py = -((y - rect.top) / rect.height) * 2 + 1;
 
-  const worldX = px * this.viewport.width / 2;
-  const worldY = py * this.viewport.height / 2;
+    const worldX = px * this.viewport.width / 2;
+    const worldY = py * this.viewport.height / 2;
 
-  for (const media of this.medias) {
-    const { position, scale } = media.plane;
-    const bounds = {
-      left: position.x - scale.x / 2,
-      right: position.x + scale.x / 2,
-      top: position.y + scale.y / 2,
-      bottom: position.y - scale.y / 2
-    };
+    for (const media of this.medias) {
+      const { position, scale } = media.plane;
+      const bounds = {
+        left: position.x - scale.x / 2,
+        right: position.x + scale.x / 2,
+        top: position.y + scale.y / 2,
+        bottom: position.y - scale.y / 2
+      };
 
-    if (
-      worldX >= bounds.left &&
-      worldX <= bounds.right &&
-      worldY >= bounds.bottom &&
-      worldY <= bounds.top
-    ) {
-      return media;
+      if (
+        worldX >= bounds.left &&
+        worldX <= bounds.right &&
+        worldY >= bounds.bottom &&
+        worldY <= bounds.top
+      ) {
+        return media;
+      }
+    }
+
+    return null;
+  }
+
+  onMouseMove(e) {
+    const media = this.getMeshUnderMouse(e.clientX, e.clientY);
+    if (media && media.link) {
+      this.gl.canvas.style.cursor = 'pointer';
+    } else {
+      this.gl.canvas.style.cursor = 'default';
     }
   }
 
-  return null;
-}
+  onClick(e) {
+    if (this.isScrolling) return;
 
-onMouseMove(e) {
-  const media = this.getMeshUnderMouse(e.clientX, e.clientY);
-  if (media && media.link) {
-    this.gl.canvas.style.cursor = 'pointer';
-  } else {
-    this.gl.canvas.style.cursor = 'default';
+    const x = e.clientX;
+    const y = e.clientY;
+    const media = this.getMeshUnderMouse(x, y);
+
+    if (media && media.link) {
+      window.location.href = media.link;
+    }
   }
-}
-
-onClick(e) {
-  if (this.isScrolling) return; // 👈 evita clics si el usuario está girando
-
-  const x = e.clientX;
-  const y = e.clientY;
-  const media = this.getMeshUnderMouse(x, y);
-
-  if (media && media.link) {
-    window.location.href = media.link;
-  }
-}
 
   onResize() {
     this.screen = {
@@ -469,42 +489,39 @@ onClick(e) {
     }
   }
   update() {
-  this.scroll.current = lerp(
-    this.scroll.current,
-    this.scroll.target,
-    this.scroll.ease
-  );
+    this.scroll.current = lerp(
+      this.scroll.current,
+      this.scroll.target,
+      this.scroll.ease
+    );
 
-  const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
+    const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
 
-  // Detectar si se está desplazando
-  const delta = Math.abs(this.scroll.current - this.scroll.last);
-  if (delta > 0.02) {
-    if (!this.isScrolling) this.isScrolling = true;
-    clearTimeout(this.scrollStopTimeout);
-    this.scrollStopTimeout = setTimeout(() => {
-      this.isScrolling = false;
-    }, 150); // espera para considerar que se detuvo
+    const delta = Math.abs(this.scroll.current - this.scroll.last);
+    if (delta > 0.02) {
+      if (!this.isScrolling) this.isScrolling = true;
+      clearTimeout(this.scrollStopTimeout);
+      this.scrollStopTimeout = setTimeout(() => {
+        this.isScrolling = false;
+      }, 150);
+    }
+
+    if (this.medias) {
+      this.medias.forEach((media) => media.update(this.scroll, direction));
+    }
+
+    this.renderer.render({ scene: this.scene, camera: this.camera });
+
+    this.scroll.last = this.scroll.current;
+    this.raf = window.requestAnimationFrame(this.update.bind(this));
   }
-
-  // Actualizar los media items
-  if (this.medias) {
-    this.medias.forEach((media) => media.update(this.scroll, direction));
-  }
-
-  // Renderizar escena
-  this.renderer.render({ scene: this.scene, camera: this.camera });
-
-  this.scroll.last = this.scroll.current;
-  this.raf = window.requestAnimationFrame(this.update.bind(this));
-}
 
   addEventListeners() {
     this.boundOnResize = this.onResize.bind(this)
     this.boundOnWheel = this.onWheel.bind(this)
     this.boundOnTouchDown = this.onTouchDown.bind(this)
     this.boundOnMouseMove = this.onMouseMove.bind(this);
-window.addEventListener('mousemove', this.boundOnMouseMove);
+    window.addEventListener('mousemove', this.boundOnMouseMove);
     this.boundOnTouchMove = this.onTouchMove.bind(this)
     this.boundOnTouchUp = this.onTouchUp.bind(this)
     window.addEventListener('resize', this.boundOnResize)
@@ -516,7 +533,7 @@ window.addEventListener('mousemove', this.boundOnMouseMove);
     window.addEventListener('touchstart', this.boundOnTouchDown)
     window.addEventListener('touchmove', this.boundOnTouchMove)
     this.boundOnClick = this.onClick.bind(this);
-this.gl.canvas.addEventListener('click', this.boundOnClick);
+    this.gl.canvas.addEventListener('click', this.boundOnClick);
     window.addEventListener('touchend', this.boundOnTouchUp)
   }
   destroy() {
@@ -541,27 +558,25 @@ this.gl.canvas.addEventListener('click', this.boundOnClick);
 export default function CircularGallery({
   items,
   bend = 3,
-  textColor = "#8B5A8B",
+  textColor = "#212529",
   borderRadius = 0.08,
-  font = "bold 30px Figtree"
+  font = "bold 32px 'Saira', sans-serif"
 }) {
   const containerRef = useRef(null)
   const [galleryItems, setGalleryItems] = useState([]);
-  
+
   useEffect(() => {
     rawProducts().then((products) => {
-      // Mapear los productos para que coincidan con la estructura esperada
       const mappedItems = products.map(product => ({
         image: product.image,
-        text: product.name, // Usar 'name' como 'text'
+        text: product.name,
         link: `/productos/${product.id}`,
-        // Mantener otras propiedades si las necesitas
         ...product
       }));
       setGalleryItems(mappedItems);
     });
   }, []);
-  
+
   useEffect(() => {
     if (galleryItems.length === 0) return;
     const app = new App(containerRef.current, { items: galleryItems, bend, textColor, borderRadius, font })
@@ -569,7 +584,7 @@ export default function CircularGallery({
       app.destroy()
     }
   }, [galleryItems, bend, textColor, borderRadius, font])
-  
+
   return (
     <div className='circular-gallery' ref={containerRef} />
   )

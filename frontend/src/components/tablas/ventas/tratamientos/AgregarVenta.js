@@ -5,7 +5,7 @@ import ClienteAutocomplete from './extensions/ClienteAutocomplete';
 
 Modal.setAppElement('#root');
 
-const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
+const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, tratamientos }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const abrirModal = () => {
@@ -48,47 +48,78 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
           <h3>Agregar nueva venta</h3>
 
           <InputsRow>
-            <input
-              type="text"
-              name="tratamiento"
-              placeholder="Tratamiento"
-              value={nuevaVenta.tratamiento}
-              onChange={onChange}
-              required
-            />
-
-            <input
-              type="number"
-              name="sesiones"
-              placeholder="Sesiones"
-              value={nuevaVenta.sesiones}
-              onChange={onChange}
-              required
-            />
-
-            <input
-              type="number"
-              name="costo"
-              placeholder="Costo"
-              min="0"
-              value={nuevaVenta.costo}
-              onChange={onChange}
-              required
-            />
-
-            <input
-              type="number"
-              name="precio"
-              placeholder="Precio"
-              min="0"
-              value={nuevaVenta.precio}
-              onChange={onChange}
-              required
-            />
-
+          <select
+            name="tratamiento_id"
+            value={nuevaVenta.tratamiento_id}
+            onChange={onChange}
+            required
+          >
+            <option value="">Seleccionar tratamiento</option>
+            {tratamientos.map(trat => (
+              <option key={trat.id} value={trat.id}>
+                {trat.nombre}
+              </option>
+            ))}
+          </select>
+          
             <ClienteAutocomplete
               clientes={clientes}
               value={nuevaVenta.cliente_id}
+              onChange={onChange}
+              required
+            />
+
+
+                  <input
+            type="number"
+            name="sesiones"
+            placeholder="Sesiones"
+            value={nuevaVenta.sesiones}
+            onChange={onChange}
+            required
+          />
+
+          <input
+            type="number"
+            name="precio"
+            placeholder="Precio"
+            value={nuevaVenta.precio}
+            onChange={onChange}
+            required
+          />
+
+          <select
+            name="forma_de_pago"
+            value={nuevaVenta.forma_de_pago}
+            onChange={onChange}
+          >
+            <option value="">Seleccioná una forma de pago</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Contado">Contado</option>
+            <option value="Debito">Débito</option>
+          </select>
+
+            <input
+              type="date"
+              name="vencimiento"
+              value={nuevaVenta.vencimiento || ''}
+              onChange={onChange}
+            />
+
+            <input
+              type="number"
+              name="cuotas"
+              placeholder="Cuotas"
+              min="0"
+              value={nuevaVenta.cuotas || ''}
+              onChange={onChange}
+            />
+
+            <input
+              type="text"
+              name="observacion"
+              placeholder="Observación"
+              value={nuevaVenta.observacion || ''}
               onChange={onChange}
             />
 
@@ -101,6 +132,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes }) => {
 };
 
 export default VentaForm;
+
 
 
 const Form = styled.form`

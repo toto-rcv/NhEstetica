@@ -80,6 +80,37 @@ const Productos = () => {
       },
       hideOnMobile: true 
     },
+    { 
+      accessorKey: 'modoUso', 
+      header: 'Modo de Uso', 
+      cell: ({ getValue, row, table }) => {
+        const modoUso = getValue();
+        if (!modoUso || !Array.isArray(modoUso)) return '';
+        // Si está en modo edición, mostrar input con placeholder
+        if (table.options.state?.editingCell && table.options.state.editingCell.rowIndex === row.index && table.options.state.editingCell.columnId === 'modoUso') {
+          return (
+            <input
+              value={Array.isArray(modoUso) ? modoUso.join('. ') : (modoUso || '')}
+              onChange={() => {}} // El input real es manejado por EditableTable
+              placeholder="Separá cada paso con un punto (.)"
+              style={{ width: '100%', padding: 8, border: '1px solid #ced4da', borderRadius: 4 }}
+              disabled
+            />
+          );
+        }
+        return (
+          <ul style={{ paddingLeft: 18, margin: 0 }}>
+            {modoUso.map((m, i) => (
+              <li key={i} style={{ listStyle: 'none', marginBottom: 2 }}>
+                <span style={{ color: '#28a745', fontWeight: 'bold', marginRight: 6 }}>✓</span>
+                {m}
+              </li>
+            ))}
+          </ul>
+        );
+      },
+      hideOnMobile: true 
+    },
   ];
 
   const handleDataChange = async (newData) => {
@@ -93,7 +124,10 @@ const Productos = () => {
           ...newRow,
           benefits: typeof newRow.benefits === 'string' && newRow.benefits.trim() 
             ? newRow.benefits.split('.').map(b => b.trim()).filter(b => b)
-            : newRow.benefits || []
+            : newRow.benefits || [],
+          modoUso: typeof newRow.modoUso === 'string' && newRow.modoUso.trim() 
+            ? newRow.modoUso.split('.').map(m => m.trim()).filter(m => m)
+            : newRow.modoUso || []
         };
         await productosService.createProducto(processedRow);
       }
@@ -125,12 +159,15 @@ const Productos = () => {
 
   const handleUpdateProducto = async (productoId, updatedData) => {
     try {
-      // Convertir benefits de string a array si es necesario (separar por punto)
+      // Asegurarse de que modoUso y benefits sean arrays
       const processedData = {
         ...updatedData,
         benefits: typeof updatedData.benefits === 'string' && updatedData.benefits.trim() 
           ? updatedData.benefits.split('.').map(b => b.trim()).filter(b => b)
-          : updatedData.benefits || []
+          : (Array.isArray(updatedData.benefits) ? updatedData.benefits : []),
+        modoUso: typeof updatedData.modoUso === 'string' && updatedData.modoUso.trim() 
+          ? updatedData.modoUso.split('.').map(m => m.trim()).filter(m => m)
+          : (Array.isArray(updatedData.modoUso) ? updatedData.modoUso : [])
       };
       await productosService.updateProducto(productoId, processedData);
       await loadProductos();

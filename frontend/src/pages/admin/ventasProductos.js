@@ -15,6 +15,7 @@ const VentasProductos = () => {
   producto_id: '',
   costo: '',
   precio: '',
+  cantidad: '',
   cliente_id: '',
   fecha: '',
   forma_de_pago: '',
@@ -28,17 +29,17 @@ const VentasProductos = () => {
 const fetchData = async () => {
   try {
     const [ventasRes, clientesRes, productosRes] = await Promise.all([
-      fetch('http://localhost:5000/api/ventas/productos', {
+      fetch('/api/ventas/productos', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }),
-      fetch('http://localhost:5000/api/clientes', {
+      fetch('/api/clientes', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }),
-      fetch('http://localhost:5000/api/productos', {
+      fetch('/api/productos', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -75,7 +76,7 @@ useEffect(() => {
     setMensaje('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/ventas/productos', {
+      const res = await fetch('/api/ventas/productos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,6 +94,7 @@ useEffect(() => {
           producto_id: '',
           costo: '',
           precio: '',
+          cantidad: '',
           cliente_id: '',
           fecha: '',
           forma_de_pago: '',
@@ -111,7 +113,7 @@ useEffect(() => {
     if (!window.confirm('¿Estás seguro de que querés eliminar esta venta?')) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/ventas/productos/${id}`, {
+      const res = await fetch(`/api/ventas/productos/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -146,15 +148,29 @@ useEffect(() => {
     setVentaEditada(null);
   };
 
+const prepararDatosParaBackend = (datos) => {
+  return {
+    ...datos,
+    producto_id: Number(datos.producto_id),
+    cliente_id: Number(datos.cliente_id),
+    costo: datos.costo !== '' ? Number(datos.costo) : 0,
+    precio: datos.precio !== '' ? Number(datos.precio) : 0,
+    cantidad: datos.cantidad !== '' ? Number(datos.cantidad) : 1,
+    cuotas: datos.cuotas !== '' ? Number(datos.cuotas) : null,
+    // fecha, forma_de_pago, observacion se pueden dejar como vienen
+  };
+};
+
 const guardarEdicion = async () => {
   try {
-    const res = await fetch(`http://localhost:5000/api/ventas/productos/${ventaEditandoId}`, {
+    const datosParaEnviar = prepararDatosParaBackend(ventaEditada);
+    const res = await fetch(`/api/ventas/productos/${ventaEditandoId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify(ventaEditada),
+      body: JSON.stringify(datosParaEnviar),
     });
 
     const data = await res.json();

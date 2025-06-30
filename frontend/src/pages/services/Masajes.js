@@ -1,11 +1,30 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Breadcrumb from "../../components/breadcrumb";
 import TreatmentsLeft from '../../components/servicios/treatmentsLeft';
 import TreatmentsRight from '../../components/servicios/treatmentsRight';
 import { motion } from 'framer-motion';
+import { tratamientosService } from '../../services/tratamientosService';
 
 function Masajes() {
+  const [tratamientos, setTratamientos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTratamientos = async () => {
+      try {
+        const data = await tratamientosService.getTratamientos();
+        setTratamientos(data.filter(t => t.categoria && t.categoria.toLowerCase() === 'masajes'));
+      } catch (err) {
+        setError('Error al cargar tratamientos');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTratamientos();
+  }, []);
+
   return (
     <>
       <Breadcrumb
@@ -15,41 +34,48 @@ function Masajes() {
         titleColor="#F5F5F5"
       />
       <BackgroundService>
-        <FadeIn delay={0.2}>
-          <Image src="/servicios/MujerLineal.png" alt="Servicios" className="mujer-lineal" />
-          <TreatmentsLeft
-            link="Masajes"
-            image="/servicios/Masajes/MaderoTerapia.jpg"
-            title="MADEROTERAPIA"
-            showLine={true}
-            description="Tratamiento corporal que utiliza herramientas de madera para modelar y reafirmar el cuerpo. Esta técnica milenaria ayuda a reducir la celulitis, mejorar la circulación y tonificar los músculos. Ideal para quienes buscan una alternativa natural y efectiva para el moldeado corporal."
-            price="$10.000"
-            promoLink="https://wa.me/5491168520606"
-            customButtonText="Saca turno"
-            customButtonLink="https://wa.me/5491168520606"
-            detailsLink="/servicios/maderoterapia"
-          />
-        </FadeIn>
-        <FadeIn delay={0.3}>
-          <TreatmentsRight
-            link="Masajes"
-            image="/servicios/Masajes/MasajeReductor.jpg"
-            title="MASAJES REDUCTORES"
-            showLine={true}
-            description="Tratamiento especializado para reducir medidas y eliminar grasa localizada. Combinamos técnicas manuales con productos específicos para maximizar resultados. Perfecto para quienes buscan perder centímetros y mejorar la apariencia de su silueta de manera natural."
-            price="$10.000"
-            promoLink="https://wa.me/5491168520606"
-            customButtonText="Saca turno"
-            customButtonLink="https://wa.me/5491168520606"
-            detailsLink="/servicios/masajesReductores"
-          />
-        </FadeIn>
+        {loading && <div style={{ textAlign: 'center', padding: '2rem' }}>Cargando tratamientos...</div>}
+        {error && <div style={{ color: 'red', textAlign: 'center', padding: '2rem' }}>{error}</div>}
+        {!loading && !error && tratamientos.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>No hay tratamientos de masajes disponibles.</div>
+        )}
+        {!loading && !error && tratamientos.map((tratamiento, idx) => (
+          <FadeIn delay={0.2 + idx * 0.1} key={tratamiento.id}>
+            {idx % 2 === 0 ? (
+              <TreatmentsLeft
+                link="Masajes"
+                image={tratamiento.imagen}
+                title={tratamiento.nombre}
+                showLine={true}
+                description={tratamiento.descripcion}
+                price={`$${tratamiento.precio}`}
+                promoLink="https://wa.me/5491168520606"
+                customButtonText="Saca turno"
+                customButtonLink="https://wa.me/5491168520606"
+                detailsLink={"/servicios/masajes/" + tratamiento.id}
+              />
+            ) : (
+              <TreatmentsRight
+                link="Masajes"
+                image={tratamiento.imagen}
+                title={tratamiento.nombre}
+                showLine={true}
+                description={tratamiento.descripcion}
+                price={`$${tratamiento.precio}`}
+                promoLink="https://wa.me/5491168520606"
+                customButtonText="Saca turno"
+                customButtonLink="https://wa.me/5491168520606"
+                detailsLink={"/servicios/masajes/" + tratamiento.id}
+              />
+            )}
+          </FadeIn>
+        ))}
       </BackgroundService>
     </>
-  )
+  );
 }
 
-export default Masajes
+export default Masajes;
 
 const BackgroundService = styled.div`
     background: var(--background-color);

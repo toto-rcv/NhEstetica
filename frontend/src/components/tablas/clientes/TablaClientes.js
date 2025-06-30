@@ -10,7 +10,9 @@ const TablaClientes = ({
   onEditCancel,
   onEditSave,
   editandoId,
-  clienteEditado
+  clienteEditado,
+  onRowClick,
+  onEditImageChange
 }) => (
   <Table>
     <thead>
@@ -29,9 +31,43 @@ const TablaClientes = ({
       {clientes.map((cliente) => {
         const enEdicion = cliente.id === editandoId;
         return (
-          <tr key={cliente.id}>
+          <tr key={cliente.id}
+          onClick={() => !enEdicion && onRowClick?.(cliente)}
+          style={{ cursor: !enEdicion ? 'pointer' : 'default' }}>
             <td>
-              {cliente.imagen ? (
+              {enEdicion ? (
+                <div style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+  <Img
+    src={
+      clienteEditado?.imagen instanceof File
+        ? URL.createObjectURL(clienteEditado.imagen)
+        : clienteEditado?.imagen || cliente.imagen
+    }
+    alt="Cliente"
+    style={{ marginBottom: '0.5rem' }}
+  />
+  <input
+    id={`edit-img-${cliente.id}`}
+    type="file"
+    accept="image/*"
+    style={{ display: 'none' }}
+    onChange={onEditImageChange}
+  />
+  <Button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      document.getElementById(`edit-img-${cliente.id}`).click();
+    }}
+    style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+  >
+    Editar imagen
+  </Button>
+</div>
+
+                </div>
+              ) : cliente.imagen ? (
                 <Img src={cliente.imagen} alt="Cliente" />
               ) : (
                 <Placeholder>📷</Placeholder>
@@ -107,13 +143,17 @@ const TablaClientes = ({
             <td>
               {enEdicion ? (
                 <>
-                  <Button onClick={onEditSave}>Guardar</Button>
-                  <Button danger onClick={onEditCancel}>Cancelar</Button>
+                 <Button onClick={(e) => { e.stopPropagation(); onEditSave(); }}>Guardar</Button>
+                 <Button danger onClick={(e) => { e.stopPropagation(); onEditCancel(); }}>Cancelar</Button>
                 </>
               ) : (
                 <>
-                  <Button onClick={() => onEditStart(cliente)}>Editar</Button>
-                  <Button danger onClick={() => onDelete(cliente.id)}>Eliminar</Button>
+                 <Button onClick={(e) => { e.stopPropagation(); onEditStart(cliente); }}>
+                  Editar
+                </Button>
+                <Button danger onClick={(e) => { e.stopPropagation(); onDelete(cliente.id); }}>
+                  Eliminar
+                </Button>
                 </>
               )}
             </td>
@@ -146,7 +186,7 @@ const Table = styled.table`
   tr:hover {
     background-color: #f0f0f0;
   }
-
+  
  input {
   width: 100%;
   padding: 6px 10px;
@@ -166,8 +206,8 @@ const Table = styled.table`
 `;
 
 const Img = styled.img`
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 50%;
 `;
@@ -189,6 +229,7 @@ const Button = styled.button`
   border: none;
   padding: 6px 10px;
   margin-right: 5px;
+  margin-bottom: 5px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9rem;

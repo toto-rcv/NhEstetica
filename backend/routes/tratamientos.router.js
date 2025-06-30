@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const productosController = require('../controllers/tratamientos.controller');
+const tratamientosController = require('../controllers/tratamientos.controller');
 
-// CRUD Productos
-router.get('/', productosController.getAllProductos);
-router.get('/nombre/:nombre', productosController.getProductoByNombre);
-router.get('/:id', productosController.getProductoById);
-router.post('/', productosController.createProducto);
-router.put('/:id', productosController.updateProducto);
-router.delete('/:id', productosController.deleteProducto);
+// CRUD Tratamientos
+router.get('/', tratamientosController.getAllTratamientos);
+router.get('/nombre/:nombre', tratamientosController.getTratamientoByNombre);
+router.get('/:id', tratamientosController.getTratamientoById);
+router.post('/', tratamientosController.createTratamiento);
+router.put('/:id', tratamientosController.updateTratamiento);
+router.delete('/:id', tratamientosController.deleteTratamiento);
 
 module.exports = router; 

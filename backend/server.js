@@ -11,6 +11,7 @@ app.use(express.json());
 
 // Servir archivos estáticos desde la carpeta public
 app.use('/images-de-productos', express.static(path.join(__dirname, 'public/images-de-productos')));
+app.use('/images-de-clientes', express.static(path.join(__dirname, 'public/images-de-clientes')));
 
 // Rutas
 app.use('/api', require('./routes/auth.router'));

@@ -1,11 +1,30 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Breadcrumb from "../../components/breadcrumb";
 import TreatmentsLeft from '../../components/servicios/treatmentsLeft';
 import TreatmentsRight from '../../components/servicios/treatmentsRight';
 import { motion } from 'framer-motion';
+import { tratamientosService } from '../../services/tratamientosService';
 
 function TratamientosFaciales() {
+    const [tratamientos, setTratamientos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchTratamientos = async () => {
+            try {
+                const data = await tratamientosService.getTratamientos();
+                setTratamientos(data.filter(t => t.categoria && t.categoria.replace(/\s/g, '').toLowerCase() === 'facial'));
+            } catch (err) {
+                setError('Error al cargar tratamientos');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTratamientos();
+    }, []);
+
     return (
         <>
             <Breadcrumb
@@ -15,151 +34,48 @@ function TratamientosFaciales() {
                 titleColor="#F5F5F5"
             />
             <BackgroundService>
-                <FadeIn delay={0.2}>
-                    <Image src="/servicios/MujerLineal.png" alt="Servicios" className="mujer-lineal" />
-                    <TreatmentsLeft
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/electroporacion.jpg"
-                        title="ELECTROPORACIÓN"
-                        showLine={true}
-                        description="Tratamiento facial avanzado que utiliza pulsos eléctricos para abrir temporalmente los poros y permitir una mejor penetración de los principios activos. Ideal para hidratación profunda, rejuvenecimiento y tratamiento de arrugas finas."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/electroporacion"
-                    />
-                </FadeIn>
-                
-                <FadeIn delay={0.3}>
-                    <TreatmentsRight
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/dermaplaning.jpg"
-                        title="DERMAPLANING"
-                        showLine={true}
-                        description="Tratamiento de exfoliación física que elimina el vello facial y las células muertas de la piel. Mejora la textura, reduce las líneas finas y permite una mejor penetración de los productos. Resulta en una piel más suave y radiante."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/dermaplaning"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={0.4}>
-                    <ImageEspalda src="/servicios/mujerLinealEspalda.png" alt="Servicios" style={{ position: 'absolute', top: '5rem', left: '5px', width: '150px', height: 'auto' }} />
-                    <TreatmentsLeft
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/dermapen.jpg"
-                        title="DERMAPEN"
-                        showLine={true}
-                        description="Tratamiento de microagujas que estimula la producción natural de colágeno y elastina. Ideal para reducir arrugas, cicatrices y mejorar la textura de la piel. Promueve la regeneración celular y el rejuvenecimiento facial."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/dermapen"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={0.5}>
-                    <TreatmentsRight
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/exosomas.avif"
-                        title="EXOSOMAS"
-                        showLine={true}
-                        description="Tratamiento regenerativo que utiliza vesículas extracelulares para estimular la renovación celular. Mejora la elasticidad, reduce las arrugas y promueve una piel más joven y saludable. Ideal para rejuvenecimiento facial."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/exosomas"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={0.6}>
-                    <Image src="/servicios/flor.png" alt="Servicios" className="floral-image" style={{ position: 'absolute', top: '20rem', right: '5px', width: '150px', height: 'auto' }} />
-                    <TreatmentsLeft
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/radiofrecuencia.jpg"
-                        title="RADIOFRECUENCIA"
-                        showLine={true}
-                        description="Tratamiento que utiliza ondas electromagnéticas para estimular la producción de colágeno y elastina. Efectivo para tensar la piel, reducir arrugas y mejorar la firmeza facial. Ideal para rejuvenecimiento no invasivo."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/radiofrecuenciaFacial"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={0.7}>
-                    <TreatmentsRight
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/hydrafacial.jpg"
-                        title="HYDRAFACIAL"
-                        showLine={true}
-                        description="Tratamiento facial avanzado que combina limpieza profunda, exfoliación, extracción, hidratación y antioxidantes. Mejora la textura, reduce las líneas finas y proporciona una piel más radiante y saludable."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/hydrafacial"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={0.8}>
-                    <ImageEspalda src="/servicios/MujerSombrero.png" alt="Servicios" style={{ position: 'absolute', top: '20rem', left: '5px', width: '150px', height: 'auto' }} />
-                    <TreatmentsLeft
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/laminado.jpg"
-                        title="LAMINADO"
-                        showLine={true}
-                        description="Tratamiento que combina diferentes técnicas para mejorar la apariencia de la piel. Incluye limpieza profunda, exfoliación y aplicación de productos específicos para lograr una piel más suave, luminosa y rejuvenecida."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/laminado"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={0.9}>
-                    <TreatmentsRight
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/perfilado.jpg"
-                        title="PERFILADO"
-                        showLine={true}
-                        description="Tratamiento que define y mejora los contornos faciales. Combina técnicas de masaje y productos específicos para tonificar y reafirmar la piel. Ideal para mejorar la definición del rostro y reducir la flacidez."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/perfilado"
-                    />
-                </FadeIn>
-
-                <FadeIn delay={1.0}>
-                    <Image src="/servicios/MujerConCopa.png" alt="Servicios" className="MujerConCopa" />
-                    <TreatmentsLeft
-                        link="TratamientosFaciales"
-                        image="/servicios/Tratamiento_Facial/vacum.jpg"
-                        title="VACUM"
-                        showLine={true}
-                        description="Tratamiento que utiliza succión controlada para mejorar la circulación y la oxigenación de la piel. Efectivo para reducir la hinchazón, mejorar la textura y promover la regeneración celular. Ideal para complementar otros tratamientos faciales."
-                        price="$10.000"
-                        promoLink="https://wa.me/5491168520606"
-                        customButtonText="Saca turno"
-                        customButtonLink="https://wa.me/5491168520606"
-                        detailsLink="/servicios/vacumFacial"
-                    />
-                </FadeIn>
+                {loading && <div style={{ textAlign: 'center', padding: '2rem' }}>Cargando tratamientos...</div>}
+                {error && <div style={{ color: 'red', textAlign: 'center', padding: '2rem' }}>{error}</div>}
+                {!loading && !error && tratamientos.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>No hay tratamientos faciales disponibles.</div>
+                )}
+                {!loading && !error && tratamientos.map((tratamiento, idx) => (
+                    <FadeIn delay={0.2 + idx * 0.1} key={tratamiento.id}>
+                        {idx % 2 === 0 ? (
+                            <TreatmentsLeft
+                                link="TratamientosFaciales"
+                                image={tratamiento.imagen}
+                                title={tratamiento.nombre}
+                                showLine={true}
+                                description={tratamiento.descripcion}
+                                price={`$${tratamiento.precio}`}
+                                promoLink="https://wa.me/5491168520606"
+                                customButtonText="Saca turno"
+                                customButtonLink="https://wa.me/5491168520606"
+                                detailsLink={"/servicios/faciales/" + tratamiento.id}
+                            />
+                        ) : (
+                            <TreatmentsRight
+                                link="TratamientosFaciales"
+                                image={tratamiento.imagen}
+                                title={tratamiento.nombre}
+                                showLine={true}
+                                description={tratamiento.descripcion}
+                                price={`$${tratamiento.precio}`}
+                                promoLink="https://wa.me/5491168520606"
+                                customButtonText="Saca turno"
+                                customButtonLink="https://wa.me/5491168520606"
+                                detailsLink={"/servicios/faciales/" + tratamiento.id}
+                            />
+                        )}
+                    </FadeIn>
+                ))}
             </BackgroundService>
         </>
-    )
+    );
 }
 
-export default TratamientosFaciales
+export default TratamientosFaciales;
 
 const BackgroundService = styled.div`
     background: var(--background-color);

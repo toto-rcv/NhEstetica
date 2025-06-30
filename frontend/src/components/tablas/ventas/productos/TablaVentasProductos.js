@@ -20,6 +20,7 @@ const TablaVentasProductos = ({
         <th>Marca</th>
         <th>Costo</th>
         <th>Precio</th>
+        <th>Cantidad</th>
         <th>Ganancia</th>
         <th>Cliente</th>
         <th>Forma de Pago</th>
@@ -84,11 +85,21 @@ const TablaVentasProductos = ({
                 `$${venta.precio}`
               )}
             </td>
+            <td>
+              {enEdicion ? (
+                <input
+                  name="cantidad"
+                  type="number"
+                  value={ventaEditada?.cantidad || ''}
+                  onChange={onEditChange}
+                />
+              ) : (
+                `${venta.cantidad}`
+              )}
+            </td>
 
             <td>
-              {!enEdicion &&
-                `$${(venta.precio - venta.costo).toFixed(2)}`
-              }
+              {!enEdicion && `$${((venta.precio - venta.costo) * venta.cantidad).toFixed(2)}`}
             </td>
 
             <td>
