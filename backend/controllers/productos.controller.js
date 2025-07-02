@@ -18,14 +18,15 @@ exports.getAllProductos = async (req, res) => {
     const productos = results.map(producto => ({
       id: producto.id,
       nombre: producto.nombre,
+      costo: producto.costo, 
       precio: producto.precio,
       subtitle: producto.subtitulo,
       descripcion: producto.descripcion,
       imagen: producto.imagen,
       categoria: producto.categoria,
       marca: producto.marca,
-      isNatural: producto.natural,
-      isVegan: producto.vegano,
+      isNatural: Boolean(producto.natural) && producto.natural !== '0' && producto.natural !== 0,
+      isVegan: Boolean(producto.vegano) && producto.vegano !== '0' && producto.vegano !== 0,
       benefits: producto.beneficios ? JSON.parse(producto.beneficios) : [],
       modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     }));
@@ -48,14 +49,15 @@ exports.getProductoById = async (req, res) => {
     const productoMapeado = {
       id: producto.id,
       nombre: producto.nombre,
+      costo: producto.costo,
       precio: producto.precio,
       subtitle: producto.subtitulo,
       descripcion: producto.descripcion,
       imagen: producto.imagen,
       categoria: producto.categoria,
       marca: producto.marca,
-      isNatural: producto.natural,
-      isVegan: producto.vegano,
+      isNatural: Boolean(producto.natural) && producto.natural !== '0' && producto.natural !== 0,
+      isVegan: Boolean(producto.vegano) && producto.vegano !== '0' && producto.vegano !== 0,
       benefits: producto.beneficios ? JSON.parse(producto.beneficios) : [],
       modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     };
@@ -69,7 +71,8 @@ exports.getProductoById = async (req, res) => {
 // Crear producto
 exports.createProducto = async (req, res) => {
   const { 
-    nombre, 
+    nombre,
+    costo,
     precio, 
     descripcion, 
     imagen, 
@@ -82,9 +85,12 @@ exports.createProducto = async (req, res) => {
     modoUso
   } = req.body;
   
-  if (!nombre || !precio) {
-    return res.status(400).json({ message: 'Nombre y precio son obligatorios' });
+  console.log('Datos recibidos en createProducto:', { nombre, costo, precio, categoria, marca });
+  
+  if (!nombre || !precio || costo === undefined || costo === null) {
+    return res.status(400).json({ message: 'Nombre, costo y precio son obligatorios' });
   }
+
   
   try {
     // Convertir benefits de array a JSON string si existe
@@ -95,18 +101,19 @@ exports.createProducto = async (req, res) => {
     
     const [result] = await db.pool.query(
       `INSERT INTO productos (
-        nombre, precio, descripcion, imagen, categoria, marca, 
+        nombre, costo, precio, descripcion, imagen, categoria, marca,
         subtitulo, \`natural\`, vegano, beneficios, modo_uso
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        nombre, precio, descripcion, imagen, categoria, marca,
+        nombre, costo, precio, descripcion, imagen, categoria, marca,
         subtitle, isNatural || false, isVegan || false, benefitsJson, modoUsoJson
       ]
     );
+
     
     res.status(201).json({ 
       id: result.insertId, 
-      nombre, precio, descripcion, imagen, categoria, marca,
+      nombre, costo, precio, descripcion, imagen, categoria, marca,
       subtitle, isNatural: isNatural || false, isVegan: isVegan || false, benefits, modoUso
     });
   } catch (err) {
@@ -118,7 +125,8 @@ exports.createProducto = async (req, res) => {
 exports.updateProducto = async (req, res) => {
   const { id } = req.params;
   const { 
-    nombre, 
+    nombre,
+    costo,
     precio, 
     descripcion, 
     imagen, 
@@ -140,17 +148,17 @@ exports.updateProducto = async (req, res) => {
     
     await db.pool.query(
       `UPDATE productos SET 
-        nombre=?, precio=?, descripcion=?, imagen=?, categoria=?, marca=?,
+        nombre=?, costo=?, precio=?, descripcion=?, imagen=?, categoria=?, marca=?,
         subtitulo=?, \`natural\`=?, vegano=?, beneficios=?, modo_uso=?
        WHERE id=?`,
       [
-        nombre, precio, descripcion, imagen, categoria, marca,
+        nombre, costo, precio, descripcion, imagen, categoria, marca,
         subtitle, isNatural || false, isVegan || false, benefitsJson, modoUsoJson, id
       ]
     );
     
     res.json({ 
-      id, nombre, precio, descripcion, imagen, categoria, marca,
+      id, nombre, costo, precio, descripcion, imagen, categoria, marca,
       subtitle, isNatural: isNatural || false, isVegan: isVegan || false, benefits, modoUso
     });
   } catch (err) {
@@ -170,14 +178,15 @@ exports.getProductoByNombre = async (req, res) => {
     const productoMapeado = {
       id: producto.id,
       nombre: producto.nombre,
+      costo: producto.costo,
       precio: producto.precio,
       subtitle: producto.subtitulo,
       descripcion: producto.descripcion,
       imagen: producto.imagen,
       categoria: producto.categoria,
       marca: producto.marca,
-      isNatural: producto.natural,
-      isVegan: producto.vegano,
+      isNatural: Boolean(producto.natural) && producto.natural !== '0' && producto.natural !== 0,
+      isVegan: Boolean(producto.vegano) && producto.vegano !== '0' && producto.vegano !== 0,
       benefits: producto.beneficios ? JSON.parse(producto.beneficios) : [],
       modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     };

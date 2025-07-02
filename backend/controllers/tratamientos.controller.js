@@ -1,9 +1,18 @@
 const db = require('../config/database');
 
-// Obtener todos los tratamientos
+// Obtener todos los tratamientos (con búsqueda opcional)
 exports.getAllTratamientos = async (req, res) => {
   try {
-    const [rows] = await db.pool.query('SELECT * FROM tratamientos');
+    const { query } = req.query;
+    let sql = 'SELECT * FROM tratamientos';
+    let params = [];
+
+    if (query) {
+      sql += ' WHERE nombre LIKE ? OR categoria LIKE ? OR descripcion LIKE ?';
+      params = [`%${query}%`, `%${query}%`, `%${query}%`];
+    }
+
+    const [rows] = await db.pool.query(sql, params);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener tratamientos' });

@@ -58,7 +58,7 @@ const AddTratamientoModal = ({ isOpen, onClose, onSuccess }) => {
     formData.append('image', file);
     
     try {
-      const response = await fetch('/api/upload/image', {
+      const response = await fetch('/api/upload/image?type=tratamiento', {
         method: 'POST',
         body: formData,
       });
@@ -224,120 +224,289 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(40, 60, 80, 0.25);
+  backdrop-filter: blur(5px) saturate(1.2);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  overflow-y: auto;
-  padding: 20px;
+  animation: fadeIn 0.3s;
+  padding: 1rem;
+  box-sizing: border-box;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    align-items: flex-start;
+    padding: 0.5rem;
+    overflow-y: auto;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.25rem;
+  }
 `;
 
 const ModalContent = styled.div`
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 100%;
+  background: linear-gradient(135deg, #f8fafc 80%, #e0f7fa 100%);
+  padding: 38px 36px 28px 36px;
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  text-align: left;
   max-width: 600px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  padding: 20px;
+  animation: popIn 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+  
+  @keyframes popIn {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 24px 20px 20px 20px;
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 12px;
+    margin-top: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 20px 16px 16px 16px;
+    max-width: 98vw;
+    border-radius: 10px;
+    margin-top: 0.5rem;
+  }
+  
+  @media (max-width: 350px) {
+    padding: 16px 12px 12px 12px;
+    border-radius: 8px;
+  }
 `;
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
+  top: 14px;
+  right: 16px;
+  background: none;
   border: none;
-  font-size: 24px;
+  font-size: 1.7rem;
+  color: #7b7b7b;
   cursor: pointer;
-  color: #666;
+  transition: color 0.2s;
+  z-index: 10;
+  padding: 4px;
+  
   &:hover {
-    color: #333;
+    color: #e57373;
+  }
+  
+  @media (max-width: 768px) {
+    top: 12px;
+    right: 12px;
+    font-size: 1.8rem;
+    padding: 6px;
+  }
+  
+  @media (max-width: 480px) {
+    top: 8px;
+    right: 8px;
+    font-size: 1.6rem;
+    padding: 8px;
   }
 `;
 
 const ModalTitle = styled.h2`
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 1.8rem;
+  color: #2e3a59;
+  margin-bottom: 24px;
+  font-size: 26px;
+  font-weight: 700;
   text-align: center;
+  letter-spacing: 0.5px;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  
+  @media (max-width: 768px) {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  
+  @media (max-width: 350px) {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
 `;
 
 const FormContainer = styled.div`
-  padding: 0 10px;
+  padding: 0;
 `;
 
 const Field = styled.div`
-  margin-bottom: 15px;
+  margin-bottom: 16px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 12px;
+  }
 `;
 
 const Row = styled.div`
   display: flex;
   gap: 15px;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
   
   @media (max-width: 600px) {
     flex-direction: column;
     gap: 0;
   }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 12px;
+  }
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #3a4a6b;
+  font-size: 1.04rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-bottom: 5px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 10px 12px;
+  border: 1.5px solid #cfd8dc;
+  border-radius: 7px;
+  font-size: 1.04rem;
+  background: #f6fafd;
+  transition: border 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+  
   &:focus {
+    border: 1.5px solid #26a69a;
     outline: none;
-    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px #b2dfdb55;
+    background: #fff;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 9px 10px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+    padding: 8px 10px;
   }
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  background: white;
+  padding: 10px 12px;
+  border: 1.5px solid #cfd8dc;
+  border-radius: 7px;
+  font-size: 1.04rem;
+  background: #f6fafd;
+  transition: border 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+  
   &:focus {
+    border: 1.5px solid #26a69a;
     outline: none;
-    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px #b2dfdb55;
+    background: #fff;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 9px 10px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+    padding: 8px 10px;
   }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 10px 12px;
+  border: 1.5px solid #cfd8dc;
+  border-radius: 7px;
+  font-size: 1.04rem;
+  background: #f6fafd;
+  transition: border 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
   min-height: 100px;
   resize: vertical;
+  
   &:focus {
+    border: 1.5px solid #26a69a;
     outline: none;
-    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px #b2dfdb55;
+    background: #fff;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 9px 10px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+    padding: 8px 10px;
   }
 `;
 
 const ImageUploadContainer = styled.div`
-  border: 2px dashed #ddd;
+  border: 2px dashed #cfd8dc;
+  border-radius: 8px;
   padding: 20px;
   text-align: center;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  background: #f9f9f9;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #26a69a;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `;
 
 const ImageInput = styled.input`
@@ -345,78 +514,179 @@ const ImageInput = styled.input`
 `;
 
 const ImageLabel = styled.label`
-  background-color: #4a90e2;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
   display: inline-block;
+  padding: 10px 20px;
+  background: #26a69a;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+  font-size: 0.95rem;
+
   &:hover {
-    background-color: #357abf;
+    background: #00897b;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 9px 18px;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px 16px;
+    font-size: 0.85rem;
   }
 `;
 
 const ImagePreview = styled.div`
   margin-top: 10px;
+  
+  img {
+    border-radius: 8px;
+    border: 2px solid #26a69a;
+  }
 `;
 
 const ButtonsContainer = styled.div`
   display: flex;
+  gap: 14px;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+  margin-top: 24px;
+  
+  @media (max-width: 768px) {
+    gap: 12px;
+    margin-top: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 `;
 
 const CancelButton = styled.button`
-  padding: 10px 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
+  background: #f5f5f5;
+  color: #7b7b7b;
+  border: 1.5px solid #cfd8dc;
+  padding: 11px 22px;
+  border-radius: 7px;
+  font-size: 1.07rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.22s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  
   &:hover {
-    background-color: #f5f5f5;
+    background: #e57373;
+    color: #fff;
+    border: 1.5px solid #e57373;
   }
+  
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 10px 18px;
+    min-height: 42px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    min-height: 44px;
   }
 `;
 
 const SubmitButton = styled.button`
-  padding: 10px 20px;
+  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff;
   border: none;
-  border-radius: 4px;
-  background-color: #4a90e2;
-  color: white;
+  padding: 11px 26px;
+  border-radius: 7px;
+  font-size: 1.07rem;
+  font-weight: 700;
   cursor: pointer;
-  &:hover {
-    background-color: #357abf;
+  box-shadow: 0 2px 8px #38f9d733;
+  transition: all 0.22s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  
+  &:hover:enabled {
+    background: linear-gradient(90deg, #26a69a 0%, #43e97b 100%);
+    box-shadow: 0 4px 16px #38f9d744;
   }
+  
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
   }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 10px 20px;
+    min-height: 42px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    min-height: 44px;
+  }
 `;
 
 const ErrorMsg = styled.div`
-  color: #e74c3c;
-  font-size: 14px;
-  margin-top: 5px;
+  color: #e53935;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  font-weight: 500;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+    margin-top: 3px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
 `;
 
 const RadioGroup = styled.div`
   display: flex;
   gap: 15px;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 10px;
+  }
 `;
 
 const RadioLabel = styled.label`
   display: flex;
   align-items: center;
   cursor: pointer;
+  font-weight: 500;
+  color: #3a4a6b;
 `;
 
 const Radio = styled.input`
-  margin-right: 5px;
+  margin-right: 8px;
+  transform: scale(1.1);
 `;
 
 export default AddTratamientoModal; 

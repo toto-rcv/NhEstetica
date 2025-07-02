@@ -53,8 +53,8 @@ function ProductDetail() {
             subtitle: productData.subtitle || '',
             description: productData.descripcion || '',
             price: productData.precio,
-            isNatural: productData.isNatural ?? false,
-            isVegan: productData.isVegan ?? false,
+            isNatural: Boolean(productData.isNatural) && productData.isNatural !== '0' && productData.isNatural !== 0 && productData.isNatural !== false,
+            isVegan: Boolean(productData.isVegan) && productData.isVegan !== '0' && productData.isVegan !== 0 && productData.isVegan !== false,
             benefits: productData.benefits || [],
             modoUso: productData.modoUso || []
           };
@@ -108,11 +108,9 @@ function ProductDetail() {
           <ProductGallery>
             <MainImageContainer>
               <ProductBadge>{product.category}</ProductBadge>
-              {product.isNatural && <NaturalBadge><FaLeaf /> Natural</NaturalBadge>}
+              {product.isNatural && <NaturalBadge $hasVegan={product.isVegan}><FaLeaf /> Natural</NaturalBadge>}
+              {product.isVegan && <VeganBadge $hasNatural={product.isNatural}>🌱 Vegano</VeganBadge>}
               <MainImage src={product.image} alt={product.name} />
-              <ZoomOverlay>
-                <ZoomIcon>🔍</ZoomIcon>
-              </ZoomOverlay>
             </MainImageContainer>
           </ProductGallery>
 
@@ -420,29 +418,31 @@ const NaturalBadge = styled.span`
   }
 `;
 
-const ZoomOverlay = styled.div`
+const VeganBadge = styled.span`
   position: absolute;
-  bottom: 15px;
+  top: ${props => props.$hasNatural ? '55px' : '15px'};
   right: 15px;
-  background-color: rgba(255, 255, 255, 0.8);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  background-color: #6a994e;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  cursor: pointer;
+  gap: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   
-  ${MainImageContainer}:hover & {
-    opacity: 1;
+  @media (max-width: 480px) {
+    top: ${props => props.$hasNatural ? '50px' : '10px'};
+    right: 10px;
+    font-size: 0.75rem;
+    padding: 4px 10px;
   }
 `;
 
-const ZoomIcon = styled.span`
-  font-size: 1.2rem;
-`;
+
 
 const ProductInfo = styled.div`
   flex: 1;

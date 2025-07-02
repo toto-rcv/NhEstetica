@@ -27,8 +27,9 @@ exports.getClienteById = async (req, res) => {
 
 exports.createCliente = async (req, res) => {
   try {
-    const { nombre, apellido, direccion, telefono, email, antiguedad } = req.body;
+    const { nombre, apellido, direccion, telefono, email, antiguedad, nacionalidad } = req.body;
     let imagen = null;
+
     if (req.file) {
       imagen = `/images-de-clientes/${req.file.filename}`;
     } else if (req.body.imagen) {
@@ -41,8 +42,8 @@ exports.createCliente = async (req, res) => {
 
     await pool.execute(
       `INSERT INTO clientes 
-       (nombre, apellido, direccion, telefono, email, antiguedad, imagen, fecha_inscripcion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+       (nombre, apellido, direccion, telefono, email, antiguedad, imagen, fecha_inscripcion, nacionalidad)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
       [
         nombre,
         apellido,
@@ -50,7 +51,8 @@ exports.createCliente = async (req, res) => {
         telefono || '',
         email || '',
         antiguedad || 0,
-        imagen || null
+        imagen || null,
+        nacionalidad || null
       ]
     );
 
@@ -64,16 +66,21 @@ exports.createCliente = async (req, res) => {
 exports.updateCliente = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, apellido, direccion, telefono, email, antiguedad } = req.body;
+    let { nombre, apellido, direccion, telefono, email, antiguedad, nacionalidad } = req.body;
+
+    if (antiguedad && antiguedad.includes('T')) {
+      antiguedad = antiguedad.slice(0, 10);
+    }
+
     let imagen = req.body.imagen;
     let eliminarAnterior = false;
     let imagenAnterior = null;
+
     if (req.file) {
       imagen = `/images-de-clientes/${req.file.filename}`;
       eliminarAnterior = true;
     }
 
-    // Si hay que eliminar la imagen anterior, primero la buscamos
     if (eliminarAnterior) {
       const [rows] = await pool.execute('SELECT imagen FROM clientes WHERE id = ?', [id]);
       if (rows.length && rows[0].imagen) {
@@ -81,31 +88,26 @@ exports.updateCliente = async (req, res) => {
       }
     }
 
-    // Actualización con o sin imagen
-    if (imagen) {
-      await pool.execute(
-        `UPDATE clientes SET nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, antiguedad = ?, imagen = ? WHERE id = ?`,
-        [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, imagen, id]
-      );
-    } else {
-      await pool.execute(
-        `UPDATE clientes SET nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, antiguedad = ? WHERE id = ?`,
-        [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, id]
-      );
-    }
+    const query =
+      imagen
+        ? `UPDATE clientes SET nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, antiguedad = ?, imagen = ?, nacionalidad = ? WHERE id = ?`
+        : `UPDATE clientes SET nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, antiguedad = ?, nacionalidad = ? WHERE id = ?`;
 
-    // Eliminar la imagen anterior si corresponde
+    const values =
+      imagen
+        ? [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, imagen, nacionalidad || null, id]
+        : [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, nacionalidad || null, id];
+
+    await pool.execute(query, values);
+
     if (eliminarAnterior && imagenAnterior) {
       const rutaFisica = path.join(__dirname, '../public', imagenAnterior);
       try {
         if (fs.existsSync(rutaFisica)) {
           fs.unlink(rutaFisica, (err) => {
-            if (err) {
-              console.error('No se pudo eliminar la imagen anterior:', err);
-            }
+            if (err) console.error('No se pudo eliminar la imagen anterior:', err);
           });
         } else {
-          // La imagen anterior no existe, no es un error grave
           console.warn('La imagen anterior no existe en el servidor:', rutaFisica);
         }
       } catch (err) {
@@ -113,9 +115,9 @@ exports.updateCliente = async (req, res) => {
       }
     }
 
-    // Traer el cliente actualizado
     const [rows] = await pool.execute('SELECT * FROM clientes WHERE id = ?', [id]);
     res.json(rows[0] || { message: 'Cliente actualizado correctamente' });
+
   } catch (err) {
     console.error('Error al actualizar cliente:', err);
     res.status(500).json({ message: 'Error al actualizar cliente' });

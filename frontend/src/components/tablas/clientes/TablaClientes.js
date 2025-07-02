@@ -2,6 +2,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
+const formatDate = (isoDate) => {
+  if (!isoDate) return '';
+  const date = new Date(isoDate);
+  return date.toLocaleDateString('es-AR'); // "dd/mm/aaaa"
+};
+
+
 const TablaClientes = ({
   clientes,
   onDelete,
@@ -23,6 +30,7 @@ const TablaClientes = ({
         <th>Email</th>
         <th>Teléfono</th>
         <th>Dirección</th>
+        <th>Nacionalidad</th>
         <th>Antigüedad</th>
         <th>Acciones</th>
       </tr>
@@ -129,15 +137,38 @@ const TablaClientes = ({
               )}
             </td>
             <td>
+  {enEdicion ? (
+    <select
+      name="nacionalidad"
+      value={clienteEditado?.nacionalidad || ''}
+      onChange={onEditChange}
+      style={{
+        padding: '6px',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+        width: '100%',
+        fontSize: '0.9rem'
+      }}
+    >
+      <option value="">Selecciona nacionalidad</option>
+      <option value="Argentina">Argentina</option>
+      <option value="Paraguay">Paraguay</option>
+    </select>
+  ) : (
+    cliente.nacionalidad || '-'
+  )}
+</td>
+
+            <td>
               {enEdicion ? (
                 <input
                   name="antiguedad"
-                  type="number"
-                  value={clienteEditado?.antiguedad || 0}
+                  type="date"
+                  value={clienteEditado?.antiguedad?.slice(0, 10) || ''}
                   onChange={onEditChange}
                 />
               ) : (
-                cliente.antiguedad
+                formatDate(cliente.antiguedad)
               )}
             </td>
             <td>

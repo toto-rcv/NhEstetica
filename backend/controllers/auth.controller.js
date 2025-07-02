@@ -3,20 +3,31 @@ const { pool } = require('../config/database');
 const { generateToken } = require('../middleware/auth');
 
 exports.register = async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ success: false, message: 'Usuario y contraseña son requeridos' });
+  const { nombre, apellido, email, direccion, telefono, password } = req.body;
+  
+  if (!nombre || !apellido || !email || !password) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Nombre, apellido, email y contraseña son requeridos' 
+    });
   }
 
   try {
-    const [existing] = await pool.execute('SELECT * FROM users WHERE username = ?', [username]);
-    if (existing.length > 0) {
-      return res.status(409).json({ success: false, message: 'El usuario ya existe' });
+    // Verificar si el email ya existe en clientes
+    const [existingCliente] = await pool.execute('SELECT * FROM clientes WHERE email = ?', [email]);
+    if (existingCliente.length > 0) {
+      return res.status(409).json({ success: false, message: 'Ya existe un cliente con este email' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await pool.execute('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
-    res.status(201).json({ success: true, message: 'Usuario registrado con éxito' });
+    const fechaActual = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    await pool.execute(`
+      INSERT INTO clientes (nombre, apellido, email, direccion, telefono, password, fecha_inscripcion) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [nombre, apellido, email, direccion, telefono, hashedPassword, fechaActual]);
+    
+    res.status(201).json({ success: true, message: 'Cliente registrado con éxito' });
   } catch (error) {
     console.error('Error en registro:', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
@@ -24,30 +35,67 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ success: false, message: 'Usuario y contraseña son requeridos' });
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: 'Email/Usuario y contraseña son requeridos' });
   }
 
   try {
-    const [users] = await pool.execute('SELECT * FROM users WHERE username = ?', [username]);
-    if (users.length === 0) {
-      return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
+    let user = null;
+    let userType = null;
+
+    // Primero buscar en usuarios (administradores) - buscar por username (que ahora es email)
+    const [users] = await pool.execute('SELECT * FROM users WHERE username = ?', [email]);
+    if (users.length > 0) {
+      user = users[0];
+      userType = 'admin';
+    } else {
+      // Si no está en users, buscar en clientes por email
+      const [clientes] = await pool.execute('SELECT * FROM clientes WHERE email = ?', [email]);
+      if (clientes.length > 0) {
+        user = clientes[0];
+        userType = 'cliente';
+      }
     }
 
-    const user = users[0];
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Email o contraseña incorrectos' });
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
+      return res.status(401).json({ success: false, message: 'Email o contraseña incorrectos' });
     }
 
     const token = generateToken(user);
-    res.json({
-      success: true,
-      message: 'Login exitoso',
-      user: { id: user.id, username: user.username },
-      token
-    });
+    
+    if (userType === 'admin') {
+      res.json({
+        success: true,
+        message: 'Login exitoso',
+        user: { 
+          id: user.id, 
+          username: user.username,
+          permisos: user.permisos,
+          type: 'admin'
+        },
+        token
+      });
+    } else {
+      res.json({
+        success: true,
+        message: 'Login exitoso',
+        user: { 
+          id: user.id, 
+          nombre: user.nombre,
+          apellido: user.apellido,
+          email: user.email,
+          imagen: user.imagen,
+          type: 'cliente'
+        },
+        token
+      });
+    }
   } catch (error) {
     console.error('Error en login:', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });

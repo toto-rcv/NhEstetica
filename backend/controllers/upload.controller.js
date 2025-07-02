@@ -5,18 +5,58 @@ const fs = require('fs');
 // Configurar multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    // Determinar el tipo de imagen basado en el parámetro de consulta
+    const type = req.query.type || 'producto';
+    let folderName;
+    
+    switch (type) {
+      case 'personal':
+        folderName = 'images-de-personal';
+        break;
+      case 'tratamiento':
+        folderName = 'images-de-tratamientos';
+        break;
+      case 'cliente':
+        folderName = 'images-de-clientes';
+        break;
+      case 'producto':
+      default:
+        folderName = 'images-de-productos';
+        break;
+    }
+    
     // Crear la carpeta si no existe
-    const uploadDir = path.join(__dirname, '../public/images-de-productos');
+    const uploadDir = path.join(__dirname, `../public/${folderName}`);
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
+    // Determinar el prefijo basado en el tipo de imagen
+    const type = req.query.type || 'producto';
+    let prefix;
+    
+    switch (type) {
+      case 'personal':
+        prefix = 'personal-';
+        break;
+      case 'tratamiento':
+        prefix = 'tratamiento-';
+        break;
+      case 'cliente':
+        prefix = 'cliente-';
+        break;
+      case 'producto':
+      default:
+        prefix = 'producto-';
+        break;
+    }
+    
     // Generar nombre único para el archivo
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    cb(null, 'producto-' + uniqueSuffix + ext);
+    cb(null, prefix + uniqueSuffix + ext);
   }
 });
 
@@ -62,8 +102,11 @@ exports.uploadImage = (req, res) => {
       });
     }
 
-    // Devolver la ruta del archivo
-    const imagePath = `/images-de-productos/${req.file.filename}`;
+    // Determinar el tipo de imagen
+    const type = req.query.type || 'producto';
+    
+    // Devolver la ruta de la API para acceder a la imagen
+    const imagePath = `/api/upload/image/${type}/${req.file.filename}`;
     res.json({ 
       message: 'Imagen subida correctamente',
       imagePath: imagePath,

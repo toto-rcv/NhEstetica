@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   getVentas,
   getVentaById,
-  getVentasByClienteId,
+  getVentasByCliente,
   createVenta,
   updateVenta,
   deleteVenta
@@ -15,7 +15,7 @@ router.get('/', getVentas);
 // Venta por ID
 router.get('/:id', getVentaById);
 
-router.get('/cliente/:id', getVentasByClienteId);
+router.get('/cliente/:id', getVentasByCliente);
 // Crear nueva venta
 router.post('/', createVenta);
 

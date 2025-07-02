@@ -1,9 +1,12 @@
 const API_URL = '/api/tratamientos';
 
 export const tratamientosService = {
-  getTratamientos: async () => {
+  getTratamientos: async (searchTerm = '') => {
     try {
-      const response = await fetch(API_URL);
+      const url = searchTerm 
+        ? `${API_URL}?query=${encodeURIComponent(searchTerm)}`
+        : API_URL;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Error al obtener tratamientos');
       }

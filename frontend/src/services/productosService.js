@@ -1,9 +1,12 @@
 const API_BASE_URL = '/api';
 
 export const productosService = {
-  // Obtener todos los productos
-  async getProductos() {
-    const response = await fetch(`${API_BASE_URL}/productos`);
+  // Obtener todos los productos (con búsqueda opcional)
+  async getProductos(searchTerm = '') {
+    const url = searchTerm 
+      ? `${API_BASE_URL}/productos?query=${encodeURIComponent(searchTerm)}`
+      : `${API_BASE_URL}/productos`;
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Error al obtener productos');
     return await response.json();
   },

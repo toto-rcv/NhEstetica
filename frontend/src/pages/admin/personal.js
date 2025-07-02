@@ -10,10 +10,13 @@ const Personal = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPerson, setSelectedPerson] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [commissions, setCommissions] = useState({ comisionDia: '$0', comisionMes: '$0' });
+  const [commissionHistory, setCommissionHistory] = useState([]);
+  const [loadingCommissions, setLoadingCommissions] = useState(false);
 
   // Cargar datos del personal al montar el componente
   useEffect(() => {
@@ -35,7 +38,42 @@ const Personal = () => {
     }
   };
 
+  // Función helper para manejar rutas de imágenes
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    
+    // Si ya es una ruta de API, usarla directamente
+    if (imagePath.startsWith('/api/upload/image/')) {
+      return imagePath;
+    }
+    
+    // Si es el formato anterior, convertirla al nuevo formato
+    if (imagePath.startsWith('/images-de-personal/')) {
+      const filename = imagePath.replace('/images-de-personal/', '');
+      return `/api/upload/image/personal/${filename}`;
+    }
+    
+    // Por defecto, asumir que es una ruta relativa válida
+    return imagePath;
+  };
+
   const columns = [
+    {
+      accessorKey: 'imagen',
+      header: 'Foto',
+      cell: ({ row }) => (
+        <ImageCell>
+          {row.original.imagen ? (
+            <EmployeeImage src={getImageUrl(row.original.imagen)} alt="Empleado" />
+          ) : (
+            <EmployeeInitials>
+              {getInitials(row.original.nombreCompleto)}
+            </EmployeeInitials>
+          )}
+        </ImageCell>
+      ),
+      size: 80,
+    },
     {
       accessorKey: 'dni',
       header: 'DNI',
@@ -122,6 +160,24 @@ const Personal = () => {
       hideOnMobile: true,
       hideOnTablet: true,
       hideOnDesktopSmall: true,
+    },
+    {
+      accessorKey: 'comisionVenta',
+      header: '% Comisión Venta',
+      hideOnMobile: true,
+      hideOnTablet: true,
+    },
+    {
+      accessorKey: 'comisionFija',
+      header: 'Comisión Fija',
+      hideOnMobile: true,
+      hideOnTablet: true,
+    },
+    {
+      accessorKey: 'sueldoMensual',
+      header: 'Sueldo Mensual',
+      hideOnMobile: true,
+      hideOnTablet: true,
     }
   ];
 
@@ -140,6 +196,7 @@ const Personal = () => {
         cargo: person.cargo || '',
         especialidad: person.especialidad || '',
         fechaContratacion: person.fechaContratacion || '',
+        imagen: person.imagen || '',
         comisionVenta: person.comision_venta ? `${person.comision_venta}%` : '0%',
         comisionFija: person.comision_fija ? `$${person.comision_fija}` : '$0',
         sueldoMensual: person.sueldo_mensual ? `$${person.sueldo_mensual}` : '$0'
@@ -283,17 +340,222 @@ const Personal = () => {
       .slice(0, 2);
   };
 
-  const getCommissionForDate = () => {
-    return { comisionDia: '$0', comisionMes: '$0' };
-  };
-
-  const getCommissionHistory = () => {
-    return [];
-  };
-
   const clearDate = () => {
     setSelectedDate('');
   };
+
+  const setTodayDate = () => {
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+  };
+
+  const getCommissionHistory = async () => {
+    if (!selectedPerson) return [];
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return [];
+      
+      // Obtener ventas de tratamientos donde participó este personal
+      const response = await fetch('/api/ventas/tratamientos', {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) return [];
+      
+      const ventas = await response.json();
+      
+      // Filtrar ventas del personal seleccionado
+      const ventasPersonal = ventas.filter(venta => venta.personal_id === selectedPerson.id);
+      
+      // Filtrar por fecha si hay una seleccionada
+      let ventasFiltradas = ventasPersonal;
+      if (selectedDate && selectedDate.trim() !== '') {
+        ventasFiltradas = ventasPersonal.filter(venta => {
+          // Verificar tanto el campo fecha como created_at
+          let coincideFecha = false;
+          
+          // Verificar campo fecha (si existe)
+          if (venta.fecha) {
+            const fechaVenta = venta.fecha.split('T')[0];
+            coincideFecha = fechaVenta === selectedDate;
+          }
+          
+          // Verificar campo created_at (siempre existe)
+          if (!coincideFecha && venta.created_at) {
+            const fechaCreated = venta.created_at.split('T')[0];
+            coincideFecha = fechaCreated === selectedDate;
+          }
+          
+          return coincideFecha;
+        });
+      }
+      
+      // Convertir ventas a formato de historial de comisiones
+      const historial = ventasFiltradas.map(venta => {
+        // Usar created_at para obtener la fecha y hora exacta de la venta
+        const fechaHoraVenta = new Date(venta.created_at);
+        const comisionPorcentaje = selectedPerson.comisionVenta ? 
+          parseFloat(selectedPerson.comisionVenta.replace('%', '')) / 100 : 0;
+        const precioTotal = (venta.sesiones || 0) * (venta.precio || 0);
+        const comisionCalculada = precioTotal * comisionPorcentaje;
+        
+        return {
+          fecha: fechaHoraVenta.toLocaleDateString('es-ES'),
+          hora: fechaHoraVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          servicio: venta.tratamiento_nombre || 'Tratamiento',
+          sesiones: venta.sesiones || 0,
+          precioUnitario: venta.precio || 0,
+          precioTotal: precioTotal,
+          comision: `$${comisionCalculada.toFixed(2)}`,
+          estado: 'Completado',
+          fechaCompleta: fechaHoraVenta // Para el ordenamiento
+        };
+      });
+      
+      // Ordenar por fecha y hora descendente (más reciente primero)
+      historial.sort((a, b) => b.fechaCompleta - a.fechaCompleta);
+      
+      // Si no hay fecha específica, limitar a 10; si hay fecha, mostrar todas
+      return (!selectedDate || selectedDate.trim() === '') ? historial.slice(0, 10) : historial;
+      
+    } catch (error) {
+      console.error('Error al obtener historial de comisiones:', error);
+      return [];
+    }
+  };
+
+  const getCommissionForDate = async () => {
+    if (!selectedPerson) return { comisionDia: '$0', comisionMes: '$0' };
+    
+    // Si no hay fecha seleccionada, no calcular comisiones por día/mes
+    if (!selectedDate || selectedDate.trim() === '') {
+      return { comisionDia: '$-', comisionMes: '$-' };
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return { comisionDia: '$0', comisionMes: '$0' };
+      
+      // Obtener ventas de tratamientos donde participó este personal
+      const response = await fetch('/api/ventas/tratamientos', {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) return { comisionDia: '$0', comisionMes: '$0' };
+      
+      const ventas = await response.json();
+      
+      // Filtrar ventas del personal seleccionado
+      const ventasPersonal = ventas.filter(venta => venta.personal_id === selectedPerson.id);
+      
+      const fechaSeleccionada = selectedDate;
+      const [año, mes] = fechaSeleccionada.split('-');
+      
+      // Calcular comisiones del DÍA específico seleccionado
+      const ventasDelDia = ventasPersonal.filter(venta => {
+        let coincideFecha = false;
+        
+        // Verificar campo fecha (si existe)
+        if (venta.fecha) {
+          const fechaVenta = venta.fecha.split('T')[0];
+          coincideFecha = fechaVenta === fechaSeleccionada;
+        }
+        
+        // Verificar campo created_at (siempre existe)
+        if (!coincideFecha && venta.created_at) {
+          const fechaCreated = venta.created_at.split('T')[0];
+          coincideFecha = fechaCreated === fechaSeleccionada;
+        }
+        
+        return coincideFecha;
+      });
+      
+      // Calcular comisiones del MES COMPLETO (del 1 al último día del mes)
+      const ventasDelMes = ventasPersonal.filter(venta => {
+        let perteneceAlMes = false;
+        
+        // Verificar campo fecha (si existe)
+        if (venta.fecha) {
+          const fechaVenta = venta.fecha.split('T')[0];
+          const [añoVenta, mesVenta] = fechaVenta.split('-');
+          perteneceAlMes = añoVenta === año && mesVenta === mes;
+        }
+        
+        // Verificar campo created_at (siempre existe)
+        if (!perteneceAlMes && venta.created_at) {
+          const fechaCreated = venta.created_at.split('T')[0];
+          const [añoCreated, mesCreated] = fechaCreated.split('-');
+          perteneceAlMes = añoCreated === año && mesCreated === mes;
+        }
+        
+        return perteneceAlMes;
+      });
+      
+      // Calcular el porcentaje de comisión del empleado
+      const comisionPorcentaje = selectedPerson.comisionVenta ? 
+        parseFloat(selectedPerson.comisionVenta.replace('%', '')) / 100 : 0;
+      
+      // Sumatoria de comisiones del DÍA
+      const comisionDia = ventasDelDia.reduce((total, venta) => {
+        const precioTotal = (venta.sesiones || 0) * (venta.precio || 0);
+        return total + (precioTotal * comisionPorcentaje);
+      }, 0);
+      
+      // Sumatoria de comisiones del MES COMPLETO
+      const comisionMes = ventasDelMes.reduce((total, venta) => {
+        const precioTotal = (venta.sesiones || 0) * (venta.precio || 0);
+        return total + (precioTotal * comisionPorcentaje);
+      }, 0);
+      
+      return {
+        comisionDia: `$${comisionDia.toFixed(2)}`,
+        comisionMes: `$${comisionMes.toFixed(2)}`,
+        // Información adicional para debug
+        ventasDelDia: ventasDelDia.length,
+        ventasDelMes: ventasDelMes.length
+      };
+      
+    } catch (error) {
+      console.error('Error al calcular comisiones:', error);
+      return { comisionDia: '$0', comisionMes: '$0' };
+    }
+  };
+
+  // Nueva función para actualizar las comisiones
+  const updateCommissions = async () => {
+    if (selectedPerson) {
+      setLoadingCommissions(true);
+      try {
+        const [comissionData, historyData] = await Promise.all([
+          getCommissionForDate(),
+          getCommissionHistory()
+        ]);
+        setCommissions(comissionData);
+        setCommissionHistory(historyData);
+      } catch (error) {
+        console.error('Error al actualizar comisiones:', error);
+      } finally {
+        setLoadingCommissions(false);
+      }
+    }
+  };
+
+  // Efecto para actualizar comisiones cuando cambia la fecha o la persona seleccionada
+  useEffect(() => {
+    if (selectedPerson) {
+      updateCommissions();
+    } else {
+      // Limpiar datos cuando no hay persona seleccionada
+      setCommissions({ comisionDia: '$0', comisionMes: '$0' });
+      setCommissionHistory([]);
+    }
+  }, [selectedDate, selectedPerson]);
 
   if (loading) {
     return (
@@ -395,7 +657,11 @@ const Personal = () => {
             </DetailsHeader>
             <PhotoSection>
               <ProfilePhoto>
-                {getInitials(selectedPerson.nombre + ' ' + selectedPerson.apellido)}
+                {selectedPerson.imagen ? (
+                  <ProfileImage src={getImageUrl(selectedPerson.imagen)} alt="Empleado" />
+                ) : (
+                  getInitials(selectedPerson.nombre + ' ' + selectedPerson.apellido)
+                )}
               </ProfilePhoto>
               <CommissionInfo>
                 <CommissionItem>
@@ -416,25 +682,62 @@ const Personal = () => {
 
           <CommissionTableContainer>
             <CommissionTableHeader>
-              <h3>Comisiones del Empleado</h3>
+              <h3>💰 Comisiones del Empleado - Sumatorias</h3>
+              <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+                Selecciona una fecha para ver las comisiones del día específico y del mes completo
+              </p>
             </CommissionTableHeader>
             <CommissionTableContent>
               <CommissionRow>
-                <CommissionLabelLarge>Fecha:</CommissionLabelLarge>
+                <CommissionLabelLarge>Fecha Seleccionada:</CommissionLabelLarge>
                 <DateInput
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                 />
               </CommissionRow>
+              
               <CommissionRow>
-                <CommissionLabelLarge>Comisión del Día:</CommissionLabelLarge>
-                <CommissionValueLarge>{getCommissionForDate().comisionDia}</CommissionValueLarge>
+                <CommissionLabelLarge>
+                  📅 Comisión del Día ({selectedDate ? new Date(selectedDate).toLocaleDateString('es-ES') : 'Sin fecha'}):
+                </CommissionLabelLarge>
+                <CommissionValueLarge>
+                  {loadingCommissions ? 'Calculando...' : commissions.comisionDia}
+                  {commissions.ventasDelDia !== undefined && (
+                    <small style={{ display: 'block', fontSize: '0.8em', color: '#666', marginTop: '2px' }}>
+                      {commissions.ventasDelDia} venta{commissions.ventasDelDia !== 1 ? 's' : ''}
+                    </small>
+                  )}
+                </CommissionValueLarge>
               </CommissionRow>
+              
               <CommissionRow>
-                <CommissionLabelLarge>Comisión del Mes:</CommissionLabelLarge>
-                <CommissionValueLarge>{getCommissionForDate().comisionMes}</CommissionValueLarge>
+                <CommissionLabelLarge>
+                  📊 Comisión del Mes Completo ({selectedDate ? 
+                    `${new Date(selectedDate).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}` : 
+                    'Sin fecha'}):
+                </CommissionLabelLarge>
+                <CommissionValueLarge>
+                  {loadingCommissions ? 'Calculando...' : commissions.comisionMes}
+                  {commissions.ventasDelMes !== undefined && (
+                    <small style={{ display: 'block', fontSize: '0.8em', color: '#666', marginTop: '2px' }}>
+                      {commissions.ventasDelMes} venta{commissions.ventasDelMes !== 1 ? 's' : ''} en el mes
+                    </small>
+                  )}
+                </CommissionValueLarge>
               </CommissionRow>
+              
+              {selectedDate && commissions.comisionDia !== '$-' && commissions.comisionMes !== '$-' && (
+                <CommissionRow style={{ borderTop: '2px solid #007bff', marginTop: '10px', paddingTop: '10px' }}>
+                  <CommissionLabelLarge style={{ fontWeight: 'bold', color: '#007bff' }}>
+                    💰 Resumen de Comisiones:
+                  </CommissionLabelLarge>
+                  <CommissionValueLarge style={{ color: '#007bff' }}>
+                    <div>Día: {commissions.comisionDia}</div>
+                    <div>Mes: {commissions.comisionMes}</div>
+                  </CommissionValueLarge>
+                </CommissionRow>
+              )}
             </CommissionTableContent>
           </CommissionTableContainer>
 
@@ -444,21 +747,42 @@ const Personal = () => {
                 Historial de Comisiones 
                 {selectedDate ? ` - ${selectedDate}` : ' - Últimas 10 Comisiones'}
               </h3>
-              {selectedDate && (
-                <ClearDateButton onClick={clearDate}>
-                  Limpiar Fecha
-                </ClearDateButton>
-              )}
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {selectedDate ? (
+                  <ClearDateButton onClick={clearDate}>
+                    Limpiar Fecha
+                  </ClearDateButton>
+                ) : (
+                  <ClearDateButton onClick={setTodayDate}>
+                    Ver Hoy
+                  </ClearDateButton>
+                )}
+              </div>
             </HistoryHeader>
             <HistoryContent>
-              {getCommissionHistory().length > 0 ? (
-                getCommissionHistory().map((item, index) => (
+              {loadingCommissions ? (
+                <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
+                  Cargando historial de comisiones...
+                </p>
+              ) : commissionHistory.length > 0 ? (
+                commissionHistory.map((item, index) => (
                   <HistoryItem key={index}>
                     <div>
                       <HistoryDate>{item.fecha} - {item.hora}</HistoryDate>
                       <HistoryService>{item.servicio}</HistoryService>
+                      <HistoryDetails>
+                        <HistoryDetailItem>
+                          <strong>Sesiones:</strong> {item.sesiones}
+                        </HistoryDetailItem>
+                        <HistoryDetailItem>
+                          <strong>Precio Unit.:</strong> ${item.precioUnitario}
+                        </HistoryDetailItem>
+                        <HistoryDetailItem>
+                          <strong>Total:</strong> ${item.precioTotal}
+                        </HistoryDetailItem>
+                      </HistoryDetails>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
                       <HistoryAmount>{item.comision}</HistoryAmount>
                       <HistoryStatus $status={item.estado}>{item.estado}</HistoryStatus>
                     </div>
@@ -466,7 +790,7 @@ const Personal = () => {
                 ))
               ) : (
                 <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
-                  {selectedDate ? 'No hay comisiones registradas para esta fecha' : 'No hay comisiones registradas'}
+                  {selectedDate ? 'No hay comisiones registradas para esta fecha' : 'No hay comisiones registradas para este empleado'}
                 </p>
               )}
             </HistoryContent>
@@ -558,6 +882,7 @@ const ProfilePhoto = styled.div`
   font-weight: bold;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
+  overflow: hidden;
   
   @media (max-width: 768px) {
     width: 120px;
@@ -828,4 +1153,60 @@ const ValidationErrorItem = styled.li`
   color: #856404;
   margin-bottom: 0.25rem;
   font-size: 0.9rem;
+`;
+
+// Nuevos componentes styled para las imágenes
+const ImageCell = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+`;
+
+const EmployeeImage = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+`;
+
+const EmployeeInitials = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 2px solid #e9ecef;
+`;
+
+const ProfileImage = styled.img`
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const HistoryDetails = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
+`;
+
+const HistoryDetailItem = styled.div`
+  font-size: 0.9rem;
+  color: #6c757d;
 `;

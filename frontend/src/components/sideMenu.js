@@ -7,16 +7,68 @@ import {
   faFacebook,
 } from "@fortawesome/free-brands-svg-icons";
 import { faEnvelopeOpenText, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function SideMenu({ isOpen, toggleMenu }) {
+  const { isLoggedIn, user, logout } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (isOpen) {
+      // Prevenir scroll del body cuando el menú esté abierto
       document.body.classList.add("menu-open");
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${window.scrollY}px`;
+      document.body.style.width = '100%';
     } else {
+      // Restaurar scroll del body cuando el menú se cierre
+      const scrollY = document.body.style.top;
       document.body.classList.remove("menu-open");
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
+
+    // Cleanup en caso de que el componente se desmonte con el menú abierto
+    return () => {
+      if (isOpen) {
+        document.body.classList.remove("menu-open");
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+      }
+    };
   }, [isOpen]);
+
+  const handleLogout = () => {
+    toggleMenu();
+    logout();
+  };
+
+  // Cerrar menú al hacer clic en un enlace
+  const handleLinkClick = () => {
+    toggleMenu();
+  };
+
+  // Manejar login/logout desde el menú móvil
+  const handleAuthAction = () => {
+    if (isLoggedIn) {
+      // Si está logueado, hacer logout
+      toggleMenu();
+      logout();
+    } else {
+      // Si no está logueado, ir al login
+      toggleMenu();
+      navigate('/login');
+    }
+  };
 
   return (
     <>
@@ -32,17 +84,31 @@ function SideMenu({ isOpen, toggleMenu }) {
         </LogoSection>
 
         <Nav>
-          <StyledLink to="/" onClick={toggleMenu}>Inicio</StyledLink>
-          <StyledLink to="/nosotros" onClick={toggleMenu}>Nosotros</StyledLink>
-          <StyledLink to="/servicios" onClick={toggleMenu}>Servicios</StyledLink>
-          <StyledLink to="/promociones" onClick={toggleMenu}>Promociones</StyledLink>
-          <StyledLink to="/productos" onClick={toggleMenu}>Productos</StyledLink>
-          <StyledLink to="/contacto" onClick={toggleMenu}>Contacto</StyledLink>
+          <StyledLink to="/" onClick={handleLinkClick}>Inicio</StyledLink>
+          <StyledLink to="/nosotros" onClick={handleLinkClick}>Nosotros</StyledLink>
+          <StyledLink to="/servicios" onClick={handleLinkClick}>Servicios</StyledLink>
+          <StyledLink to="/promociones" onClick={handleLinkClick}>Promociones</StyledLink>
+          <StyledLink to="/productos" onClick={handleLinkClick}>Productos</StyledLink>
+          <StyledLink to="/contacto" onClick={handleLinkClick}>Contacto</StyledLink>
         </Nav>
 
-        <ReserveContainer>
-          <Button>Reservá tu turno</Button>
-        </ReserveContainer>
+        <AuthSection>
+          {isLoggedIn ? (
+            <AuthButton 
+              onClick={handleLogout}
+              $isLoggedIn={true}
+            >
+              Cerrar Sesión
+            </AuthButton>
+          ) : (
+            <AuthButton 
+              onClick={handleAuthAction}
+              $isLoggedIn={false}
+            >
+              Iniciar Sesión
+            </AuthButton>
+          )}
+        </AuthSection>
 
         <IconsContainer isOpen={isOpen}>
           <Icons>
@@ -121,6 +187,16 @@ const LogoSection = styled.div`
     text-align: center;
     font-family: var(--heading-font);
   }
+
+  @media (max-width: 768px) {
+  img {
+      width: 50px;
+    }
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+
 `;
 
 const Nav = styled.nav`
@@ -169,32 +245,48 @@ const Icons = styled.div`
   }
 `;
 
-const Button = styled.button`
-  padding: 15px 30px;
-  font-size: 1rem;
-  background-color: var(--terciary-color);
-  font-family: var(--heading-font);
-  font-weight: 600;
+
+
+const AuthSection = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 30px 0 0;
+`;
+
+const AuthButton = styled.button`
+  background: ${props => props.$isLoggedIn 
+    ? 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)' 
+    : 'linear-gradient(135deg, var(--primary-color-dark) 0%, var(--terciary-color) 100%)'
+  };
   color: white;
   border: none;
+  padding: 12px 24px;
   border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--heading-font);
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  text-decoration: none;
-  display: inline-block;
-  width: fit-content;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 
   &:hover {
-    background-color: color-mix(in srgb, var(--terciary-color) 95%, black 5%);
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    background: ${props => props.$isLoggedIn 
+      ? 'linear-gradient(135deg, #c0392b 0%, #a93226 100%)' 
+      : 'linear-gradient(135deg, var(--terciary-color) 0%, var(--primary-color-dark) 100%)'
+    };
   }
-`;
 
-const ReserveContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  padding: 30px 0 0;
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
 `;

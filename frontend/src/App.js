@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/header';
 import Footer from './components/footer';
 import Inicio from './pages/Home';
@@ -8,6 +9,8 @@ import Productos from './pages/Productos';
 import Promociones from './pages/Promociones';
 import Contacto from './pages/Contacto';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import NotFound from './pages/NotFound';
 import WhatsApp from './components/home/whatsApp-modal';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import TratamientosCorporales from './pages/services/TratamientosCorporales';
@@ -48,6 +51,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/servicios" element={<Servicios />} />
         <Route path="/Productos" element={<Productos />} />
@@ -111,7 +115,8 @@ function AppContent() {
             <ComisionesAdmin />
           </ProtectedRoute>
         } />
-        <Route path="*" element={<div>Ruta no encontrada</div>} />
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
 
 
       </Routes>
@@ -121,7 +126,11 @@ function AppContent() {
 }
 
 function App() {
-  return <AppContent />;
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }
 
 export default App;

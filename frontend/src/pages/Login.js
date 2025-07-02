@@ -1,32 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import LoginModal from '../components/LoginModal';
 
 const LoginContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-color) 0%, rgba(224, 117, 162, 0.1) 50%, rgba(224, 117, 212, 0.1) 100%);
   padding: 20px;
+  margin-top: 60px;
 `;
 
 const LoginCard = styled.div`
   background: white;
   padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(224, 117, 162, 0.2);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   text-align: center;
+  border: 1px solid rgba(224, 117, 162, 0.1);
 `;
 
 const Title = styled.h2`
-  color: #333;
+  color: var(--primary-color-dark);
   margin-bottom: 30px;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
+  font-family: var(--heading-font);
+  background: linear-gradient(135deg, var(--primary-color-dark) 0%, var(--terciary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const Subtitle = styled.p`
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 16px;
+  font-family: var(--text-font);
 `;
 
 const Form = styled.form`
@@ -46,42 +61,73 @@ const Label = styled.label`
   font-weight: 500;
   color: #555;
   font-size: 14px;
+  font-family: var(--text-font);
 `;
 
 const Input = styled.input`
-  padding: 12px 16px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
+  padding: 14px 16px;
+  border: 2px solid rgba(224, 117, 162, 0.2);
+  border-radius: 12px;
   font-size: 16px;
-  transition: border-color 0.3s ease;
+  font-family: var(--text-font);
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
   
   &:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: var(--primary-color-dark);
+    box-shadow: 0 0 0 3px rgba(224, 117, 162, 0.1);
+    background: white;
   }
 `;
 
 const LoginButton = styled.button`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color-dark) 0%, var(--terciary-color) 100%);
   color: white;
-  padding: 14px;
+  padding: 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
+  font-family: var(--text-font);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s ease;
   margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(224, 117, 162, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
   
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+    
+    &:hover::before {
+      left: -100%;
+    }
   }
 `;
 
@@ -90,6 +136,10 @@ const ErrorMessage = styled.div`
   font-size: 14px;
   margin-top: 10px;
   text-align: center;
+  padding: 8px;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #dc3545;
 `;
 
 const SuccessMessage = styled.div`
@@ -97,11 +147,33 @@ const SuccessMessage = styled.div`
   font-size: 14px;
   margin-top: 10px;
   text-align: center;
+  padding: 8px;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+`;
+
+const RegisterLink = styled.div`
+  margin-top: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  
+  a {
+    color: var(--primary-color-dark);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    
+    &:hover {
+      color: var(--terciary-color);
+    }
+  }
 `;
 
 function Login() {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
@@ -110,17 +182,19 @@ function Login() {
   const [showModal, setShowModal] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
+  const { isLoggedIn, user, login: authLogin, logout } = useAuth();
 
   // Verificar si ya está autenticado al cargar el componente
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const username = localStorage.getItem('username');
-    
-    if (token && username) {
-      setLoggedInUser(username);
+    if (isLoggedIn && user) {
+      if (user.type === 'admin') {
+        setLoggedInUser(user.username);
+      } else {
+        setLoggedInUser(user.fullName);
+      }
       setShowModal(true);
     }
-  }, []);
+  }, [isLoggedIn, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -139,7 +213,7 @@ function Login() {
     setSuccess('');
 
     // Validación simple
-    if (!formData.username || !formData.password) {
+    if (!formData.email || !formData.password) {
       setError('Por favor completa todos los campos');
       setIsLoading(false);
       return;
@@ -158,17 +232,20 @@ function Login() {
       const data = await response.json();
 
       if (data.success) {
-  setSuccess('¡Login exitoso!');
-  
-  localStorage.setItem('token', data.token);
-  localStorage.setItem('username', data.user.username);
-  localStorage.setItem('isLoggedIn', 'true');
-  
-  setLoggedInUser(data.user.username);
-  
-  // Redirigir al panel de administración
-  navigate('/admin');
-} else {
+        setSuccess('¡Login exitoso!');
+        
+        // Usar el contexto para manejar el login
+        const userData = authLogin(data.user, data.token);
+        
+        setLoggedInUser(userData.type === 'admin' ? userData.username : userData.fullName);
+        
+        // Redirigir según el tipo de usuario
+        if (userData.type === 'admin') {
+          navigate('/admin/inicio');
+        } else {
+          navigate('/');
+        }
+      } else {
         setError(data.message || 'Error al iniciar sesión');
       }
     } catch (err) {
@@ -179,18 +256,13 @@ function Login() {
   };
 
   const handleLogout = () => {
-    // Limpiar localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('isLoggedIn');
+    // Usar el contexto para hacer logout
+    logout();
     
-    // Limpiar estado
+    // Limpiar estado local
     setLoggedInUser(null);
     setShowModal(false);
-    setFormData({ username: '', password: '' });
-    
-    // Redirigir a la página principal
-    navigate('/');
+    setFormData({ email: '', password: '' });
   };
 
   const handleCloseModal = () => {
@@ -203,16 +275,17 @@ function Login() {
       <LoginContainer>
         <LoginCard>
           <Title>Iniciar Sesión</Title>
+          <Subtitle>Accede como cliente o administrador</Subtitle>
           <Form onSubmit={handleSubmit}>
             <InputGroup>
-              <Label htmlFor="username">Usuario</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="Ingresa tu usuario"
+                placeholder="Ingresa tu email"
                 disabled={isLoading}
               />
             </InputGroup>
@@ -239,9 +312,16 @@ function Login() {
           {success && <SuccessMessage>{success}</SuccessMessage>}
           
           <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>
-            <p><strong>Credenciales de prueba:</strong></p>
-            <p>Usuario: <strong>user</strong> | Contraseña: <strong>123</strong></p>
+            <p><strong>Credenciales de administrador:</strong></p>
+            <p>Email: <strong>admin@nhestetica.com</strong> | Contraseña: <strong>123</strong></p>
+            <p style={{ fontSize: '12px', marginTop: '8px', color: '#888' }}>
+              Los clientes usan su email registrado
+            </p>
           </div>
+          
+          <RegisterLink>
+            ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+          </RegisterLink>
         </LoginCard>
       </LoginContainer>
       

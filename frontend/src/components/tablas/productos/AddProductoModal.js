@@ -4,6 +4,7 @@ import { productosService } from '../../../services/productosService';
 
 const initialState = {
   nombre: '',
+  costo: '',
   precio: '',
   subtitle: '',
   descripcion: '',
@@ -29,6 +30,8 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
   const validate = () => {
     const newErrors = {};
     if (!form.nombre) newErrors.nombre = 'El nombre es obligatorio';
+    if (!form.costo) newErrors.costo = 'El costo es obligatorio';
+    else if (isNaN(form.costo) || parseFloat(form.costo) <= 0) newErrors.costo = 'El costo debe ser un número válido mayor a 0';
     if (!form.precio) newErrors.precio = 'El precio es obligatorio';
     else if (isNaN(form.precio) || parseFloat(form.precio) <= 0) newErrors.precio = 'El precio debe ser un número válido mayor a 0';
     if (!form.categoria) newErrors.categoria = 'La categoría es obligatoria';
@@ -115,11 +118,14 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
       
       const productoData = {
         ...form,
+        costo: parseFloat(form.costo),
         precio: parseFloat(form.precio),
         imagen: imagePath,
         benefits: benefitsArray,
         modoUso: modoUsoArray
       };
+      
+      console.log('Datos que se envían al backend:', productoData);
       
       await productosService.createProducto(productoData);
       setForm(initialState);
@@ -154,6 +160,18 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
               <Label>Nombre del Producto*</Label>
               <Input name="nombre" value={form.nombre} onChange={handleChange} />
               {errors.nombre && <ErrorMsg>{errors.nombre}</ErrorMsg>}
+            </Field>
+            
+            <Field>
+              <Label>Costo*</Label>
+              <Input 
+                name="costo" 
+                type="number" 
+                step="0.01" 
+                value={form.costo} 
+                onChange={handleChange} 
+              />
+              {errors.costo && <ErrorMsg>{errors.costo}</ErrorMsg>}
             </Field>
             
             <Field>

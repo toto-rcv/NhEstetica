@@ -2,25 +2,44 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 const DetalleCliente = ({ cliente, onClose }) => {
-  const [ventas, setVentas] = useState([]);
-  const [filtroFecha, setFiltroFecha] = useState('');
-  const [ventasFiltradas, setVentasFiltradas] = useState([]);
+  const [ventasProductosOriginal, setVentasProductosOriginal] = useState([]);
+  const [ventasProductosFiltradas, setVentasProductosFiltradas] = useState([]);
+
+  const [ventasTratamientosOriginal, setVentasTratamientosOriginal] = useState([]);
+  const [ventasTratamientosFiltradas, setVentasTratamientosFiltradas] = useState([]);
+
+  const [filtroDesde, setFiltroDesde] = useState('');
+  const [filtroHasta, setFiltroHasta] = useState('');
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchVentas = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/ventas/productos/cliente/' + cliente.id, {
-          headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('token')
-          }
-        });
-        const data = await res.json();
-        setVentas(data);
-        setVentasFiltradas(data);
+
+        const [resProd, resTrat] = await Promise.all([
+          fetch(`/api/ventas/productos/cliente/${cliente.id}`, {
+            headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+          }),
+          fetch(`/api/ventas/tratamientos/cliente/${cliente.id}`, {
+            headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+          })
+        ]);
+
+        const [dataProd, dataTrat] = await Promise.all([
+          resProd.json(),
+          resTrat.json()
+        ]);
+
+        setVentasProductosOriginal(Array.isArray(dataProd) ? dataProd : []);
+        setVentasProductosFiltradas(Array.isArray(dataProd) ? dataProd : []);
+
+        setVentasTratamientosOriginal(Array.isArray(dataTrat) ? dataTrat : []);
+        setVentasTratamientosFiltradas(Array.isArray(dataTrat) ? dataTrat : []);
+
       } catch (err) {
-        console.error('Error al obtener ventas del cliente:', err);
+        console.error('Error al obtener ventas:', err);
       } finally {
         setLoading(false);
       }
@@ -29,18 +48,56 @@ const DetalleCliente = ({ cliente, onClose }) => {
     if (cliente?.id) fetchVentas();
   }, [cliente]);
 
-  const handleBuscarPorFecha = () => {
-    if (!filtroFecha) {
-      setVentasFiltradas(ventas);
-      return;
-    }
+const handleBuscarPorFecha = () => {
+  const desde = filtroDesde ? new Date(filtroDesde) : null;
+  const hasta = filtroHasta ? new Date(filtroHasta) : null;
 
-    const filtradas = ventas.filter(v =>
-      v.fecha?.startsWith(filtroFecha)
-    );
+  const filtrarPorRango = (ventas) =>
+    ventas.filter(v => {
+      const fecha = new Date(v.fecha);
+      if (desde && fecha < desde) return false;
+      if (hasta && fecha > hasta) return false;
+      return true;
+    });
 
-    setVentasFiltradas(filtradas);
+  setVentasProductosFiltradas(filtrarPorRango(ventasProductosOriginal));
+  setVentasTratamientosFiltradas(filtrarPorRango(ventasTratamientosOriginal));
+};
+
+   
+
+  const calcularEstadisticas = () => {
+  const totalTratamientos = ventasTratamientosFiltradas.reduce((acc, v) => acc + v.precio, 0);
+  const totalProductos = ventasProductosFiltradas.reduce((acc, v) => acc + v.precio * v.cantidad, 0);
+  const total = totalTratamientos + totalProductos;
+
+  // Fechas mínimas y máximas
+  const fechas = [...ventasTratamientosFiltradas, ...ventasProductosFiltradas]
+    .map(v => new Date(v.fecha))
+    .filter(d => !isNaN(d)); // quitar invalid dates
+
+  const visitas = ventasTratamientosFiltradas.length;
+
+  if (fechas.length === 0) return { total: 0, promedioMensual: 0, promedioVisita: 0 };
+
+  const fechaMin = new Date(Math.min(...fechas));
+  const fechaMax = new Date(Math.max(...fechas));
+
+  const meses = Math.max(
+    (fechaMax.getFullYear() - fechaMin.getFullYear()) * 12 + (fechaMax.getMonth() - fechaMin.getMonth()) + 1,
+    1
+  );
+
+  const promedioMensual = total / meses;
+  const promedioVisita = visitas ? total / visitas : 0;
+
+  return {
+    total,
+    promedioMensual,
+    promedioVisita
   };
+};
+
 
   if (!cliente) return null;
 
@@ -48,30 +105,32 @@ const DetalleCliente = ({ cliente, onClose }) => {
     <Overlay onClick={onClose}>
       <DetalleContainer onClick={(e) => e.stopPropagation()}>
         <Encabezado>
-        {cliente.imagen && (
-          <ImagenCliente src={cliente.imagen} alt="Foto del cliente" />
-        )}
-        <h3>Cliente: {cliente.nombre} {cliente.apellido}</h3>
-      </Encabezado>
-
-
+          {cliente.imagen && <ImagenCliente src={cliente.imagen} alt="Foto del cliente" />}
+          <h3>Cliente: {cliente.nombre} {cliente.apellido}</h3>
+        </Encabezado>
         <InputGroup>
-          <label>Buscar por fecha (YYYY-MM-DD):</label>
+          <label>Buscar por rango de fechas:</label>
           <div>
             <input
               type="date"
-              value={filtroFecha}
-              onChange={(e) => setFiltroFecha(e.target.value)}
+              value={filtroDesde}
+              onChange={(e) => setFiltroDesde(e.target.value)}
+            />
+            <span style={{ margin: '0 10px' }}>hasta</span>
+            <input
+              type="date"
+              value={filtroHasta}
+              onChange={(e) => setFiltroHasta(e.target.value)}
             />
             <button onClick={handleBuscarPorFecha}>Buscar</button>
           </div>
         </InputGroup>
 
-        <h4>Compras de Productos del cliente</h4>
-
+        {/* Ventas de productos */}
+        <h4>Compras de Productos</h4>
         {loading ? (
           <MensajeCargando>Cargando ventas...</MensajeCargando>
-        ) : ventasFiltradas.length > 0 ? (
+        ) : ventasProductosFiltradas.length > 0 ? (
           <VentasTable>
             <thead>
               <tr>
@@ -79,44 +138,110 @@ const DetalleCliente = ({ cliente, onClose }) => {
                 <th>Marca</th>
                 <th>Precio</th>
                 <th>Cantidad</th>
-                <th>Fecha de Compra</th>
+                <th>Fecha</th>
                 <th>Forma de pago</th>
                 <th>Cuotas</th>
                 <th>Observación</th>
-                <th>Subtotal</th> {/* ← nueva columna */}
+                <th>Subtotal</th>
               </tr>
             </thead>
-
             <tbody>
-              {ventasFiltradas.map((venta) => {
-                const subtotal = venta.precio * venta.cantidad;
-                return (
-                  <tr key={venta.id}>
-                    <td>{venta.nombre_producto}</td>
-                    <td>{venta.marca_producto}</td>
-                    <td>${venta.precio}</td>
-                    <td>{venta.cantidad}</td>
-                    <td>{venta.fecha?.split('T')[0]}</td>
-                    <td>{venta.forma_de_pago}</td>
-                    <td>{venta.cuotas ? venta.cuotas : '0'}</td>
-                    <td>{venta.observacion}</td>
-                    <td>${subtotal}</td>
-                  </tr>
-                );
-              })}
+              {ventasProductosFiltradas.map(v => (
+                <tr key={v.id}>
+                  <td>{v.nombre_producto}</td>
+                  <td>{v.marca_producto}</td>
+                  <td>${v.precio}</td>
+                  <td>{v.cantidad}</td>
+                  <td>{v.fecha?.split('T')[0]}</td>
+                  <td>{v.forma_de_pago}</td>
+                  <td>{v.cuotas || 0}</td>
+                  <td>{v.observacion}</td>
+                  <td>${v.precio * v.cantidad}</td>
+                </tr>
+              ))}
             </tbody>
             <tfoot>
               <tr>
                 <td colSpan="8" style={{ textAlign: 'right', fontWeight: 'bold' }}>Total:</td>
                 <td style={{ fontWeight: 'bold' }}>
-                  ${ventasFiltradas.reduce((acc, v) => acc + (v.precio * v.cantidad), 0)}
+                  ${ventasProductosFiltradas.reduce((acc, v) => acc + (v.precio * v.cantidad), 0)}
                 </td>
               </tr>
             </tfoot>
-
           </VentasTable>
         ) : (
-          <MensajeSinVentas>No se encontraron compras para este cliente.</MensajeSinVentas>
+          <MensajeSinVentas>No se encontraron compras de productos.</MensajeSinVentas>
+        )}
+
+        {/* Ventas de tratamientos */}
+        <h4>Tratamientos Realizados</h4>
+        {loading ? (
+          <MensajeCargando>Cargando tratamientos...</MensajeCargando>
+        ) : ventasTratamientosFiltradas.length > 0 ? (
+          <VentasTable>
+            <thead>
+              <tr>
+                <th>Tratamiento</th>
+                <th>Sesiones</th>
+                <th>Precio</th>
+                <th>Fecha</th>
+                <th>Forma de pago</th>
+                <th>Cuotas</th>
+                <th>Vencimiento</th>
+                <th>Observación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ventasTratamientosFiltradas.map(v => (
+                <tr key={v.id}>
+                  <td>{v.tratamiento_nombre}</td>
+                  <td>{v.sesiones}</td>
+                  <td>${v.precio}</td>
+                  <td>{v.fecha?.split('T')[0]}</td>
+                  <td>{v.forma_de_pago}</td>
+                  <td>{v.cuotas || 0}</td>
+                  <td>{v.vencimiento?.split('T')[0] || '-'}</td>
+                  <td>{v.observacion}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="7" style={{ textAlign: 'right', fontWeight: 'bold' }}>Total:</td>
+                <td style={{ fontWeight: 'bold' }}>
+                  ${ventasTratamientosFiltradas.reduce((acc, v) => acc + v.precio, 0)}
+                </td>
+              </tr>
+            </tfoot>
+          </VentasTable>
+        ) : (
+          <MensajeSinVentas>No se encontraron tratamientos realizados.</MensajeSinVentas>
+        )}
+
+        {/* Estadísticas del cliente */}
+        <h4>Estadísticas del Cliente</h4>
+        {loading ? (
+          <MensajeCargando>Cargando estadísticas...</MensajeCargando>
+        ) : ventasTratamientosFiltradas.length > 0 ? (
+          <VentasTable>
+            <thead>
+              <tr>
+                <th>Total Gastado</th>
+                <th>Promedio Mensual</th>
+                <th>Promedio por Visita</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${calcularEstadisticas().total.toFixed(2)}</td>
+                <td>${calcularEstadisticas().promedioMensual.toFixed(2)}</td>
+                <td>${calcularEstadisticas().promedioVisita.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </VentasTable>
+
+        ) : (
+          <MensajeSinVentas>No se encontraron tratamientos realizados.</MensajeSinVentas>
         )}
 
         <CerrarButton onClick={onClose}>Cerrar</CerrarButton>
@@ -126,6 +251,9 @@ const DetalleCliente = ({ cliente, onClose }) => {
 };
 
 export default DetalleCliente;
+
+// (Estilos quedan igual a los que tenías)
+
 
 // Estilos
 

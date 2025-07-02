@@ -19,6 +19,7 @@ exports.getPersonal = async (req, res) => {
         comision_venta,
         comision_fija,
         sueldo_mensual,
+        imagen,
         estado,
         created_at,
         updated_at
@@ -53,6 +54,7 @@ exports.getPersonalById = async (req, res) => {
         comision_venta,
         comision_fija,
         sueldo_mensual,
+        imagen,
         estado
       FROM personal 
       WHERE id = ? AND estado = 'Activo'
@@ -84,7 +86,8 @@ exports.createPersonal = async (req, res) => {
       fecha_contratacion,
       comision_venta,
       comision_fija,
-      sueldo_mensual
+      sueldo_mensual,
+      imagen
     } = req.body;
 
     // Verificar si el DNI ya existe
@@ -118,8 +121,8 @@ exports.createPersonal = async (req, res) => {
       `INSERT INTO personal (
         dni, nombre, apellido, direccion, telefono, email, 
         cargo, especialidad, fecha_contratacion, 
-        comision_venta, comision_fija, sueldo_mensual, estado
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
+        comision_venta, comision_fija, sueldo_mensual, imagen, estado
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
       [
         dni,
         nombre,
@@ -132,7 +135,8 @@ exports.createPersonal = async (req, res) => {
         fecha_contratacion || null,
         comision_venta || 0,
         comision_fija || 0,
-        sueldo_mensual || 0
+        sueldo_mensual || 0,
+        imagen || null
       ]
     );
 
@@ -162,7 +166,8 @@ exports.updatePersonal = async (req, res) => {
       fecha_contratacion,
       comision_venta,
       comision_fija,
-      sueldo_mensual
+      sueldo_mensual,
+      imagen
     } = req.body;
 
     // Verificar si el empleado existe
@@ -207,7 +212,7 @@ exports.updatePersonal = async (req, res) => {
         dni = ?, nombre = ?, apellido = ?, direccion = ?, 
         telefono = ?, email = ?, cargo = ?, especialidad = ?, 
         fecha_contratacion = ?, comision_venta = ?, 
-        comision_fija = ?, sueldo_mensual = ?
+        comision_fija = ?, sueldo_mensual = ?, imagen = ?
       WHERE id = ?`,
       [
         dni,
@@ -222,6 +227,7 @@ exports.updatePersonal = async (req, res) => {
         comision_venta || 0,
         comision_fija || 0,
         sueldo_mensual || 0,
+        imagen || null,
         id
       ]
     );
@@ -286,6 +292,7 @@ exports.searchPersonal = async (req, res) => {
         comision_venta,
         comision_fija,
         sueldo_mensual,
+        imagen,
         estado
       FROM personal 
       WHERE estado = 'Activo' 

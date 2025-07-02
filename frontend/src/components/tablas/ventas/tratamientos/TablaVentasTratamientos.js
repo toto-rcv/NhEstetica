@@ -5,6 +5,7 @@ const TablaVentasTratamientos = ({
   ventas,
   clientes,
   tratamientos,
+  personal,
   onDelete,
   onEditStart,
   onEditChange,
@@ -17,8 +18,10 @@ const TablaVentasTratamientos = ({
     <thead>
       <tr>
         <th>Tratamiento</th>
+        <th>Personal</th>
         <th>Sesiones</th>
         <th>Precio</th>
+        <th>Total</th>
         <th>Forma de Pago</th>
         <th>Vencimiento</th>
         <th>Cuotas</th>
@@ -32,25 +35,18 @@ const TablaVentasTratamientos = ({
       {ventas.map((venta) => {
         const enEdicion = venta.id === editandoId;
 
-        // Buscar nombre tratamiento y cliente para mostrar en vista
         const tratamientoNombre = tratamientos.find(t => t.id === venta.tratamiento_id)?.nombre || '';
-        const clienteNombre = clientes.find(c => c.id === venta.cliente_id)?.nombre || '';
-        const clienteApellido = clientes.find(c => c.id === venta.cliente_id)?.apellido || '';
+        const cliente = clientes.find(c => c.id === venta.cliente_id) || {};
+        const personalData = personal.find(p => p.id === venta.personal_id) || {};
 
         return (
           <tr key={venta.id}>
             <td>
               {enEdicion ? (
-                <select
-                  name="tratamiento_id"
-                  value={ventaEditada.tratamiento_id || ''}
-                  onChange={onEditChange}
-                >
+                <select name="tratamiento_id" value={ventaEditada.tratamiento_id || ''} onChange={onEditChange}>
                   <option value="">Seleccionar tratamiento</option>
                   {tratamientos.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nombre}
-                    </option>
+                    <option key={t.id} value={t.id}>{t.nombre}</option>
                   ))}
                 </select>
               ) : (
@@ -58,40 +54,41 @@ const TablaVentasTratamientos = ({
               )}
             </td>
 
-            <td>
+             <td>
               {enEdicion ? (
-                <input
-                  type="number"
-                  name="sesiones"
-                  value={ventaEditada.sesiones || ''}
-                  onChange={onEditChange}
-                />
+                <select name="personal_id" value={ventaEditada.personal_id || ''} onChange={onEditChange}>
+                  <option value="">Seleccionar personal</option>
+                  {personal.map(p => (
+                    <option key={p.id} value={p.id}>{p.nombre} {p.apellido}</option>
+                  ))}
+                </select>
               ) : (
-                venta.sesiones
+                personalData.nombre ? `${personalData.nombre} ${personalData.apellido}` : '-'
               )}
             </td>
 
+
             <td>
               {enEdicion ? (
-                <input
-                  type="number"
-                  name="precio"
-                  value={ventaEditada.precio || ''}
-                  onChange={onEditChange}
-                />
+                <input type="number" name="sesiones" value={ventaEditada.sesiones || ''} onChange={onEditChange} />
+              ) : (
+                venta.sesiones
+              )}
+            </td>           
+            <td>
+              {enEdicion ? (
+                <input type="number" name="precio" value={ventaEditada.precio || ''} onChange={onEditChange} />
               ) : (
                 `$${venta.precio || 0}`
               )}
             </td>
 
             <td>
+              {`$${(venta.precio * venta.sesiones).toFixed(0)}`}
+            </td>
+            <td>
               {enEdicion ? (
-                <input
-                  type="text"
-                  name="forma_de_pago"
-                  value={ventaEditada.forma_de_pago || ''}
-                  onChange={onEditChange}
-                />
+                <input type="text" name="forma_de_pago" value={ventaEditada.forma_de_pago || ''} onChange={onEditChange} />
               ) : (
                 venta.forma_de_pago || '-'
               )}
@@ -99,25 +96,15 @@ const TablaVentasTratamientos = ({
 
             <td>
               {enEdicion ? (
-                <input
-                  type="date"
-                  name="vencimiento"
-                  value={ventaEditada.vencimiento ? ventaEditada.vencimiento.split('T')[0] : ''}
-                  onChange={onEditChange}
-                />
+                <input type="date" name="vencimiento" value={ventaEditada.vencimiento?.slice(0, 10) || ''} onChange={onEditChange} />
               ) : (
-                venta.vencimiento ? venta.vencimiento.split('T')[0] : '-'
+                venta.vencimiento?.slice(0, 10) || '-'
               )}
             </td>
 
             <td>
               {enEdicion ? (
-                <input
-                  type="number"
-                  name="cuotas"
-                  value={ventaEditada.cuotas || ''}
-                  onChange={onEditChange}
-                />
+                <input type="number" name="cuotas" value={ventaEditada.cuotas || ''} onChange={onEditChange} />
               ) : (
                 venta.cuotas || 0
               )}
@@ -125,12 +112,7 @@ const TablaVentasTratamientos = ({
 
             <td>
               {enEdicion ? (
-                <input
-                  type="text"
-                  name="observacion"
-                  value={ventaEditada.observacion || ''}
-                  onChange={onEditChange}
-                />
+                <input type="text" name="observacion" value={ventaEditada.observacion || ''} onChange={onEditChange} />
               ) : (
                 venta.observacion || '-'
               )}
@@ -138,32 +120,22 @@ const TablaVentasTratamientos = ({
 
             <td>
               {enEdicion ? (
-                <select
-                  name="cliente_id"
-                  value={ventaEditada.cliente_id || ''}
-                  onChange={onEditChange}
-                >
+                <select name="cliente_id" value={ventaEditada.cliente_id || ''} onChange={onEditChange}>
                   <option value="">Seleccionar cliente</option>
-                  {clientes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nombre} {c.apellido}
-                    </option>
+                  {clientes.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre} {c.apellido}</option>
                   ))}
                 </select>
               ) : (
-                `${clienteNombre} ${clienteApellido}`
+                `${cliente.nombre || ''} ${cliente.apellido || ''}`
               )}
             </td>
+
             <td>
               {enEdicion ? (
-                <input
-                  type="date"
-                  name="fecha"
-                  value={ventaEditada.fecha ? ventaEditada.fecha.split('T')[0] : ''}
-                  onChange={onEditChange}
-                />
+                <input type="date" name="fecha" value={ventaEditada.fecha?.slice(0, 10) || ''} onChange={onEditChange} />
               ) : (
-                venta.fecha ? venta.fecha.split('T')[0] : '-'
+                venta.fecha?.slice(0, 10) || '-'
               )}
             </td>
 
@@ -171,12 +143,12 @@ const TablaVentasTratamientos = ({
               {enEdicion ? (
                 <>
                   <Button onClick={onEditSave}>Guardar</Button>
-                  <Button danger onClick={onEditCancel}>Cancelar</Button>
+                  <Button $danger onClick={onEditCancel}>Cancelar</Button>
                 </>
               ) : (
                 <>
                   <Button onClick={() => onEditStart(venta)}>Editar</Button>
-                  <Button danger onClick={() => onDelete(venta.id)}>Eliminar</Button>
+                  <Button $danger onClick={() => onDelete(venta.id)}>Eliminar</Button>
                 </>
               )}
             </td>
@@ -227,11 +199,12 @@ const Table = styled.table`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.danger ? '#e74c3c' : '#3498db'};
+  background-color: ${props => props.$danger ? '#e74c3c' : '#3498db'};
   color: white;
   border: none;
   padding: 6px 10px;
   margin-right: 5px;
+  margin-bottom: 5px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9rem;

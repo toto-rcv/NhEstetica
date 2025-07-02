@@ -42,7 +42,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
             <CerrarBtn type="button" onClick={cerrarModal}>✖</CerrarBtn>
           </Header>
 
-          <h3>Agregar nueva venta de producto</h3>
+          <ModalTitle>Agregar nueva venta de producto</ModalTitle>
 
           <InputsRow>
             <ProductoAutocomplete
@@ -61,8 +61,8 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               value={nuevaVenta.costo}
               onChange={onChange}
               required
+              readOnly
             />
-
             <input
               type="number"
               name="precio"
@@ -71,6 +71,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               value={nuevaVenta.precio}
               onChange={onChange}
               required
+              readOnly
             />
             <input
               type="number"
@@ -88,13 +89,15 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               onChange={onChange}
             />
 
-            <input
-            type="date"
-            name="fecha"
-            value={nuevaVenta.fecha}
-            onChange={onChange}
-            placeholder="Fecha"
-          />
+            <label>
+              Fecha de compra:
+              <input
+                type="date"
+                name="fecha"
+                value={nuevaVenta.fecha || ''}
+                onChange={onChange}
+              />
+            </label>
 
           <select
             name="forma_de_pago"
@@ -135,9 +138,11 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
 export default VentaForm;
 
 const Form = styled.form`
-  padding: 1rem;
-  border-radius: 20px;
-  font-family: "Raleway";
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 30px;
+  text-align: left;
 `;
 
 const InputsRow = styled.div`
@@ -146,30 +151,55 @@ const InputsRow = styled.div`
   gap: 1rem;
   margin-bottom: 1rem;
 
-  input, select {
-    padding: 0.5rem;
+  input,
+  select {
+    padding: 14px 18px;
     font-size: 1rem;
     width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    max-width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: block;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    gap: 0.3rem;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   }
 
   button {
-    background: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     font-weight: bold;
     border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 5px;
-    font-family: "Raleway";
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 16px;
     cursor: pointer;
+    font-family: "Raleway";
     align-self: flex-start;
+    transition: 0.3s ease;
   }
 
   button:hover {
-    background: #5566dd;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
   }
 `;
+
 
 const AgregarBtn = styled.button`
   background: #4caf50;
@@ -189,41 +219,54 @@ const AgregarBtn = styled.button`
 
 const modalStyles = {
   content: {
-    maxWidth: '500px',
+    maxWidth: '600px',
+    width: '90%',
     margin: 'auto',
     borderRadius: '20px',
     padding: '2rem',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
     top: '50%',
     left: '50%',
     right: 'auto',
     bottom: 'auto',
     transform: 'translate(-50%, -50%)',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f7fa 100%)',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
   },
 };
 
 const Header = styled.div`
   width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 1rem;
-  gap: 20px;
+  height: 0; /* no ocupa espacio visual */
+  position: relative;
 `;
 
 const CerrarBtn = styled.button`
-  background: transparent;
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
   border: none;
-  font-size: 1.4rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: white;
   cursor: pointer;
-  color: #666;
-  padding: 0;
-  line-height: 1;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  z-index: 100;
 
   &:hover {
-    color: #333;
+    transform: scale(1.1);
   }
+`;
+
+
+const ModalTitle = styled.h3`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: center;
 `;
