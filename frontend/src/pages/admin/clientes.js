@@ -219,31 +219,29 @@ const handleInputChange = (e) => {
 
   const handleAgregarCliente = async (e) => {
   e.preventDefault();
-  setMensaje('');
 
-  const esEdicion = Boolean(nuevoCliente.id);
+  const formData = new FormData();
+  formData.append('nombre', nuevoCliente.nombre);
+  formData.append('apellido', nuevoCliente.apellido);
+  formData.append('direccion', nuevoCliente.direccion);
+  formData.append('email', nuevoCliente.email);
+  formData.append('telefono', nuevoCliente.telefono);
+  formData.append('antiguedad', nuevoCliente.antiguedad || '');
+  formData.append('nacionalidad', nuevoCliente.nacionalidad || '');
+
+  if (nuevoCliente.imagen) {
+    formData.append('imagen', nuevoCliente.imagen);
+  }
+
+  const url = nuevoCliente.id ? `/api/clientes/${nuevoCliente.id}` : '/api/clientes';
+  const method = nuevoCliente.id ? 'PUT' : 'POST';
+
   try {
-    const url = esEdicion
-      ? `/api/clientes/${nuevoCliente.id}`
-      : '/api/clientes';
-    const method = esEdicion ? 'PUT' : 'POST';
-
-    const formData = new FormData();
-    formData.append('nombre', nuevoCliente.nombre);
-    formData.append('apellido', nuevoCliente.apellido);
-    formData.append('direccion', nuevoCliente.direccion);
-    formData.append('email', nuevoCliente.email);
-    formData.append('telefono', nuevoCliente.telefono);
-    formData.append('antiguedad', nuevoCliente.antiguedad);
-    if (nuevoCliente.imagen) {
-      formData.append('imagen', nuevoCliente.imagen);
-    }
-
     const res = await fetch(url, {
       method,
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
-        // NO poner 'Content-Type': 'multipart/form-data' aquí
+        // NO poner 'Content-Type' para que fetch lo configure automáticamente
       },
       body: formData,
     });
@@ -251,10 +249,8 @@ const handleInputChange = (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      setMensaje(esEdicion ? 'Cliente actualizado con éxito ✏️' : 'Cliente agregado con éxito ✅');
-      // Refrescar la lista de clientes tras agregar
+      setMensaje(nuevoCliente.id ? 'Cliente actualizado con éxito ✏️' : 'Cliente agregado con éxito ✅');
       await cargarClientes();
-      // Limpiar el formulario
       setNuevoCliente({
         nombre: '',
         apellido: '',
@@ -265,14 +261,7 @@ const handleInputChange = (e) => {
         imagen: null,
         nacionalidad: '',
       });
-      // Limpiar búsqueda si estaba activa y ir a la última página si se agregó un cliente
-      if (terminoBusqueda) {
-        limpiarBusqueda();
-      } else if (!esEdicion) {
-        // Si agregamos un cliente nuevo, ir a la última página para verlo
-        const nuevasPaginas = Math.ceil((clientes.length + 1) / clientesPorPagina);
-        setPaginaActual(nuevasPaginas);
-      }
+      // Reset búsqueda o paginación según corresponda
     } else {
       setMensaje(data.message || 'Error al guardar cliente');
     }
@@ -280,6 +269,7 @@ const handleInputChange = (e) => {
     setMensaje('Error de red al intentar guardar cliente');
   }
 };
+
 
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
@@ -384,7 +374,7 @@ const handleInputChange = (e) => {
                       <PaginationButton
                         key={numeroPagina}
                         onClick={() => cambiarPagina(numeroPagina)}
-                        active={paginaActual === numeroPagina}
+                        $active={paginaActual === numeroPagina}
                       >
                         {numeroPagina}
                       </PaginationButton>
@@ -594,17 +584,17 @@ const PaginationControls = styled.div`
 
 const PaginationButton = styled.button`
   padding: 0.5rem 1rem;
-  border: 1px solid ${props => props.active ? '#3498db' : '#e1e5e9'};
+  border: 1px solid ${props => props.$active ? '#3498db' : '#e1e5e9'};
   border-radius: 8px;
-  background: ${props => props.active ? '#3498db' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  background: ${props => props.$active ? '#3498db' : 'white'};
+  color: ${props => props.$active ? 'white' : '#666'};
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
   min-width: 40px;
 
   &:hover:not(:disabled) {
-    background: ${props => props.active ? '#2980b9' : '#e1e5e9'};
+    background: ${props => props.$active ? '#2980b9' : '#e1e5e9'};
     transform: translateY(-1px);
   }
 

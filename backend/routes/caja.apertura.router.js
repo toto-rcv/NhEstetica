@@ -6,7 +6,8 @@ const {
   createCaja,
   updateCaja,
   deleteCaja,
-  getCajaByFecha
+  getCajaByFecha,
+  cerrarCaja
 } = require('../controllers/caja.apertura.controller');
 
 router.get('/', getCajas);
@@ -18,6 +19,8 @@ router.get('/:id', getCajaById);
 router.post('/', createCaja);
 
 router.put('/:id', updateCaja);
+
+router.put('/cerrar/:fecha', cerrarCaja);
 
 router.delete('/:id', deleteCaja);
 

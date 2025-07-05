@@ -12,10 +12,14 @@ const ProductoAutocomplete = ({ value, onChange }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      const data = await res.json();
-      setResultados(data);
+      const responseData = await res.json();
+      
+      // La API devuelve un objeto con estructura de paginación: {data: productos[], pagination: {}}
+      const data = responseData.data || responseData;
+      setResultados(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error al buscar productos:", err);
+      setResultados([]);
     }
   };
 

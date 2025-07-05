@@ -17,6 +17,7 @@ app.use('/images-de-personal', express.static(path.join(__dirname, 'public/image
 
 // Rutas
 app.use('/api', require('./routes/auth.router'));
+app.use('/api/inicio', require('./routes/inicio.router'));
 app.use('/api/clientes', require('./routes/clientes.router'));
 app.use('/api/personal', require('./routes/personal.router'));
 app.use('/api/ventas/tratamientos', require('./routes/ventas.tratamientos.router'));

@@ -8,6 +8,7 @@ Modal.setAppElement('#root');
 
 const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const { width } = useScreenSize();
 
   const abrirModal = () => {
     if (!nuevaVenta.id) setModalIsOpen(true);
@@ -25,17 +26,20 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
     if (nuevaVenta.id && modalIsOpen) cerrarModal();
   }, [nuevaVenta]);
 
-  const productoSeleccionado = productos.find(p => p.id === parseInt(nuevaVenta.producto_id));
+  const productoSeleccionado = Array.isArray(productos) ? productos.find(p => p.id === parseInt(nuevaVenta.producto_id)) : null;
 
   return (
     <>
-      <AgregarBtn onClick={abrirModal}>Agregar Venta</AgregarBtn>
+      <AgregarBtn onClick={abrirModal}>
+        <span>💰</span>
+        Agregar Venta
+      </AgregarBtn>
 
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={cerrarModal}
         contentLabel="Formulario Venta Producto"
-        style={modalStyles}
+        style={getModalStyles(width)}
       >
         <Form onSubmit={handleSubmit}>
           <Header>
@@ -61,7 +65,6 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               value={nuevaVenta.costo}
               onChange={onChange}
               required
-              readOnly
             />
             <input
               type="number"
@@ -71,7 +74,6 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
               value={nuevaVenta.precio}
               onChange={onChange}
               required
-              readOnly
             />
             <input
               type="number"
@@ -141,8 +143,15 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-right: 30px;
   text-align: left;
+
+  @media (max-width: 768px) {
+    gap: 15px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
 `;
 
 const InputsRow = styled.div`
@@ -171,17 +180,26 @@ const InputsRow = styled.div`
     flex-direction: column;
     font-weight: 500;
     gap: 0.3rem;
+    font-size: 0.95rem;
+  }
+
+  input:hover,
+  select:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
   input:focus,
   select:focus {
-    border-color: #667eea;
+    border-color: #10b981;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    background: #ffffff;
+    transform: translateY(-1px);
   }
 
   button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     font-weight: bold;
     border: none;
@@ -191,47 +209,196 @@ const InputsRow = styled.div`
     cursor: pointer;
     font-family: "Raleway";
     align-self: flex-start;
-    transition: 0.3s ease;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
   }
 
   button:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    gap: 0.8rem;
+    
+    input,
+    select {
+      padding: 12px 16px;
+      font-size: 0.95rem;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 15px;
+      max-width: 100%;
+      align-self: stretch;
+    }
+
+    label {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.7rem;
+    
+    input,
+    select {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      gap: 0.2rem;
+    }
   }
 `;
 
 
 const AgregarBtn = styled.button`
-  background: #4caf50;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   padding: 0.7rem 1.2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  margin: 1rem 0;
+  margin: 0;
   font-family: "Raleway";
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 150px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
 
   &:hover {
-    background: #3e8e41;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    min-width: 140px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    padding: 0.6rem 1rem;
+    width: 100%;
+    max-width: 200px;
+    min-width: auto;
   }
 `;
 
-const modalStyles = {
-  content: {
-    maxWidth: '600px',
-    width: '90%',
-    margin: 'auto',
-    borderRadius: '20px',
-    padding: '2rem',
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    transform: 'translate(-50%, -50%)',
-    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f7fa 100%)',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-  },
+// Hook para detectar tamaño de pantalla
+const useScreenSize = () => {
+  const [screenSize, setScreenSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return screenSize;
+};
+
+const getModalStyles = (width) => {
+  const isMobile = width <= 480;
+  const isTablet = width <= 768 && width > 480;
+  
+  return {
+    content: {
+      maxWidth: isMobile ? '100%' : '600px',
+      width: isMobile ? '100%' : isTablet ? '98%' : '95%',
+      height: isMobile ? '100%' : 'auto',
+      maxHeight: isMobile ? '100vh' : '95vh',
+      margin: 'auto',
+      borderRadius: isMobile ? '0' : isTablet ? '15px' : '20px',
+      padding: isMobile ? '1rem' : isTablet ? '1rem' : '1.5rem',
+      top: isMobile ? '0' : '50%',
+      left: isMobile ? '0' : '50%',
+      right: 'auto',
+      bottom: 'auto',
+      transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f2fe 100%)',
+      boxShadow: '0 25px 80px rgba(0, 0, 0, 0.15)',
+      overflow: 'auto',
+      border: 'none',
+    },
+    overlay: {
+      backgroundColor: 'rgba(30, 41, 59, 0.8)',
+      backdropFilter: 'blur(4px)',
+      zIndex: 1000,
+    },
+  };
 };
 
 const Header = styled.div`
@@ -258,6 +425,23 @@ const CerrarBtn = styled.button`
   &:hover {
     transform: scale(1.1);
   }
+
+  @media (max-width: 768px) {
+    top: -15px;
+    right: -15px;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  @media (max-width: 480px) {
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+  }
 `;
 
 
@@ -269,4 +453,16 @@ const ModalTitle = styled.h3`
   font-weight: 800;
   margin-bottom: 20px;
   text-align: center;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 20px;
+    margin-bottom: 15px;
+    margin-top: 10px;
+  }
 `;

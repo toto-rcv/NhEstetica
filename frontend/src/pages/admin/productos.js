@@ -14,52 +14,79 @@ const Productos = () => {
   // Estados para la búsqueda
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [buscando, setBuscando] = useState(false);
-  const [productosOriginales, setProductosOriginales] = useState([]);
   const [mensaje, setMensaje] = useState('');
+  // Estados para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [paginationInfo, setPaginationInfo] = useState({
+    totalPages: 0,
+    totalItems: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
 
+  // Cargar productos cuando cambie la página, items por página o el término de búsqueda
   useEffect(() => {
-    loadProductos();
-  }, []);
+    loadProductos(terminoBusqueda);
+  }, [currentPage, itemsPerPage, terminoBusqueda]);
 
-  const loadProductos = async () => {
+  const loadProductos = async (searchTerm) => {
     try {
       setLoading(true);
-      const productosData = await productosService.getProductos();
-      setData(productosData);
-      setProductosOriginales(productosData); // Guardamos los productos originales
-      setError(null);
+      const response = await productosService.getProductos(searchTerm, currentPage, itemsPerPage);
+      
+      // Asegurarse de que la respuesta tenga la estructura esperada
+      if (response && response.data && response.pagination) {
+        setData(response.data);
+        setPaginationInfo(response.pagination);
+        setError(null);
+        
+        // Actualizar mensaje si hay búsqueda activa
+        if (searchTerm) {
+          if (response.data.length === 0) {
+            setMensaje('No se pudo encontrar el Producto solicitado');
+          } else {
+            setMensaje(`Se encontraron ${response.pagination.totalItems} producto${response.pagination.totalItems > 1 ? 's' : ''}`);
+          }
+        } else {
+          setMensaje('');
+        }
+      } else {
+        // Manejar respuesta en formato legacy (sin paginación)
+        setData(response || []);
+        setPaginationInfo({
+          totalPages: 1,
+          totalItems: (response || []).length,
+          currentPage: 1,
+          itemsPerPage: itemsPerPage,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
+        setError(null);
+        setMensaje('');
+      }
     } catch (err) {
+      console.error('Error al cargar productos:', err);
       setError('Error al cargar los productos');
+      setData([]);
+      setPaginationInfo({
+        totalPages: 0,
+        totalItems: 0,
+        currentPage: 1,
+        itemsPerPage: itemsPerPage,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const buscarProductos = async (termino) => {
-    if (!termino.trim()) {
-      // Si no hay término de búsqueda, mostrar todos los productos
-      setData(productosOriginales);
-      setMensaje('');
-      return;
-    }
-
     setBuscando(true);
-    try {
-      const productosData = await productosService.getProductos(termino);
-      
-      if (productosData.length === 0) {
-        setMensaje('No se pudo encontrar el Producto solicitado');
-        setData([]);
-      } else {
-        setData(productosData);
-        setMensaje(`Se encontraron ${productosData.length} producto${productosData.length > 1 ? 's' : ''}`);
-      }
-    } catch (error) {
-      console.error('Error al buscar productos:', error);
-      setMensaje('Error al buscar productos');
-    } finally {
-      setBuscando(false);
-    }
+    setCurrentPage(1); // Resetear a la primera página en nueva búsqueda
+    await loadProductos(termino);
+    setBuscando(false);
   };
 
   const handleBusquedaChange = (e) => {
@@ -77,10 +104,12 @@ const Productos = () => {
     }, 500);
   };
 
-  const limpiarBusqueda = () => {
+  const limpiarBusqueda = async () => {
     setTerminoBusqueda('');
-    setData(productosOriginales);
+    setCurrentPage(1);
     setMensaje('');
+    // Recargar productos sin filtro usando loadProductos con término vacío
+    await loadProductos('');
   };
 
   const columns = [
@@ -187,14 +216,11 @@ const Productos = () => {
         await productosService.createProducto(processedRow);
       }
       if (newRows.length > 0) {
-        await loadProductos();
+        await loadProductos(terminoBusqueda);
         // Limpiar búsqueda si estaba activa
         if (terminoBusqueda) {
           limpiarBusqueda();
         }
-      } else {
-        setData(newData);
-        setProductosOriginales(newData);
       }
     } catch (err) {
       setError('Error al guardar producto');
@@ -208,15 +234,11 @@ const Productos = () => {
       const rowToDelete = data[rowIndex];
       if (rowToDelete && rowToDelete.id) {
         await productosService.deleteProducto(rowToDelete.id);
-        await loadProductos();
+        await loadProductos(terminoBusqueda);
         // Limpiar búsqueda si estaba activa
         if (terminoBusqueda) {
           limpiarBusqueda();
         }
-      } else {
-        const newData = data.filter((_, idx) => idx !== rowIndex);
-        setData(newData);
-        setProductosOriginales(newData);
       }
     } catch (err) {
       setError('Error al eliminar producto');
@@ -236,14 +258,20 @@ const Productos = () => {
           : (Array.isArray(updatedData.modoUso) ? updatedData.modoUso : [])
       };
       await productosService.updateProducto(productoId, processedData);
-      await loadProductos();
-      // Mantener búsqueda activa si había una
-      if (terminoBusqueda) {
-        setTimeout(() => buscarProductos(terminoBusqueda), 100);
-      }
+      await loadProductos(terminoBusqueda);
     } catch (err) {
       setError('Error al actualizar producto');
     }
+  };
+
+  // Funciones de paginación
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleItemsPerPageChange = (newLimit) => {
+    setItemsPerPage(newLimit);
+    setCurrentPage(1); // Resetear a la primera página
   };
 
   if (loading) {
@@ -262,7 +290,7 @@ const Productos = () => {
         <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
           Error: {error}
           <br />
-          <button onClick={loadProductos} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
+          <button onClick={() => loadProductos(terminoBusqueda)} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
             Reintentar
           </button>
         </div>
@@ -303,7 +331,7 @@ const Productos = () => {
         <AddProductoModal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
-          onSuccess={async () => { setShowAddModal(false); await loadProductos(); limpiarBusqueda(); }}
+          onSuccess={async () => { setShowAddModal(false); await loadProductos(terminoBusqueda); limpiarBusqueda(); }}
         />
         {isSaving && (
           <div style={{ 
@@ -320,6 +348,23 @@ const Productos = () => {
             Guardando cambios...
           </div>
         )}
+        
+        {/* Información de paginación y selector de elementos por página */}
+        <PaginationInfoContainer>
+          <PaginationInfo>
+            Mostrando {data?.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0} - {Math.min(currentPage * itemsPerPage, paginationInfo?.totalItems || 0)} de {paginationInfo?.totalItems || 0} productos
+          </PaginationInfo>
+          <ItemsPerPageContainer>
+            <label>Elementos por página:</label>
+            <select value={itemsPerPage} onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </ItemsPerPageContainer>
+        </PaginationInfoContainer>
+
         <EditableTable
           data={data}
           columns={columns}
@@ -330,6 +375,51 @@ const Productos = () => {
           onUpdateRow={handleUpdateProducto}
           customButtons={null}
         />
+
+        {/* Controles de paginación */}
+        {(paginationInfo?.totalPages || 0) > 1 && (
+          <PaginationContainer>
+            <PaginationButton 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={!paginationInfo?.hasPrevPage}
+            >
+              ⟨ Anterior
+            </PaginationButton>
+            
+            <PaginationNumbers>
+              {Array.from({ length: Math.min(5, paginationInfo?.totalPages || 0) }, (_, i) => {
+                const totalPages = paginationInfo?.totalPages || 0;
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+                
+                return (
+                  <PaginationNumber
+                    key={pageNumber}
+                    onClick={() => handlePageChange(pageNumber)}
+                    $isActive={pageNumber === currentPage}
+                  >
+                    {pageNumber}
+                  </PaginationNumber>
+                );
+              })}
+            </PaginationNumbers>
+            
+            <PaginationButton 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={!paginationInfo?.hasNextPage}
+            >
+              Siguiente ⟩
+            </PaginationButton>
+          </PaginationContainer>
+        )}
       </Container>
     </TablasLayout>
   );
@@ -451,4 +541,128 @@ const MensajeContainer = styled.div`
   background-color: ${props => props.tipo === 'error' ? '#fee' : '#efe'};
   color: ${props => props.tipo === 'error' ? '#c53030' : '#38a169'};
   border: 1px solid ${props => props.tipo === 'error' ? '#fed7d7' : '#c6f6d5'};
+`;
+
+// Estilos para la paginación
+const PaginationInfoContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+`;
+
+const ItemsPerPageContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  select {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+  }
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1rem;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+`;
+
+const PaginationButton = styled.button`
+  padding: 0.5rem 1rem;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #6c757d;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+`;
+
+const PaginationNumbers = styled.div`
+  display: flex;
+  gap: 0.25rem;
+`;
+
+const PaginationNumber = styled.button`
+  width: 40px;
+  height: 40px;
+  border: 1px solid #dee2e6;
+  background: ${props => props.$isActive ? '#3498db' : 'white'};
+  color: ${props => props.$isActive ? 'white' : '#6c757d'};
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: ${props => props.$isActive ? '600' : '500'};
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ${props => props.$isActive ? '#2980b9' : '#e9ecef'};
+    border-color: ${props => props.$isActive ? '#2980b9' : '#adb5bd'};
+  }
+
+  @media (max-width: 768px) {
+    width: 35px;
+    height: 35px;
+    font-size: 0.8rem;
+  }
 `; 

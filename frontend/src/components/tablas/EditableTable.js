@@ -36,6 +36,7 @@ const EditableTable = ({
   const [editingCell, setEditingCell] = useState(null);
   const [editValue, setEditValue] = useState('');
   const [isEditingMode, setIsEditingMode] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState({});
 
   const tableColumns = useMemo(() => [
     ...columns,
@@ -59,7 +60,13 @@ const EditableTable = ({
     }
   ], [columns]);
 
-  const tableData = useMemo(() => data, [data]);
+  const tableData = useMemo(() => {
+    // Aplicar cambios pendientes a los datos para mostrar en la tabla
+    return data.map((row, index) => {
+      const rowChanges = pendingChanges[index] || {};
+      return { ...row, ...rowChanges };
+    });
+  }, [data, pendingChanges]);
 
   const table = useReactTable({
     data: tableData,
@@ -73,7 +80,13 @@ const EditableTable = ({
     
     e.stopPropagation();
     setEditingCell({ rowIndex, columnId });
-    setEditValue(value);
+    
+    // Usar el valor pendiente si existe, sino el valor original
+    const currentValue = pendingChanges[rowIndex] && pendingChanges[rowIndex][columnId] !== undefined
+      ? pendingChanges[rowIndex][columnId]
+      : value;
+    
+    setEditValue(currentValue);
   };
 
   const handleCellChange = (e) => {
@@ -82,15 +95,15 @@ const EditableTable = ({
 
   const handleCellBlur = () => {
     if (editingCell) {
-      const newData = [...data];
-      const rowData = newData[editingCell.rowIndex];
-      rowData[editingCell.columnId] = editValue;
-      if (rowData.id && onUpdateRow) {
-        onUpdateRow(rowData.id, rowData);
-      } else {
-        onDataChange(newData);
-      }
-      // No salimos del modo edición ni limpiamos editingCell aquí
+      // Solo guardamos los cambios en el estado pendiente, no enviamos al backend
+      setPendingChanges(prev => ({
+        ...prev,
+        [editingCell.rowIndex]: {
+          ...prev[editingCell.rowIndex],
+          [editingCell.columnId]: editValue
+        }
+      }));
+      
       setEditingCell(null);
       setEditValue('');
     }
@@ -131,14 +144,44 @@ const EditableTable = ({
     }
   };
 
+  const applyPendingChanges = () => {
+    // Aplicar todos los cambios pendientes al backend
+    Object.keys(pendingChanges).forEach(async (rowIndex) => {
+      const index = parseInt(rowIndex);
+      const rowData = { ...data[index], ...pendingChanges[index] };
+      
+      if (rowData.id && onUpdateRow) {
+        try {
+          await onUpdateRow(rowData.id, rowData);
+        } catch (error) {
+          console.error('Error al actualizar fila:', error);
+        }
+      }
+    });
+    
+    // Limpiar cambios pendientes
+    setPendingChanges({});
+  };
+
+
+
   const toggleEditMode = () => {
-    setIsEditingMode(!isEditingMode);
-    // Limpiar cualquier celda que esté siendo editada solo al salir de edición
     if (isEditingMode) {
+      // Al salir del modo edición, guardar automáticamente todos los cambios
+      const hasChanges = Object.keys(pendingChanges).length > 0;
+      if (hasChanges) {
+        applyPendingChanges();
+      }
+      
+      setIsEditingMode(false);
       setEditingCell(null);
       setEditValue('');
+    } else {
+      setIsEditingMode(true);
     }
   };
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   return (
     <>
@@ -153,14 +196,22 @@ const EditableTable = ({
                 {addRowText}
               </AddRowButton>
             )}
+
             <EditTableButton 
               $isEditing={isEditingMode}
+              $hasChanges={hasPendingChanges}
               onClick={toggleEditMode}
             >
-              {isEditingMode ? 'Salir de Edición' : 'Editar Tabla'}
+              {isEditingMode ? (hasPendingChanges ? 'Guardar y Terminar' : 'Terminar Edición') : 'Editar Tabla'}
             </EditTableButton>
           </ButtonGroup>
         </TableHeader>
+        
+        {hasPendingChanges && isEditingMode && (
+          <PendingChangesIndicator>
+            <span>📝 Tienes {Object.keys(pendingChanges).length} cambio(s) pendiente(s) - Se guardarán al terminar de editar</span>
+          </PendingChangesIndicator>
+        )}
         
         <Table>
           <thead>
@@ -191,6 +242,7 @@ const EditableTable = ({
               <Tr 
                 key={row.id}
                 $clickable={!!onRowClick}
+                $hasChanges={!!pendingChanges[rowIndex]}
                 onClick={() => handleRowClick(rowIndex)}
               >
                 {row.getVisibleCells().map(cell => {
@@ -210,6 +262,7 @@ const EditableTable = ({
                     <Td
                       key={cell.id}
                       $editable={isEditingMode}
+                      $hasChanges={!!(pendingChanges[rowIndex] && pendingChanges[rowIndex][cell.column.id] !== undefined)}
                       onClick={(e) => handleCellClick(rowIndex, cell.column.id, cell.getValue(), e)}
                       className={`${cell.column.columnDef.hideOnMobile ? 'hide-mobile' : ''} ${cell.column.columnDef.hideOnTablet ? 'hide-tablet' : ''} ${cell.column.columnDef.hideOnDesktopSmall ? 'hide-desktop-small' : ''}`}
                     >
@@ -290,6 +343,7 @@ const Td = styled.td`
   border-bottom: 1px solid #dee2e6;
   vertical-align: middle;
   cursor: ${props => props.$editable ? 'pointer' : 'default'};
+  background-color: ${props => props.$hasChanges ? '#fff3cd' : 'transparent'};
   
   &:hover {
     background-color: ${props => props.$editable ? '#f8f9fa' : 'transparent'};
@@ -299,6 +353,7 @@ const Td = styled.td`
 const Tr = styled.tr`
   cursor: ${props => props.$clickable ? 'pointer' : 'default'};
   transition: background-color 0.2s ease;
+  border-left: ${props => props.$hasChanges ? '4px solid #ffc107' : '4px solid transparent'};
   
   &:hover {
     background-color: ${props => props.$clickable ? '#f8f9fa' : 'transparent'};
@@ -410,7 +465,11 @@ const AddRowButton = styled.button`
 `;
 
 export const EditTableButton = styled.button`
-  background: ${props => props.$isEditing ? '#dc3545' : '#ffc107'};
+  background: ${props => {
+    if (props.$isEditing && props.$hasChanges) return '#007bff';
+    if (props.$isEditing) return '#28a745';
+    return '#ffc107';
+  }};
   color: ${props => props.$isEditing ? 'white' : '#212529'};
   border: none;
   padding: 12px 24px;
@@ -420,8 +479,13 @@ export const EditTableButton = styled.button`
   font-weight: 500;
   margin-bottom: 1rem;
   transition: all 0.2s;
+  box-shadow: ${props => props.$hasChanges ? '0 0 10px rgba(0, 123, 255, 0.5)' : 'none'};
   &:hover {
-    background: ${props => props.$isEditing ? '#c82333' : '#e0a800'};
+    background: ${props => {
+      if (props.$isEditing && props.$hasChanges) return '#0056b3';
+      if (props.$isEditing) return '#218838';
+      return '#e0a800';
+    }};
   }
   @media (max-width: 768px) {
     padding: 10px 18px;
@@ -433,4 +497,14 @@ export const EditTableButton = styled.button`
     font-size: 12px;
     margin-bottom: 0.5rem;
   }
+`;
+
+const PendingChangesIndicator = styled.div`
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+  color: #495057;
 `;

@@ -59,6 +59,8 @@ export const personalService = {
   // Actualizar empleado
   async updatePersonal(id, empleadoData) {
     try {
+      console.log('Enviando datos al backend:', empleadoData);
+      
       const response = await fetch(`${API_BASE_URL}/personal/${id}`, {
         method: 'PUT',
         headers: {
@@ -69,6 +71,13 @@ export const personalService = {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Error del backend:', errorData);
+        
+        // Si hay errores de validación específicos, mostrarlos
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          throw new Error(`Errores de validación:\n${errorData.errors.join('\n')}`);
+        }
+        
         throw new Error(errorData.message || 'Error al actualizar el empleado');
       }
 

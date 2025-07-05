@@ -3,20 +3,24 @@ import styled from 'styled-components';
 import TablasLayout from '../../components/tablas/TablasLayout';
 import Ingresos from '../../components/tablas/caja/Ingresos';
 import Egresos from '../../components/tablas/caja/Egresos';
-import FormasDePago from '../../components/tablas/caja/FormasDePago';
+import CajaResumen from '../../components/tablas/caja/FormasDePago';
+
 import ModalCaja from '../../components/tablas/caja/ModalCaja';
+import ModalCerrarCaja from '../../components/tablas/caja/ModalCerrarCaja';
 
 const Caja = () => {
   const hoy = new Date();
   const hoyISO = hoy.toISOString().slice(0, 10);
 
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [modalCerrarAbierto, setModalCerrarAbierto] = useState(false);
   const [montoApertura, setMontoApertura] = useState(null); 
   const [fechaCaja, setFechaCaja] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [fechaSeleccionada, setFechaSeleccionada] = useState(hoyISO);
   const [egresosEfectivo, setEgresosEfectivo] = useState(0);
-
+  const [ingresosEfectivo, setIngresosEfectivo] = useState(0);
+  const [contadorActualizacion, setContadorActualizacion] = useState(0);
   const [year, month, day] = fechaSeleccionada.split('-');
   const fechaLegible = new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString('es-AR', {
     day: 'numeric',
@@ -52,6 +56,33 @@ const Caja = () => {
         setModalAbierto(false);
       } else {
         alert(data.message || 'Error al guardar la caja');
+      }
+    } catch (error) {
+      alert('Error de conexión con el servidor');
+      console.error(error);
+    }
+  };
+
+  const handleCerrarCaja = async () => {
+    const montoCierre = parseFloat(montoApertura) + ingresosEfectivo - egresosEfectivo;
+    
+    try {
+      const res = await fetch(`http://localhost:5000/api/caja/apertura/cerrar/${fechaSeleccionada}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          monto_cierre: montoCierre
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Caja cerrada exitosamente');
+        setModalCerrarAbierto(false);
+        fetchCaja(); // Recargar los datos de la caja
+      } else {
+        alert(data.message || 'Error al cerrar la caja');
       }
     } catch (error) {
       alert('Error de conexión con el servidor');
@@ -97,16 +128,34 @@ const Caja = () => {
     }
   };
 
+  const fetchIngresosEfectivo = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/ingresos/fecha/${fechaSeleccionada}`);
+      if (res.ok) {
+        const data = await res.json();
+        const totalEfectivo = data
+          .filter(i => i.forma_de_pago === 'Efectivo')
+          .reduce((acc, cur) => acc + parseFloat(cur.importe || 0), 0);
+        setIngresosEfectivo(totalEfectivo);
+      } else {
+        setIngresosEfectivo(0);
+      }
+    } catch (err) {
+      setIngresosEfectivo(0);
+    }
+  };
+
   useEffect(() => {
     fetchCaja();
     fetchEgresosEfectivo();
+    fetchIngresosEfectivo();
   }, [fechaSeleccionada]);
 
   return (
     <TablasLayout title="Gestión de Caja">
       <Container>
         <HeaderContainer>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <FechaNavegacion>
             <ChevronButton onClick={() => cambiarDia(-1)}>←</ChevronButton>
             <Title>{montoApertura !== null ? `Día ${fechaLegible}` : `Sin caja registrada (${fechaLegible})`}</Title>
             <ChevronButton onClick={() => cambiarDia(1)}>→</ChevronButton>
@@ -116,46 +165,80 @@ const Caja = () => {
               onChange={(e) => setFechaSeleccionada(e.target.value)}
               max={hoyISO}
             />
-          </div>
+          </FechaNavegacion>
 
-          {!cargando && montoApertura !== null && !isNaN(montoApertura) ? (
-            <CajaTable>
-              <thead>
-                <tr>
-                  <th>Apertura</th>
-                  <th>Egresos Efectivo</th>
-                  <th>Cierre</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>${parseFloat(montoApertura).toFixed(0)}</td>
-                  <td>${egresosEfectivo.toFixed(0)}</td>
-                  <td>${(parseFloat(montoApertura) - egresosEfectivo).toFixed(0)}</td>
-                </tr>
-              </tbody>
-            </CajaTable>
-          ) : (
-            <AddCajaButton onClick={() => setModalAbierto(true)}>
-              Agregar Caja del día
-            </AddCajaButton>
-          )}
+          <CajaSection>
+            {!cargando && montoApertura !== null && !isNaN(montoApertura) ? (
+              <CajaContainer>
+                <CajaTable>
+                  <thead>
+                    <tr>
+                      <th>Apertura</th>
+                      <th>Ingresos Efectivo</th>
+                      <th>Egresos Efectivo</th>
+                      <th>Cierre</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>${parseFloat(montoApertura).toFixed(0)}</td>
+                      <td>${ingresosEfectivo.toFixed(0)}</td>
+                      <td>${egresosEfectivo.toFixed(0)}</td>
+                      <td>${(parseFloat(montoApertura) + ingresosEfectivo - egresosEfectivo).toFixed(0)}</td>
+                    </tr>
+                  </tbody>
+                </CajaTable>
+                {esHoy && (
+                  <CerrarCajaButton onClick={() => setModalCerrarAbierto(true)}>
+                    Cerrar Caja
+                  </CerrarCajaButton>
+                )}
+              </CajaContainer>
+            ) : (
+              <AddCajaButton onClick={() => setModalAbierto(true)}>
+                Agregar Caja del día
+              </AddCajaButton>
+            )}
+          </CajaSection>
         </HeaderContainer>
 
-        <Ingresos fechaSeleccionada={fechaSeleccionada} />
         <Egresos
           fechaSeleccionada={fechaSeleccionada}
           onActualizar={() => {
             fetchCaja();
             fetchEgresosEfectivo();
+            fetchIngresosEfectivo();
+            setContadorActualizacion(prev => prev + 1); // <-- NUEVO
           }}
         />
-        <FormasDePago />
+
+        <Ingresos
+          fechaSeleccionada={fechaSeleccionada}
+          onActualizar={() => {
+            fetchCaja();
+            fetchEgresosEfectivo();
+            fetchIngresosEfectivo();
+            setContadorActualizacion(prev => prev + 1); // <-- NUEVO
+          }}
+        />
+
+        <CajaResumen 
+          fechaSeleccionada={fechaSeleccionada}
+          actualizarTrigger={contadorActualizacion}
+        />
+
 
         <ModalCaja
           isOpen={modalAbierto}
           onClose={() => setModalAbierto(false)}
           onGuardar={handleGuardarMonto}
+        />
+
+        <ModalCerrarCaja
+          isOpen={modalCerrarAbierto}
+          onClose={() => setModalCerrarAbierto(false)}
+          onConfirmar={handleCerrarCaja}
+          montoCierre={(parseFloat(montoApertura || 0) + ingresosEfectivo - egresosEfectivo).toFixed(0)}
         />
       </Container>
     </TablasLayout>
@@ -174,10 +257,21 @@ const Container = styled.div`
 
 const HeaderContainer = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+`;
+
+const FechaNavegacion = styled.div`
+  display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+`;
+
+const CajaSection = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const Title = styled.h2`
@@ -248,4 +342,32 @@ const DateInput = styled.input`
   border: 2px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
+`;
+
+const CajaContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const CerrarCajaButton = styled.button`
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 `;

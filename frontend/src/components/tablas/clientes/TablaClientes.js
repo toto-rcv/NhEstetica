@@ -175,14 +175,14 @@ const TablaClientes = ({
               {enEdicion ? (
                 <>
                  <Button onClick={(e) => { e.stopPropagation(); onEditSave(); }}>Guardar</Button>
-                 <Button danger onClick={(e) => { e.stopPropagation(); onEditCancel(); }}>Cancelar</Button>
+                                   <Button $danger onClick={(e) => { e.stopPropagation(); onEditCancel(); }}>Cancelar</Button>
                 </>
               ) : (
                 <>
                  <Button onClick={(e) => { e.stopPropagation(); onEditStart(cliente); }}>
                   Editar
                 </Button>
-                <Button danger onClick={(e) => { e.stopPropagation(); onDelete(cliente.id); }}>
+                                  <Button $danger onClick={(e) => { e.stopPropagation(); onDelete(cliente.id); }}>
                   Eliminar
                 </Button>
                 </>
@@ -255,7 +255,7 @@ const Placeholder = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.danger ? '#e74c3c' : '#3498db'};
+  background-color: ${props => props.$danger ? '#e74c3c' : '#3498db'};
   color: white;
   border: none;
   padding: 6px 10px;

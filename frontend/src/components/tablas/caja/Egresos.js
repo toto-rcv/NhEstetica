@@ -121,56 +121,71 @@ const handleGuardarEdicion = async () => {
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            {egresos.map((e) => (
-              <tr key={e.id}>
-                <td>{new Date(e.fecha).toLocaleDateString()}</td>
-                {editandoId === e.id ? (
-                  <>
-                    <td>
-                      <input
-                        value={egresoEditado.detalle}
-                        onChange={(ev) => handleEditChange('detalle', ev.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={egresoEditado.forma_pago}
-                        onChange={(e) => handleEditChange('forma_pago', e.target.value)}
-                      >
-                        <option value="">Seleccione</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Débito">Débito</option>
-                        <option value="Crédito">Crédito</option>
-                        <option value="MP">MP</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={egresoEditado.importe}
-                        onChange={(ev) => handleEditChange('importe', ev.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <ActionButton onClick={handleGuardarEdicion}>💾</ActionButton>
-                      <ActionButton onClick={handleCancelarEdicion}>❌</ActionButton>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>{e.detalle}</td>
-                    <td>{e.forma_pago}</td>
-                    <td>${parseFloat(e.importe).toFixed(2)}</td>
-                    <td>
-                      <ActionButton onClick={() => handleEditarClick(e)}>✏️</ActionButton>
-                      <ActionButton onClick={() => handleEliminarEgreso(e.id)}>🗑️</ActionButton>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
+<tbody>
+    {egresos.map((e) => (
+      <tr key={e.id}>
+        <td>{new Date(e.fecha).toLocaleDateString()}</td>
+        {editandoId === e.id ? (
+          <>
+            <td>
+              <input
+                value={egresoEditado.detalle}
+                onChange={(ev) => handleEditChange('detalle', ev.target.value)}
+              />
+            </td>
+            <td>
+              <select
+                value={egresoEditado.forma_pago}
+                onChange={(e) => handleEditChange('forma_pago', e.target.value)}
+              >
+                <option value="">Seleccione</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Débito">Débito</option>
+                <option value="Crédito">Crédito</option>
+                <option value="MP">MP</option>
+              </select>
+            </td>
+            <td>
+              <input
+                type="number"
+                value={egresoEditado.importe}
+                onChange={(ev) => handleEditChange('importe', ev.target.value)}
+              />
+            </td>
+            <td>
+              <ActionButton onClick={handleGuardarEdicion}>💾</ActionButton>
+              <ActionButton onClick={handleCancelarEdicion}>❌</ActionButton>
+            </td>
+          </>
+        ) : (
+          <>
+            <td>{e.detalle}</td>
+            <td>{e.forma_pago}</td>
+            <td>${parseFloat(e.importe).toFixed(2)}</td>
+            <td>
+              <ActionButton onClick={() => handleEditarClick(e)}>✏️</ActionButton>
+              <ActionButton onClick={() => handleEliminarEgreso(e.id)}>🗑️</ActionButton>
+            </td>
+          </>
+        )}
+      </tr>
+    ))}
+
+    {/* Total de egresos */}
+  <TotalRow>
+    <td></td>
+    <td><strong>Total</strong></td>
+    <td></td>
+    <td>
+      <strong>
+        ${egresos.reduce((acc, e) => acc + parseFloat(e.importe || 0), 0).toFixed(2)}
+      </strong>
+    </td>
+    <td></td>
+  </TotalRow>
+
+  </tbody>
+
         </Table>
       ) : (
         <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>No hay egresos para esta fecha.</p>
@@ -230,7 +245,8 @@ const Table = styled.table`
   }
 
   th {
-    background-color: #f5f5f5;
+    background-color: #667eea;
+    color: white;
   }
 
   input, select {
@@ -252,3 +268,7 @@ const ActionButton = styled.button`
     opacity: 0.7;
   }
 `;
+
+const TotalRow = styled.tr`
+  background: #ecf0f1;
+`

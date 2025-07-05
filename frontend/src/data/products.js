@@ -3,9 +3,18 @@ export let brands = [];
 
 export async function rawProducts() {
   try {
-    const response = await fetch('/api/productos');
+    const response = await fetch('/api/productos?limit=1000'); // Obtener todos los productos
     if (!response.ok) throw new Error('Error al obtener productos');
-    const data = await response.json();
+    const responseData = await response.json();
+
+    // La API devuelve un objeto con estructura de paginación: {data: productos[], pagination: {}}
+    const data = responseData.data || responseData;
+
+    // Verificar que data sea un array
+    if (!Array.isArray(data)) {
+      console.error('❌ API response is not an array:', data);
+      return [];
+    }
 
     const brandSet = new Set();
     const categorySet = new Set();

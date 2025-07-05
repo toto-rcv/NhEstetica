@@ -305,67 +305,83 @@ const VentasTratamientos = () => {
   };
 
   return (
-    <TablasLayout title="Gestión de Ventas">
+    <TablasLayout>
       <Container>
-        <Title>Gestión de Ventas de Tratamientos</Title>
-        <Text>
-          Aquí podrás gestionar las ventas y transacciones de tratamientos del establecimiento.
-        </Text>
+        <Title>Gestión de ventas de tratamientos</Title>
 
         {/* Filtros de fecha */}
         <FiltrosContainer>
           <FiltrosFecha>
-            <h4>Filtrar por fecha</h4>
+            <FiltroHeader>
+              <FiltroTitle>
+                <FilterIcon>📅</FilterIcon>
+                Filtrar por fecha
+              </FiltroTitle>
+            </FiltroHeader>
             <FechaInputs>
-              <div>
-                <label>Desde:</label>
-                <input
+              <InputGroup>
+                <InputLabel>Desde:</InputLabel>
+                <DateInput
                   type="date"
                   name="fechaDesde"
                   value={fechaDesde}
                   onChange={handleFechaChange}
                 />
-              </div>
-              <div>
-                <label>Hasta:</label>
-                <input
+              </InputGroup>
+              <InputGroup>
+                <InputLabel>Hasta:</InputLabel>
+                <DateInput
                   type="date"
                   name="fechaHasta"
                   value={fechaHasta}
                   onChange={handleFechaChange}
                 />
-              </div>
+              </InputGroup>
               <FiltroButtons>
                 <FiltroButton onClick={aplicarFiltroFechas}>
+                  <ButtonIcon>🔍</ButtonIcon>
                   Aplicar Filtro
                 </FiltroButton>
-                <FiltroButton onClick={resetearAlMesActual} secondary>
+                <FiltroButton onClick={resetearAlMesActual} $secondary>
+                  <ButtonIcon>📊</ButtonIcon>
                   Mes Actual
                 </FiltroButton>
               </FiltroButtons>
             </FechaInputs>
             <FiltroInfo>
+              <InfoIcon>ℹ️</InfoIcon>
               Mostrando {ventas.length} venta{ventas.length !== 1 ? 's' : ''} 
               {fechaDesde && fechaHasta && ` del ${fechaDesde} al ${fechaHasta}`}
             </FiltroInfo>
           </FiltrosFecha>
         </FiltrosContainer>
 
-        <VentaForm
-          nuevaVenta={nuevaVenta}
-          onChange={handleInputChange}
-          onSubmit={handleAgregarVenta}
-          clientes={clientes}
-          tratamientos={tratamientos}
-          personal={personal}
-        />
-
-        {mensaje && <MensajeContainer tipo={mensaje.includes('Error') ? 'error' : 'success'}>{mensaje}</MensajeContainer>}
+        {mensaje && (
+          <MensajeContainer tipo={mensaje.includes('Error') ? 'error' : 'success'}>
+            <MensajeIcon>{mensaje.includes('Error') ? '❌' : '✅'}</MensajeIcon>
+            {mensaje}
+          </MensajeContainer>
+        )}
 
         {loading ? (
-          <p>Cargando ventas...</p>
+          <LoadingContainer>
+            <LoadingSpinner />
+            <LoadingText>Cargando ventas...</LoadingText>
+          </LoadingContainer>
         ) : (
           <>
+            <TableHeader>
+              <TableTitle>Gestión de ventas del tratamiento</TableTitle>
+              <VentaForm
+                nuevaVenta={nuevaVenta}
+                onChange={handleInputChange}
+                onSubmit={handleAgregarVenta}
+                clientes={clientes}
+                tratamientos={tratamientos}
+                personal={personal}
+              />
+            </TableHeader>
+
             <TablaVentasTratamientos
               ventas={ventasActuales}
               clientes={clientes}
@@ -384,6 +400,7 @@ const VentasTratamientos = () => {
             {totalPaginas > 1 && (
               <PaginationContainer>
                 <PaginationInfo>
+                  <PaginationIcon>📄</PaginationIcon>
                   Mostrando {indicePrimeraVenta + 1} - {Math.min(indiceUltimaVenta, ventas.length)} de {ventas.length} ventas
                 </PaginationInfo>
                 <PaginationControls>
@@ -400,7 +417,7 @@ const VentasTratamientos = () => {
                       <PaginationButton
                         key={numeroPagina}
                         onClick={() => cambiarPagina(numeroPagina)}
-                        active={paginaActual === numeroPagina}
+                        $active={paginaActual === numeroPagina}
                       >
                         {numeroPagina}
                       </PaginationButton>
@@ -425,82 +442,187 @@ const VentasTratamientos = () => {
 
 export default VentasTratamientos;
 
+// Styled Components con mejores colores y efectos
 const Container = styled.div`
   text-align: left;
-  padding: 3rem;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 50%, #f8f9fa 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
 `;
 
 const Title = styled.h2`
-  color: #333;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 8px rgba(102, 126, 234, 0.1);
+  text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
-const Text = styled.p`
-  color: #666;
-  font-size: 1.1rem;
-  line-height: 1.6;
+const TableHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+`;
+
+const TableTitle = styled.h3`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 `;
 
 const FiltrosContainer = styled.div`
   margin-bottom: 2rem;
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e1e5e9;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  }
 `;
 
-const FiltrosFecha = styled.div`
-  h4 {
-    margin: 0 0 1rem 0;
-    color: #333;
-    font-size: 1.1rem;
+const FiltrosFecha = styled.div``;
+
+const FiltroHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
   }
+`;
+
+const FiltroTitle = styled.h4`
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const FilterIcon = styled.span`
+  font-size: 1.2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 `;
 
 const FechaInputs = styled.div`
-  display:flex;
-  gap: 1rem;
+  display: flex;
+  align-items: end;
+  gap: 1.5rem;
   flex-wrap: wrap;
-
-  > div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-
-    label {
-      font-weight: 500;
-      color: #555;
-      font-size: 0.9rem;
-    }
-
-    input {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      min-width: 140px;
-
-      &:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
-      }
-    }
-  }
 
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+  }
+`;
+
+const InputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const InputLabel = styled.label`
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const DateInput = styled.input`
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  min-width: 160px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #1e293b;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  &:hover {
+    border-color: #cbd5e1;
   }
 `;
 
 const FiltroButtons = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-direction: column;
 
   @media (max-width: 768px) {
@@ -510,20 +632,26 @@ const FiltroButtons = styled.div`
 `;
 
 const FiltroButton = styled.button`
-  padding: 0.7rem 1.2rem;
+  padding: 0.8rem 1.5rem;
   border: none;
-  background-color: ${props => props.secondary ? '#6c757d' : '#007bff'};
+  background: ${props => props.$secondary 
+    ? 'linear-gradient(135deg, #64748b 0%, #475569 100%)' 
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
   color: white;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 12px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
   &:hover {
-    background-color: ${props => props.secondary ? '#5a6268' : '#0056b3'};
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
   }
 
   &:active {
@@ -531,23 +659,91 @@ const FiltroButton = styled.button`
   }
 `;
 
-const FiltroInfo = styled.p`
-  margin-top: 1rem;
-  margin-bottom: 0;
-  color: #666;
+const ButtonIcon = styled.span`
   font-size: 0.9rem;
-  font-style: italic;
+`;
+
+const FiltroInfo = styled.p`
+  margin-top: 1.5rem;
+  margin-bottom: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+`;
+
+const InfoIcon = styled.span`
+  font-size: 1rem;
 `;
 
 const MensajeContainer = styled.div`
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-weight: 500;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
   text-align: center;
-  background-color: ${props => props.tipo === 'error' ? '#fee' : '#efe'};
-  color: ${props => props.tipo === 'error' ? '#c53030' : '#38a169'};
-  border: 1px solid ${props => props.tipo === 'error' ? '#fed7d7' : '#c6f6d5'};
+  background: ${props => props.tipo === 'error' 
+    ? 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)' 
+    : 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)'};
+  color: ${props => props.tipo === 'error' ? '#dc2626' : '#16a34a'};
+  border: 1px solid ${props => props.tipo === 'error' ? '#fecaca' : '#bbf7d0'};
+  box-shadow: 0 4px 12px ${props => props.tipo === 'error' 
+    ? 'rgba(239, 68, 68, 0.1)' 
+    : 'rgba(34, 197, 94, 0.1)'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  animation: slideIn 0.3s ease-out;
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const MensajeIcon = styled.span`
+  font-size: 1.1rem;
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.p`
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
 `;
 
 const PaginationContainer = styled.div`
@@ -555,6 +751,11 @@ const PaginationContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -565,12 +766,20 @@ const PaginationContainer = styled.div`
 
 const PaginationInfo = styled.span`
   font-size: 0.9rem;
-  color: #666;
+  color: #64748b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   
   @media (max-width: 768px) {
     text-align: center;
     font-size: 0.8rem;
   }
+`;
+
+const PaginationIcon = styled.span`
+  font-size: 1rem;
 `;
 
 const PaginationControls = styled.div`
@@ -586,31 +795,40 @@ const PaginationControls = styled.div`
 `;
 
 const PaginationButton = styled.button`
-  padding: 0.5rem 1rem;
-  border: 1px solid ${props => props.active ? '#007bff' : '#e1e5e9'};
-  border-radius: 8px;
-  background: ${props => props.active ? '#007bff' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  padding: 0.6rem 1.2rem;
+  border: 2px solid ${props => props.$active ? '#667eea' : '#e2e8f0'};
+  border-radius: 12px;
+  background: ${props => props.$active 
+    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'};
+  color: ${props => props.$active ? 'white' : '#64748b'};
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  min-width: 40px;
+  font-weight: 600;
+  min-width: 45px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 
   &:hover:not(:disabled) {
-    background: ${props => props.active ? '#0056b3' : '#e1e5e9'};
+    background: ${props => props.$active 
+      ? 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)' 
+      : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)'};
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
   }
 
   &:disabled {
-    background: #f0f0f0;
-    color: #ccc;
+    background: #f1f5f9;
+    color: #cbd5e1;
     cursor: not-allowed;
-    border-color: #e0e0e0;
+    border-color: #e2e8f0;
+    transform: none;
+    box-shadow: none;
   }
   
   @media (max-width: 480px) {
-    padding: 0.4rem 0.7rem;
+    padding: 0.5rem 0.8rem;
     font-size: 0.8rem;
-    min-width: 35px;
+    min-width: 40px;
   }
 `;

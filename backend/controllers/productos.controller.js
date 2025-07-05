@@ -1,18 +1,40 @@
 const db = require('../config/database');
 
-// Obtener todos los productos
+// Obtener todos los productos con paginación
 exports.getAllProductos = async (req, res) => {
   try {
-    const { query } = req.query;
-    let sql = 'SELECT * FROM productos';
-    let params = [];
+    const { query, page = 1, limit = 10 } = req.query;
+    
+    // Convertir a números y validar
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.max(1, Math.min(100, parseInt(limit))); // Máximo 100 elementos por página
+    const offset = (pageNum - 1) * limitNum;
 
+    // Construir la consulta base para filtros
+    let whereClause = '';
+    let params = [];
+    
     if (query) {
-      sql += ' WHERE nombre LIKE ? OR marca LIKE ? OR subtitulo LIKE ?';
+      whereClause = ' WHERE nombre LIKE ? OR marca LIKE ? OR subtitulo LIKE ?';
       params = [`%${query}%`, `%${query}%`, `%${query}%`];
     }
 
-    const [results] = await db.pool.query(sql, params);
+    // Consulta para obtener el total de registros
+    const countSql = `SELECT COUNT(*) as total FROM productos${whereClause}`;
+    const [countResults] = await db.pool.query(countSql, params);
+    const totalItems = countResults[0].total;
+    const totalPages = Math.ceil(totalItems / limitNum);
+
+    // Consulta para obtener los productos paginados
+    const sql = `SELECT * FROM productos${whereClause} ORDER BY id DESC LIMIT ?, ?`;
+    const queryParams = [...params, offset, limitNum];
+    
+    // Debug log
+    console.log('Pagination query:', sql);
+    console.log('Query params:', queryParams);
+    console.log('pageNum:', pageNum, 'limitNum:', limitNum, 'offset:', offset);
+    
+    const [results] = await db.pool.query(sql, queryParams);
     
     // Mapear campos de la base de datos a los nombres esperados por el frontend
     const productos = results.map(producto => ({
@@ -31,7 +53,18 @@ exports.getAllProductos = async (req, res) => {
       modoUso: producto.modo_uso ? JSON.parse(producto.modo_uso) : []
     }));
     
-    res.json(productos);
+    // Respuesta con datos de paginación
+    res.json({
+      data: productos,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: totalPages,
+        totalItems: totalItems,
+        itemsPerPage: limitNum,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Error al obtener productos', error: err });
   }

@@ -103,6 +103,35 @@ const updateCaja = async (req, res) => {
   }
 };
 
+// Cerrar caja (actualizar solo el monto de cierre)
+const cerrarCaja = async (req, res) => {
+  const { fecha } = req.params;
+  const { monto_cierre } = req.body;
+
+  if (monto_cierre == null) {
+    return res.status(400).json({ message: 'El monto de cierre es obligatorio' });
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+    return res.status(400).json({ message: 'Formato de fecha inválido' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE caja_aperturas_cierres SET monto_cierre = ? WHERE fecha = ?',
+      [monto_cierre, fecha]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'No hay caja abierta para esa fecha' });
+    }
+
+    res.json({ message: 'Caja cerrada exitosamente', monto_cierre });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // Eliminar caja
 const deleteCaja = async (req, res) => {
   const { id } = req.params;
@@ -123,5 +152,6 @@ module.exports = {
   getCajaByFecha,
   createCaja,
   updateCaja,
-  deleteCaja
+  deleteCaja,
+  cerrarCaja
 };

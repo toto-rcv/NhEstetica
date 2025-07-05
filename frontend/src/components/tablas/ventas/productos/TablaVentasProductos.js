@@ -33,7 +33,7 @@ const TablaVentasProductos = ({
     <tbody>
       {ventas.map((venta) => {
         const enEdicion = venta.id === editandoId;
-        const producto = productos.find(p => p.id === (enEdicion ? parseInt(ventaEditada?.producto_id) : venta.producto_id));
+        const producto = Array.isArray(productos) ? productos.find(p => p.id === (enEdicion ? parseInt(ventaEditada?.producto_id) : venta.producto_id)) : null;
         const nombreProducto = producto?.nombre || venta.nombre_producto || '';
         const marcaProducto = producto?.marca || venta.marca_producto || '';
 
@@ -47,7 +47,7 @@ const TablaVentasProductos = ({
                   onChange={onEditChange}
                 >
                   <option value="">Seleccionar producto...</option>
-                  {productos.map((p) => (
+                  {Array.isArray(productos) && productos.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.nombre}
                     </option>
@@ -110,7 +110,7 @@ const TablaVentasProductos = ({
                   onChange={onEditChange}
                 >
                   <option value="">Seleccionar cliente...</option>
-                  {clientes.map((c) => (
+                  {Array.isArray(clientes) && clientes.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.nombre} {c.apellido}
                     </option>
@@ -177,12 +177,12 @@ const TablaVentasProductos = ({
               {enEdicion ? (
                 <>
                   <Button onClick={onEditSave}>Guardar</Button>
-                  <Button danger onClick={onEditCancel}>Cancelar</Button>
+                  <Button $danger onClick={onEditCancel}>Cancelar</Button>
                 </>
               ) : (
                 <>
                   <Button onClick={() => onEditStart(venta)}>Editar</Button>
-                  <Button danger onClick={() => onDelete(venta.id)}>Eliminar</Button>
+                  <Button $danger onClick={() => onDelete(venta.id)}>Eliminar</Button>
                 </>
               )}
             </td>
@@ -200,52 +200,133 @@ const Table = styled.table`
   width: 100%;
   margin-top: 2rem;
   border-collapse: collapse;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.1);
 
   th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     text-align: left;
+    vertical-align: middle;
   }
 
   th {
-    background-color: #f5f5f5;
-    color: #333;
+    background: linear-gradient(180deg, #667eea 0%, #5a67d8 50%, #4f46e5 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
   }
 
-  tr:hover {
-    background-color: #f0f0f0;
+  tbody tr {
+    background: white;
+    transition: all 0.3s ease;
+    
+    &:nth-child(even) {
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    }
+    
+    &:hover {
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+  }
+
+  td {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+    color: #374151;
+    font-size: 0.9rem;
+    text-align: center;
+    
+    &:first-child {
+      font-weight: 600;
+      color: #1e293b;
+    }
   }
 
   input, select {
     width: 100%;
-    padding: 6px 10px;
+    padding: 10px 14px;
     font-size: 0.9rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fefefe;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #1e293b;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
     &:focus {
       outline: none;
       border-color: #667eea;
-      box-shadow: 0 0 4px rgba(102, 126, 234, 0.5);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    &:hover {
+      border-color: #cbd5e1;
     }
   }
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.danger ? '#e74c3c' : '#3498db'};
+  background: ${props => props.$danger 
+    ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' 
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
   color: white;
   border: none;
-  padding: 6px 10px;
-  margin-right: 5px;
-  margin-bottom: 6px;
-  border-radius: 5px;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-family: "Raleway";
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px ${props => props.$danger 
+    ? 'rgba(239, 68, 68, 0.3)' 
+    : 'rgba(102, 126, 234, 0.3)'};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+  width: 100px;
+  text-align: center;
+  display: inline-block;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
 
   &:hover {
-    opacity: 0.8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px ${props => props.$danger 
+      ? 'rgba(239, 68, 68, 0.4)' 
+      : 'rgba(102, 126, 234, 0.4)'};
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;

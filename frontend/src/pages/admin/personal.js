@@ -133,6 +133,12 @@ const Personal = () => {
       hideOnTablet: true,
     },
     {
+      accessorKey: 'direccion',
+      header: 'Dirección',
+      hideOnMobile: true,
+      hideOnTablet: true,
+    },
+    {
       accessorKey: 'email',
       header: 'Email',
       hideOnMobile: true,
@@ -296,6 +302,10 @@ const Personal = () => {
   // Función para actualizar un empleado existente
   const handleUpdateEmployee = async (employeeId, updatedData) => {
     try {
+      setIsSaving(true);
+      setError(null);
+      setValidationErrors([]);
+
       // Procesar la fecha de contratación
       let fechaContratacion = null;
       if (updatedData.fechaContratacion) {
@@ -307,26 +317,195 @@ const Personal = () => {
         }
       }
 
+      // Procesar nombre y apellido
+      let nombre = '';
+      let apellido = '';
+      
+      if (updatedData.nombreCompleto) {
+        const nombreParts = updatedData.nombreCompleto.trim().split(' ');
+        nombre = nombreParts[0] || '';
+        apellido = nombreParts.slice(1).join(' ') || '';
+      } else if (updatedData.nombre && updatedData.apellido) {
+        nombre = updatedData.nombre;
+        apellido = updatedData.apellido;
+      }
+
+      // Procesar comisiones (remover símbolos si existen)
+      let comisionVenta = 0;
+      let comisionFija = 0;
+      let sueldoMensual = 0;
+
+      if (updatedData.comisionVenta) {
+        comisionVenta = parseFloat(updatedData.comisionVenta.toString().replace(/[%$]/g, '')) || 0;
+      }
+      if (updatedData.comisionFija) {
+        comisionFija = parseFloat(updatedData.comisionFija.toString().replace(/[%$]/g, '')) || 0;
+      }
+      if (updatedData.sueldoMensual) {
+        sueldoMensual = parseFloat(updatedData.sueldoMensual.toString().replace(/[%$]/g, '')) || 0;
+      }
+
       const empleadoData = {
-        dni: updatedData.dni,
-        nombre: updatedData.nombreCompleto ? updatedData.nombreCompleto.split(' ')[0] : '',
-        apellido: updatedData.nombreCompleto ? updatedData.nombreCompleto.split(' ').slice(1).join(' ') : '',
+        dni: updatedData.dni || '',
+        nombre: nombre,
+        apellido: apellido,
         direccion: updatedData.direccion || '',
         telefono: updatedData.telefono || '',
         email: updatedData.email || '',
         cargo: updatedData.cargo || '',
         especialidad: updatedData.especialidad || '',
         fecha_contratacion: fechaContratacion,
-        comision_venta: updatedData.comision_venta || 0,
-        comision_fija: updatedData.comision_fija || 0,
-        sueldo_mensual: updatedData.sueldo_mensual || 0
+        comision_venta: comisionVenta,
+        comision_fija: comisionFija,
+        sueldo_mensual: sueldoMensual
       };
 
+      console.log('Datos enviados al backend:', empleadoData);
+      
       await personalService.updatePersonal(employeeId, empleadoData);
       await loadPersonal();
+      
+      // Si el empleado actualizado es el que está seleccionado, actualizar también selectedPerson
+      if (selectedPerson && selectedPerson.id === employeeId) {
+        // Recargar la información del empleado seleccionado
+        const updatedPersonData = await personalService.getPersonalById(employeeId);
+        setSelectedPerson({
+          id: updatedPersonData.id,
+          dni: updatedPersonData.dni || '',
+          nombre: updatedPersonData.nombre || '',
+          apellido: updatedPersonData.apellido || '',
+          direccion: updatedPersonData.direccion || '',
+          telefono: updatedPersonData.telefono || '',
+          email: updatedPersonData.email || '',
+          cargo: updatedPersonData.cargo || '',
+          especialidad: updatedPersonData.especialidad || '',
+          fechaContratacion: updatedPersonData.fecha_contratacion || '',
+          imagen: updatedPersonData.imagen || '',
+          comisionVenta: updatedPersonData.comision_venta ? `${updatedPersonData.comision_venta}%` : '0%',
+          comisionFija: updatedPersonData.comision_fija ? `$${updatedPersonData.comision_fija}` : '$0',
+          sueldoMensual: updatedPersonData.sueldo_mensual ? `$${updatedPersonData.sueldo_mensual}` : '$0'
+        });
+      }
+      
+      setError(null);
+      setValidationErrors([]);
+      
     } catch (err) {
       console.error('Error al actualizar empleado:', err);
-      setError(err.message || 'Error al actualizar el empleado');
+      
+      // Manejar errores de validación
+      if (err.message.includes('Errores de validación:')) {
+        const errorLines = err.message.split('\n');
+        const validationErrors = errorLines.slice(1);
+        setValidationErrors(validationErrors);
+        setError(null);
+      } else {
+        setError(err.message || 'Error al actualizar el empleado');
+        setValidationErrors([]);
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Función para manejar cambios en la tabla de detalles del empleado
+  const handleDetailsDataChange = (newData) => {
+    // Actualizar el estado del empleado seleccionado con los nuevos datos
+    if (newData.length > 0) {
+      setSelectedPerson(newData[0]);
+    }
+  };
+
+  // Función para actualizar empleado desde la tabla de detalles
+  const handleUpdateEmployeeFromDetails = async (employeeId, updatedData) => {
+    try {
+      setIsSaving(true);
+      setError(null);
+      setValidationErrors([]);
+
+      // Procesar la fecha de contratación
+      let fechaContratacion = null;
+      if (updatedData.fechaContratacion) {
+        if (updatedData.fechaContratacion.includes('/')) {
+          const [day, month, year] = updatedData.fechaContratacion.split('/');
+          fechaContratacion = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } else {
+          fechaContratacion = updatedData.fechaContratacion;
+        }
+      }
+
+      // Procesar comisiones (remover símbolos si existen)
+      let comisionVenta = 0;
+      let comisionFija = 0;
+      let sueldoMensual = 0;
+
+      if (updatedData.comisionVenta) {
+        comisionVenta = parseFloat(updatedData.comisionVenta.toString().replace(/[%$]/g, '')) || 0;
+      }
+      if (updatedData.comisionFija) {
+        comisionFija = parseFloat(updatedData.comisionFija.toString().replace(/[%$]/g, '')) || 0;
+      }
+      if (updatedData.sueldoMensual) {
+        sueldoMensual = parseFloat(updatedData.sueldoMensual.toString().replace(/[%$]/g, '')) || 0;
+      }
+
+      const empleadoData = {
+        dni: updatedData.dni || '',
+        nombre: updatedData.nombre || '',
+        apellido: updatedData.apellido || '',
+        direccion: updatedData.direccion || '',
+        telefono: updatedData.telefono || '',
+        email: updatedData.email || '',
+        cargo: updatedData.cargo || '',
+        especialidad: updatedData.especialidad || '',
+        fecha_contratacion: fechaContratacion,
+        comision_venta: comisionVenta,
+        comision_fija: comisionFija,
+        sueldo_mensual: sueldoMensual
+      };
+
+      console.log('Datos enviados desde tabla de detalles:', empleadoData);
+      
+      await personalService.updatePersonal(employeeId, empleadoData);
+      await loadPersonal();
+      
+      // Actualizar el estado local del empleado seleccionado
+      const updatedPersonData = await personalService.getPersonalById(employeeId);
+      setSelectedPerson({
+        id: updatedPersonData.id,
+        dni: updatedPersonData.dni || '',
+        nombre: updatedPersonData.nombre || '',
+        apellido: updatedPersonData.apellido || '',
+        direccion: updatedPersonData.direccion || '',
+        telefono: updatedPersonData.telefono || '',
+        email: updatedPersonData.email || '',
+        cargo: updatedPersonData.cargo || '',
+        especialidad: updatedPersonData.especialidad || '',
+        fechaContratacion: updatedPersonData.fecha_contratacion || '',
+        imagen: updatedPersonData.imagen || '',
+        comisionVenta: updatedPersonData.comision_venta ? `${updatedPersonData.comision_venta}%` : '0%',
+        comisionFija: updatedPersonData.comision_fija ? `$${updatedPersonData.comision_fija}` : '$0',
+        sueldoMensual: updatedPersonData.sueldo_mensual ? `$${updatedPersonData.sueldo_mensual}` : '$0'
+      });
+      
+      setError(null);
+      setValidationErrors([]);
+      
+    } catch (err) {
+      console.error('Error al actualizar empleado desde detalles:', err);
+      
+      // Manejar errores de validación
+      if (err.message.includes('Errores de validación:')) {
+        const errorLines = err.message.split('\n');
+        const validationErrors = errorLines.slice(1);
+        setValidationErrors(validationErrors);
+        setError(null);
+      } else {
+        setError(err.message || 'Error al actualizar el empleado');
+        setValidationErrors([]);
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -345,7 +524,12 @@ const Personal = () => {
   };
 
   const setTodayDate = () => {
-    setSelectedDate(new Date().toISOString().split('T')[0]);
+    // Crear fecha local sin problemas de zona horaria
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    setSelectedDate(`${year}-${month}-${day}`);
   };
 
   const getCommissionHistory = async () => {
@@ -374,44 +558,82 @@ const Personal = () => {
       let ventasFiltradas = ventasPersonal;
       if (selectedDate && selectedDate.trim() !== '') {
         ventasFiltradas = ventasPersonal.filter(venta => {
-          // Verificar tanto el campo fecha como created_at
-          let coincideFecha = false;
-          
-          // Verificar campo fecha (si existe)
+          // Priorizar el campo fecha sobre created_at
           if (venta.fecha) {
-            const fechaVenta = venta.fecha.split('T')[0];
-            coincideFecha = fechaVenta === selectedDate;
+            // Si existe el campo fecha, usar SOLO ese campo
+            const fechaVenta = new Date(venta.fecha);
+            const fechaVentaStr = `${fechaVenta.getFullYear()}-${String(fechaVenta.getMonth() + 1).padStart(2, '0')}-${String(fechaVenta.getDate()).padStart(2, '0')}`;
+            return fechaVentaStr === selectedDate;
+          } else if (venta.created_at) {
+            // Si no existe el campo fecha, usar created_at como fallback
+            const fechaCreated = new Date(venta.created_at);
+            const fechaCreatedStr = `${fechaCreated.getFullYear()}-${String(fechaCreated.getMonth() + 1).padStart(2, '0')}-${String(fechaCreated.getDate()).padStart(2, '0')}`;
+            return fechaCreatedStr === selectedDate;
           }
           
-          // Verificar campo created_at (siempre existe)
-          if (!coincideFecha && venta.created_at) {
-            const fechaCreated = venta.created_at.split('T')[0];
-            coincideFecha = fechaCreated === selectedDate;
-          }
-          
-          return coincideFecha;
+          return false;
         });
       }
       
       // Convertir ventas a formato de historial de comisiones
       const historial = ventasFiltradas.map(venta => {
-        // Usar created_at para obtener la fecha y hora exacta de la venta
-        const fechaHoraVenta = new Date(venta.created_at);
-        const comisionPorcentaje = selectedPerson.comisionVenta ? 
-          parseFloat(selectedPerson.comisionVenta.replace('%', '')) / 100 : 0;
-        const precioTotal = (venta.sesiones || 0) * (venta.precio || 0);
-        const comisionCalculada = precioTotal * comisionPorcentaje;
+        // Función auxiliar para crear fecha válida
+        const crearFechaValida = (fechaString) => {
+          if (!fechaString) return null;
+          
+          // Usar directamente new Date() ya que las fechas vienen en formato ISO
+          return new Date(fechaString);
+        };
+        
+        // Usar el campo fecha de la venta si existe, sino usar created_at
+        let fechaVenta;
+        let fechaHoraVenta;
+        
+        if (venta.fecha) {
+          // Si existe el campo fecha, usarlo para la fecha
+          fechaVenta = crearFechaValida(venta.fecha);
+          // Para la hora, usar created_at si existe, sino usar la fecha
+          fechaHoraVenta = venta.created_at ? crearFechaValida(venta.created_at) : fechaVenta;
+        } else {
+          // Si no existe el campo fecha, usar created_at para ambos
+          fechaVenta = crearFechaValida(venta.created_at);
+          fechaHoraVenta = crearFechaValida(venta.created_at);
+        }
+        
+        // Validar que las fechas sean válidas
+        if (!fechaVenta || isNaN(fechaVenta.getTime())) {
+          fechaVenta = new Date(); // Usar fecha actual como fallback
+        }
+        if (!fechaHoraVenta || isNaN(fechaHoraVenta.getTime())) {
+          fechaHoraVenta = fechaVenta; // Usar fechaVenta como fallback
+        }
+        
+        // Obtener valores de comisión del empleado
+        const comisionPorcentaje = Number(selectedPerson.comisionVenta ? 
+          selectedPerson.comisionVenta.replace('%', '') : 0);
+        const comisionFija = Number(selectedPerson.comisionFija ? 
+          selectedPerson.comisionFija.replace('$', '') : 0);
+        
+        // Calcular comisiones según la fórmula correcta
+        const precio = Number(venta.precio || 0);
+        const sesiones = Number(venta.sesiones || 0);
+        const precioTotal = precio * sesiones;
+        const comisionPorcentualCalculada = (precioTotal * comisionPorcentaje) / 100;
+        const comisionFijaTotal = comisionFija * sesiones;
+        const totalComision = comisionPorcentualCalculada + comisionFijaTotal;
         
         return {
-          fecha: fechaHoraVenta.toLocaleDateString('es-ES'),
+          fecha: fechaVenta.toLocaleDateString('es-ES'),
           hora: fechaHoraVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
           servicio: venta.tratamiento_nombre || 'Tratamiento',
-          sesiones: venta.sesiones || 0,
-          precioUnitario: venta.precio || 0,
+          sesiones: sesiones,
+          precioUnitario: precio,
           precioTotal: precioTotal,
-          comision: `$${comisionCalculada.toFixed(2)}`,
+          comision: `$${totalComision.toFixed(2)}`,
+          comisionPorcentual: `$${comisionPorcentualCalculada.toFixed(2)}`,
+          comisionFija: `$${comisionFijaTotal.toFixed(2)}`,
           estado: 'Completado',
-          fechaCompleta: fechaHoraVenta // Para el ordenamiento
+          fechaCompleta: fechaVenta // Para el ordenamiento - usar la fecha del campo fecha
         };
       });
       
@@ -459,58 +681,68 @@ const Personal = () => {
       
       // Calcular comisiones del DÍA específico seleccionado
       const ventasDelDia = ventasPersonal.filter(venta => {
-        let coincideFecha = false;
-        
-        // Verificar campo fecha (si existe)
+        // Priorizar el campo fecha sobre created_at
         if (venta.fecha) {
-          const fechaVenta = venta.fecha.split('T')[0];
-          coincideFecha = fechaVenta === fechaSeleccionada;
+          // Si existe el campo fecha, usar SOLO ese campo
+          const fechaVenta = new Date(venta.fecha);
+          const fechaVentaStr = `${fechaVenta.getFullYear()}-${String(fechaVenta.getMonth() + 1).padStart(2, '0')}-${String(fechaVenta.getDate()).padStart(2, '0')}`;
+          return fechaVentaStr === fechaSeleccionada;
+        } else if (venta.created_at) {
+          // Si no existe el campo fecha, usar created_at como fallback
+          const fechaCreated = new Date(venta.created_at);
+          const fechaCreatedStr = `${fechaCreated.getFullYear()}-${String(fechaCreated.getMonth() + 1).padStart(2, '0')}-${String(fechaCreated.getDate()).padStart(2, '0')}`;
+          return fechaCreatedStr === fechaSeleccionada;
         }
         
-        // Verificar campo created_at (siempre existe)
-        if (!coincideFecha && venta.created_at) {
-          const fechaCreated = venta.created_at.split('T')[0];
-          coincideFecha = fechaCreated === fechaSeleccionada;
-        }
-        
-        return coincideFecha;
+        return false;
       });
       
       // Calcular comisiones del MES COMPLETO (del 1 al último día del mes)
       const ventasDelMes = ventasPersonal.filter(venta => {
-        let perteneceAlMes = false;
-        
-        // Verificar campo fecha (si existe)
+        // Priorizar el campo fecha sobre created_at
         if (venta.fecha) {
-          const fechaVenta = venta.fecha.split('T')[0];
-          const [añoVenta, mesVenta] = fechaVenta.split('-');
-          perteneceAlMes = añoVenta === año && mesVenta === mes;
+          // Si existe el campo fecha, usar SOLO ese campo
+          const fechaVenta = new Date(venta.fecha);
+          const añoVenta = fechaVenta.getFullYear();
+          const mesVenta = fechaVenta.getMonth() + 1;
+          return añoVenta === parseInt(año) && mesVenta === parseInt(mes);
+        } else if (venta.created_at) {
+          // Si no existe el campo fecha, usar created_at como fallback
+          const fechaCreated = new Date(venta.created_at);
+          const añoCreated = fechaCreated.getFullYear();
+          const mesCreated = fechaCreated.getMonth() + 1;
+          return añoCreated === parseInt(año) && mesCreated === parseInt(mes);
         }
         
-        // Verificar campo created_at (siempre existe)
-        if (!perteneceAlMes && venta.created_at) {
-          const fechaCreated = venta.created_at.split('T')[0];
-          const [añoCreated, mesCreated] = fechaCreated.split('-');
-          perteneceAlMes = añoCreated === año && mesCreated === mes;
-        }
-        
-        return perteneceAlMes;
+        return false;
       });
       
-      // Calcular el porcentaje de comisión del empleado
-      const comisionPorcentaje = selectedPerson.comisionVenta ? 
-        parseFloat(selectedPerson.comisionVenta.replace('%', '')) / 100 : 0;
+      // Obtener valores de comisión del empleado
+      const comisionPorcentaje = Number(selectedPerson.comisionVenta ? 
+        selectedPerson.comisionVenta.replace('%', '') : 0);
+      const comisionFija = Number(selectedPerson.comisionFija ? 
+        selectedPerson.comisionFija.replace('$', '') : 0);
       
       // Sumatoria de comisiones del DÍA
       const comisionDia = ventasDelDia.reduce((total, venta) => {
-        const precioTotal = (venta.sesiones || 0) * (venta.precio || 0);
-        return total + (precioTotal * comisionPorcentaje);
+        const precio = Number(venta.precio || 0);
+        const sesiones = Number(venta.sesiones || 0);
+        const precioTotal = precio * sesiones;
+        const comisionPorcentualCalculada = (precioTotal * comisionPorcentaje) / 100;
+        const comisionFijaTotal = comisionFija * sesiones;
+        const totalComision = comisionPorcentualCalculada + comisionFijaTotal;
+        return total + totalComision;
       }, 0);
       
       // Sumatoria de comisiones del MES COMPLETO
       const comisionMes = ventasDelMes.reduce((total, venta) => {
-        const precioTotal = (venta.sesiones || 0) * (venta.precio || 0);
-        return total + (precioTotal * comisionPorcentaje);
+        const precio = Number(venta.precio || 0);
+        const sesiones = Number(venta.sesiones || 0);
+        const precioTotal = precio * sesiones;
+        const comisionPorcentualCalculada = (precioTotal * comisionPorcentaje) / 100;
+        const comisionFijaTotal = comisionFija * sesiones;
+        const totalComision = comisionPorcentualCalculada + comisionFijaTotal;
+        return total + totalComision;
       }, 0);
       
       return {
@@ -649,7 +881,8 @@ const Personal = () => {
                 <EditableTable
                   data={[selectedPerson]}
                   columns={detailsColumns}
-                  onDataChange={() => {}}
+                  onDataChange={handleDetailsDataChange}
+                  onUpdateRow={handleUpdateEmployeeFromDetails}
                   title="Información Personal"
                   addRowText=""
                 />
@@ -699,7 +932,7 @@ const Personal = () => {
               
               <CommissionRow>
                 <CommissionLabelLarge>
-                  📅 Comisión del Día ({selectedDate ? new Date(selectedDate).toLocaleDateString('es-ES') : 'Sin fecha'}):
+                  📅 Comisión del Día ({selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-ES') : 'Sin fecha'}):
                 </CommissionLabelLarge>
                 <CommissionValueLarge>
                   {loadingCommissions ? 'Calculando...' : commissions.comisionDia}
@@ -714,7 +947,7 @@ const Personal = () => {
               <CommissionRow>
                 <CommissionLabelLarge>
                   📊 Comisión del Mes Completo ({selectedDate ? 
-                    `${new Date(selectedDate).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}` : 
+                    `${new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}` : 
                     'Sin fecha'}):
                 </CommissionLabelLarge>
                 <CommissionValueLarge>
@@ -779,6 +1012,12 @@ const Personal = () => {
                         </HistoryDetailItem>
                         <HistoryDetailItem>
                           <strong>Total:</strong> ${item.precioTotal}
+                        </HistoryDetailItem>
+                        <HistoryDetailItem>
+                          <strong>Com. %:</strong> {item.comisionPorcentual}
+                        </HistoryDetailItem>
+                        <HistoryDetailItem>
+                          <strong>Com. Fija:</strong> {item.comisionFija}
                         </HistoryDetailItem>
                       </HistoryDetails>
                     </div>

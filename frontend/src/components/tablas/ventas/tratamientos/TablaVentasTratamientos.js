@@ -165,51 +165,149 @@ const Table = styled.table`
   width: 100%;
   margin-top: 2rem;
   border-collapse: collapse;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.1);
 
   th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+    padding: 15px 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   }
 
   th {
-    background-color: #f5f5f5;
-    color: #333;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    
+    &:first-child {
+      border-top-left-radius: 16px;
+    }
+    
+    &:last-child {
+      border-top-right-radius: 16px;
+    }
   }
 
-  tr:hover {
-    background-color: #f0f0f0;
+  tbody tr {
+    transition: all 0.3s ease;
+    background: white;
+    
+    &:hover {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    
+    &:nth-child(even) {
+      background: rgba(248, 250, 252, 0.5);
+      
+      &:hover {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      }
+    }
+  }
+
+  td {
+    font-size: 0.9rem;
+    color: #374151;
+    vertical-align: middle;
   }
 
   input, select {
     width: 100%;
-    padding: 6px 10px;
-    font-size: 0.9rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fefefe;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #374151;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
     &:focus {
       outline: none;
       border-color: #667eea;
-      box-shadow: 0 0 4px rgba(102, 126, 234, 0.5);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    &:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    
+    th, td {
+      padding: 10px 8px;
     }
   }
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.$danger ? '#e74c3c' : '#3498db'};
+  background: ${props => props.$danger 
+    ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' 
+    : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'};
   color: white;
   border: none;
-  padding: 6px 10px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  border-radius: 5px;
+  padding: 8px 16px;
+  margin: 2px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: 100px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px ${props => props.$danger 
+    ? 'rgba(239, 68, 68, 0.2)' 
+    : 'rgba(16, 185, 129, 0.2)'};
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+  }
 
   &:hover {
-    opacity: 0.8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px ${props => props.$danger 
+      ? 'rgba(239, 68, 68, 0.3)' 
+      : 'rgba(16, 185, 129, 0.3)'};
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    width: 80px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 `;

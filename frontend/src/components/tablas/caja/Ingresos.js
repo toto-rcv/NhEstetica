@@ -29,24 +29,30 @@ const Ingresos = ({ fechaSeleccionada }) => {
 
   return (
     <Section>
-        <Header>
-      <Title>Ingresos</Title>
+      <Header>
+        <Title>Ingresos</Title>
       </Header>
       <Table>
         <thead>
           <tr>
-            <th>Tipo</th>
             <th>Cliente</th>
+            <th>Tratamiento</th>
+            <th>Sesiones</th>
+            <th>Producto Comprado</th>
+            <th>Cantidad</th>
             <th>Forma de Pago</th>
             <th>Importe</th>
-            <th>Observación</th>
+            <th>Observaciones</th>
           </tr>
         </thead>
         <tbody>
           {ingresos.map((ing, i) => (
             <tr key={i}>
-              <td>{ing.tipo}</td>
-              <td>{ing.nombre} {ing.apellido}</td>
+              <td>{ing.cliente_nombre} {ing.cliente_apellido}</td>
+              <td>{ing.tratamiento_nombre}</td>
+              <td>{ing.sesiones}</td>
+              <td>{ing.producto_nombre}</td>
+              <td>{ing.cantidad}</td>
               <td>{ing.forma_de_pago}</td>
               <td>${ing.importe}</td>
               <td>{ing.observacion}</td>
@@ -55,8 +61,8 @@ const Ingresos = ({ fechaSeleccionada }) => {
         </tbody>
         <tfoot>
           <TrFooter>
-            <td colSpan={3}><strong>Total</strong></td>
-            <td colSpan={2}><strong>${total.toFixed(2)}</strong></td>
+            <td colSpan={7}><strong>Total</strong></td>
+            <td><strong>${total.toFixed(2)}</strong></td>
           </TrFooter>
         </tfoot>
       </Table>
@@ -86,7 +92,8 @@ const Table = styled.table`
   }
 
   th {
-    background-color: #f5f5f5;
+    background-color: #667eea;
+    color: white;
   }
 
   input, select {
