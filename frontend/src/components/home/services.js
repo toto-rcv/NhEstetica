@@ -4,10 +4,10 @@ import { Link as RouterLink } from 'react-router-dom';
 
 function AboutUs() {
     const services = [
-        { image: './servicios/TratamientoCorporal.jpg', label: 'ESTÉTICA CORPORAL', href: '/servicios/TratamientosCorporales' },
-        { image: './servicios/TratamientoFaciales.jpg', label: 'ESTÉTICA FACIAL', href: '/servicios/TratamientosFaciales' },
-        { image: './servicios/Masajes.jpg', label: 'RELLENOS Y CORRECCIONES', href: '/servicios/Masajes' },
-        { image: './servicios/depilacion.jpg', label: 'DEPILACIÓN LÁSER', href: '/servicios/DepilacionLaser' },
+        { image: '/servicios/TratamientoCorporal.jpg', label: 'ESTÉTICA CORPORAL', href: '/servicios/TratamientosCorporales' },
+        { image: '/servicios/TratamientoFaciales.jpg', label: 'ESTÉTICA FACIAL', href: '/servicios/TratamientosFaciales' },
+        { image: '/servicios/Masajes.jpg', label: 'RELLENOS Y CORRECCIONES', href: '/servicios/Masajes' },
+        { image: '/servicios/depilacion.jpg', label: 'DEPILACIÓN LÁSER', href: '/servicios/DepilacionLaser' },
     ];
 
     const handleClick = () => {

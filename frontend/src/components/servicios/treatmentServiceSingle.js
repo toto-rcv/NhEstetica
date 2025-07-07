@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { createPortal } from "react-dom";
+import ReservaTurnoModal from "../ReservaTurnoModal";
 
 const TreatmentService = ({ 
     // Propiedades básicas
@@ -28,8 +30,14 @@ const TreatmentService = ({
     
     // Callbacks
     onImageClick,
-    onButtonClick
+    onButtonClick,
+    
+    // Datos del tratamiento para el modal
+    tratamiento
 }) => {
+    const [showModal, setShowModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
     const handleClick = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (onButtonClick) onButtonClick();
@@ -39,6 +47,8 @@ const TreatmentService = ({
         handleClick();
         if (onImageClick) {
             onImageClick();
+        } else if (customButtonText === "Reservá tu turno" && tratamiento) {
+            setShowModal(true);
         } else if (customButtonLink) {
             window.location.href = customButtonLink;
         } else if (link) {
@@ -46,20 +56,33 @@ const TreatmentService = ({
         }
     };
 
+    const handleButtonClick = (e) => {
+        e.preventDefault();
+        if (customButtonText === "Reservá tu turno" && tratamiento) {
+            setShowModal(true);
+        } else if (customButtonLink) {
+            window.location.href = customButtonLink;
+        } else if (link) {
+            window.location.href = `/servicios/${link}`;
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+    };
+
+    const handleReservaSuccess = () => {
+        setShowSuccessModal(true);
+        setShowModal(false);
+    };
+
     const renderImage = () => (
         <ImageContainer>
             <Image src={image} alt={title} onClick={handleImageClick} />
             <ButtonOverlay>
-                <StyledLink
-                    to={customButtonLink || (link ? `/servicios/${link}` : "#")} 
-                    onClick={handleClick}
-                    as={customButtonLink ? 'a' : Link}
-                    href={customButtonLink}
-                    target={customButtonLink ? "_blank" : undefined}
-                    rel={customButtonLink ? "noopener noreferrer" : undefined}
-                >
+                <StyledButton onClick={handleButtonClick}>
                     RESERVÁ TU TURNO
-                </StyledLink>
+                </StyledButton>
             </ButtonOverlay>
         </ImageContainer>
     );
@@ -78,24 +101,10 @@ const TreatmentService = ({
                     )}
                 </PriceContainer>
             )}
-            <ReserveButton 
-                to={customButtonLink || (link ? `/servicios/${link}` : "#")} 
-                onClick={handleClick}
-                as={customButtonLink ? 'a' : Link}
-                href={customButtonLink}
-                target={customButtonLink ? "_blank" : undefined}
-                rel={customButtonLink ? "noopener noreferrer" : undefined}
-            >
+            <ReserveButton onClick={handleButtonClick}>
                 RESERVÁ TU TURNO
             </ReserveButton>
-            <MobileButton 
-                to={customButtonLink || (link ? `/servicios/${link}` : "#")} 
-                onClick={handleClick}
-                as={customButtonLink ? 'a' : Link}
-                href={customButtonLink}
-                target={customButtonLink ? "_blank" : undefined}
-                rel={customButtonLink ? "noopener noreferrer" : undefined}
-            >
+            <MobileButton onClick={handleButtonClick}>
                 RESERVÁ TU TURNO
             </MobileButton>
         </TextContent>
@@ -116,6 +125,29 @@ const TreatmentService = ({
                     </>
                 )}
             </ContentWrapper>
+
+            {tratamiento && showModal && createPortal(
+                <ReservaTurnoModal
+                    isOpen={showModal}
+                    onClose={handleModalClose}
+                    tratamiento={tratamiento}
+                    onSuccess={handleReservaSuccess}
+                />,
+                document.body
+            )}
+
+            {showSuccessModal && createPortal(
+                <SuccessOverlay onClick={() => setShowSuccessModal(false)}>
+                    <SuccessModal onClick={(e) => e.stopPropagation()}>
+                        <h2>¡Turno reservado exitosamente!</h2>
+                        <p>Te contactaremos pronto para confirmar tu cita.</p>
+                        <CloseSuccessButton onClick={() => setShowSuccessModal(false)}>
+                            Cerrar
+                        </CloseSuccessButton>
+                    </SuccessModal>
+                </SuccessOverlay>,
+                document.body
+            )}
         </Container>
     );
 };
@@ -409,7 +441,7 @@ const ButtonOverlay = styled.div`
     }
 `;
 
-const StyledLink = styled(Link)`
+const StyledButton = styled.button`
     background: var(--primary-color);
     color: white;
     padding: 1rem 2rem;
@@ -433,7 +465,7 @@ const StyledLink = styled(Link)`
     }
 `;
 
-const MobileButton = styled(Link)`
+const MobileButton = styled.button`
     display: none;
     background: var(--primary-color);
     color: white;
@@ -460,7 +492,7 @@ const MobileButton = styled(Link)`
     }
 `;
 
-const ReserveButton = styled(Link)`
+const ReserveButton = styled.button`
     display: inline-block;
     font-size: 1rem;
     color: var(--terciary-color);
@@ -502,5 +534,58 @@ const ReserveButton = styled(Link)`
         display: none;
         font-size: 0.9rem;
         padding: 0.6rem 1.4rem;
+    }
+`;
+
+const SuccessOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+`;
+
+const SuccessModal = styled.div`
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    text-align: center;
+
+    h2 {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    p {
+        font-size: 1rem;
+        color: var(--text-color);
+        margin-bottom: 2rem;
+    }
+`;
+
+const CloseSuccessButton = styled.button`
+    background: var(--primary-color);
+    color: white;
+    padding: 0.8rem 1.6rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+
+    &:hover {
+        background: transparent;
+        color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 `;

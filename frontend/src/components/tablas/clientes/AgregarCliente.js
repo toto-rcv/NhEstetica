@@ -3,16 +3,19 @@ import styled from 'styled-components';
 
 const ClienteForm = ({ nuevoCliente, onChange, onSubmit }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const abrirModal = () => {
-    if (!nuevoCliente.id) setModalIsOpen(true);
+    if (!nuevoCliente.id) {
+      setModalIsOpen(true);
+      // Resetear vista previa de imagen
+      setImagePreview('');
+    }
   };
 
   const cerrarModal = () => {
     setModalIsOpen(false);
-    setImageFile(null);
     setImagePreview('');
   };
 
@@ -26,94 +29,207 @@ const ClienteForm = ({ nuevoCliente, onChange, onSubmit }) => {
         },
       };
       onChange(simulatedEvent);
+      
+      // Crear vista previa
       const reader = new FileReader();
       reader.onload = (e) => setImagePreview(e.target.result);
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(e);
-    cerrarModal();
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit(e);
+      cerrarModal();
+    } catch (error) {
+      console.error('Error al enviar formulario:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
-    if (nuevoCliente.id && modalIsOpen) cerrarModal();
+    if (nuevoCliente.id && modalIsOpen) {
+      cerrarModal();
+    }
   }, [nuevoCliente]);
 
   return (
     <>
-      <AgregarBtn onClick={abrirModal}>➕ Agregar Cliente</AgregarBtn>
+      <AddClientButton onClick={abrirModal}>
+        <ButtonIcon>👤</ButtonIcon>
+        <ButtonText>Agregar Cliente</ButtonText>
+      </AddClientButton>
 
       {modalIsOpen && (
         <ModalOverlay onClick={cerrarModal}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <CloseButton onClick={cerrarModal} title="Cerrar">✖</CloseButton>
-            <ModalTitle>Agregar Cliente</ModalTitle>
+            <ModalHeader>
+              <ModalTitle>
+                <TitleIcon>👤</TitleIcon>
+                Nuevo Cliente
+              </ModalTitle>
+              <CloseButton onClick={cerrarModal} title="Cerrar">
+                ✕
+              </CloseButton>
+            </ModalHeader>
 
             <Form onSubmit={handleSubmit}>
-              <Field>
-                <Label>Nombre*</Label>
-                <Input name="nombre" value={nuevoCliente.nombre} onChange={onChange} required />
-              </Field>
+              <FormGrid>
+                <FormColumn>
+                  <Field>
+                    <Label>
+                      <LabelIcon>👤</LabelIcon>
+                      Nombre *
+                    </Label>
+                    <Input 
+                      name="nombre" 
+                      value={nuevoCliente.nombre} 
+                      onChange={onChange} 
+                      required 
+                      placeholder="Ingresa el nombre"
+                    />
+                  </Field>
 
-              <Field>
-                <Label>Apellido*</Label>
-                <Input name="apellido" value={nuevoCliente.apellido} onChange={onChange} required />
-              </Field>
+                  <Field>
+                    <Label>
+                      <LabelIcon>👤</LabelIcon>
+                      Apellido *
+                    </Label>
+                    <Input 
+                      name="apellido" 
+                      value={nuevoCliente.apellido} 
+                      onChange={onChange} 
+                      required 
+                      placeholder="Ingresa el apellido"
+                    />
+                  </Field>
 
-              <Field>
-                <Label>Nacionalidad</Label>
-                <Select
-                  name="nacionalidad"
-                  value={nuevoCliente.nacionalidad}
-                  onChange={onChange}
-                >
-                  <option value="">Selecciona nacionalidad</option>
-                  <option value="Argentina">Argentina</option>
-                  <option value="Paraguay">Paraguay</option>
-                </Select>
-              </Field>
-              <Field>
-                <Label>Email</Label>
-                <Input type="email" name="email" value={nuevoCliente.email} onChange={onChange} />
-              </Field>
+                  <Field>
+                    <Label>
+                      <LabelIcon>📧</LabelIcon>
+                      Email
+                    </Label>
+                    <Input 
+                      type="email" 
+                      name="email" 
+                      value={nuevoCliente.email} 
+                      onChange={onChange} 
+                      placeholder="ejemplo@correo.com"
+                    />
+                  </Field>
 
-              <Field>
-                <Label>Teléfono</Label>
-                <Input type="tel" name="telefono" value={nuevoCliente.telefono} onChange={onChange} />
-              </Field>
+                  <Field>
+                    <Label>
+                      <LabelIcon>📞</LabelIcon>
+                      Teléfono
+                    </Label>
+                    <Input 
+                      type="tel" 
+                      name="telefono" 
+                      value={nuevoCliente.telefono} 
+                      onChange={onChange} 
+                      placeholder="+54 11 1234-5678"
+                    />
+                  </Field>
+                </FormColumn>
 
-              <Field>
-                <Label>Dirección</Label>
-                <Input name="direccion" value={nuevoCliente.direccion} onChange={onChange} />
-              </Field>
+                <FormColumn>
+                  <Field>
+                    <Label>
+                      <LabelIcon>🏠</LabelIcon>
+                      Dirección
+                    </Label>
+                    <Input 
+                      name="direccion" 
+                      value={nuevoCliente.direccion} 
+                      onChange={onChange} 
+                      placeholder="Calle, número, ciudad"
+                    />
+                  </Field>
 
-          <Field>
-            <Label>Antigüedad (fecha)</Label>
-            <Input
-              type="date"
-              name="antiguedad"
-              value={nuevoCliente.antiguedad || ''}
-              onChange={onChange}
-            />
-          </Field>
+                  <Field>
+                    <Label>
+                      <LabelIcon>🌍</LabelIcon>
+                      Nacionalidad
+                    </Label>
+                    <Select
+                      name="nacionalidad"
+                      value={nuevoCliente.nacionalidad}
+                      onChange={onChange}
+                    >
+                      <option value="">Selecciona una opción</option>
+                      <option value="Argentina">🇦🇷 Argentina</option>
+                      <option value="Paraguay">🇵🇾 Paraguay</option>
+                    </Select>
+                  </Field>
 
-              <Field>
-                <Label>Foto del Cliente</Label>
-                <ImageInput type="file" accept="image/*" onChange={handleImageChange} />
-                {imagePreview && (
-                  <ImagePreview>
-                    <img src={imagePreview} alt="Preview" />
-                  </ImagePreview>
-                )}
-              </Field>
+                  <Field>
+                    <Label>
+                      <LabelIcon>📅</LabelIcon>
+                      Fecha de ingreso
+                    </Label>
+                    <Input
+                      type="date"
+                      name="antiguedad"
+                      value={nuevoCliente.antiguedad || ''}
+                      onChange={onChange}
+                    />
+                  </Field>
 
-              <ButtonGroup>
-                <AddButton type="submit">➕ Agregar</AddButton>
-                <CancelButton type="button" onClick={cerrarModal}>❌ Cancelar</CancelButton>
-              </ButtonGroup>
+                  <Field>
+                    <Label>
+                      <LabelIcon>📷</LabelIcon>
+                      Foto del Cliente
+                    </Label>
+                    <ImageUploadArea>
+                      <ImageInput 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleImageChange}
+                        id="image-upload"
+                      />
+                      <ImageUploadLabel htmlFor="image-upload">
+                        {imagePreview ? (
+                          <ImagePreview>
+                            <PreviewImage src={imagePreview} alt="Vista previa" />
+                            <ChangeImageText>Cambiar imagen</ChangeImageText>
+                          </ImagePreview>
+                        ) : (
+                          <ImagePlaceholder>
+                            <PlaceholderIcon>📷</PlaceholderIcon>
+                            <PlaceholderText>Seleccionar imagen</PlaceholderText>
+                            <PlaceholderSubtext>JPG, PNG, GIF (máx. 5MB)</PlaceholderSubtext>
+                          </ImagePlaceholder>
+                        )}
+                      </ImageUploadLabel>
+                    </ImageUploadArea>
+                  </Field>
+                </FormColumn>
+              </FormGrid>
+
+              <FormFooter>
+                <ButtonGroup>
+                  <CancelButton type="button" onClick={cerrarModal}>
+                    ❌ Cancelar
+                  </CancelButton>
+                  <SubmitButton type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <LoadingSpinner />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        ✅ Agregar Cliente
+                      </>
+                    )}
+                  </SubmitButton>
+                </ButtonGroup>
+              </FormFooter>
             </Form>
           </ModalContent>
         </ModalOverlay>
@@ -124,17 +240,54 @@ const ClienteForm = ({ nuevoCliente, onChange, onSubmit }) => {
 
 export default ClienteForm;
 
-// Reutilizados del modal de productos
+// Estilos modernos y profesionales
+const AddClientButton = styled.button`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const ButtonIcon = styled.span`
+  font-size: 1.2rem;
+`;
+
+const ButtonText = styled.span`
+  font-weight: 600;
+`;
+
 const ModalOverlay = styled.div`
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.3s ease-out;
+  padding: 2rem;
 
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -143,221 +296,316 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f7fa 100%);
-  padding: 40px;
+  background: white;
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  max-width: 600px;
-  width: 90%;
+  max-width: 900px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  position: relative;
-  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   @keyframes slideIn {
-    0% { transform: scale(0.8) translateY(-20px); opacity: 0; }
+    0% { transform: scale(0.9) translateY(-20px); opacity: 0; }
     100% { transform: scale(1) translateY(0); opacity: 1; }
   }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 20px 20px 0 0;
 `;
 
 const ModalTitle = styled.h2`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 30px;
-  position: relative;
+  color: #2d3748;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
 
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 2px;
-  }
+const TitleIcon = styled.span`
+  font-size: 1.5rem;
+  color: #667eea;
 `;
 
 const CloseButton = styled.button`
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 1.2rem;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 
   &:hover {
     transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
   }
 `;
 
 const Form = styled.form`
+  padding: 2rem;
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+`;
+
+const FormColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  text-align: left;
-  padding-right: 25px;
+  gap: 1.5rem;
 `;
 
 const Field = styled.div`
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 
 const Label = styled.label`
   font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 6px;
-  display: block;
-  text-transform: uppercase;
-  color: #2d3748;
+  font-size: 0.9rem;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const LabelIcon = styled.span`
+  font-size: 1rem;
+  color: #667eea;
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: 14px 18px;
+  padding: 0.8rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 16px;
-  background: #ffffff;
+  font-size: 1rem;
+  background: white;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  
+  color: #2d3748;
+
   &:focus {
-    border-color: #667eea;
     outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  &::placeholder {
+    color: #a0aec0;
+  }
+`;
+
+const Select = styled.select`
+  padding: 0.8rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  color: #2d3748;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   }
 `;
 
+const ImageUploadArea = styled.div`
+  position: relative;
+`;
+
 const ImageInput = styled.input`
-  width: 100%;
-  padding: 14px 18px;
+  display: none;
+`;
+
+const ImageUploadLabel = styled.label`
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+`;
+
+const ImagePlaceholder = styled.div`
   border: 2px dashed #cbd5e0;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
   background: #f7fafc;
   transition: all 0.3s ease;
-  cursor: pointer;
-
+  
   &:hover {
     border-color: #667eea;
     background: rgba(102, 126, 234, 0.05);
   }
 `;
 
+const PlaceholderIcon = styled.div`
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #a0aec0;
+`;
+
+const PlaceholderText = styled.div`
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 0.25rem;
+`;
+
+const PlaceholderSubtext = styled.div`
+  font-size: 0.85rem;
+  color: #718096;
+`;
+
 const ImagePreview = styled.div`
-  margin-top: 15px;
-  text-align: center;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
   
-  img {
-    max-width: 200px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border: 3px solid #ffffff;
+  &:hover {
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
   }
+`;
+
+const PreviewImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+`;
+
+const ChangeImageText = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+  padding: 1rem;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  ${ImagePreview}:hover & {
+    opacity: 1;
+  }
+`;
+
+const FormFooter = styled.div`
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 1rem;
 
   @media (max-width: 480px) {
     flex-direction: column;
-    button {
-      width: 100%;
-    }
-  }
-`;
-
-const AddButton = styled.button`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
   }
 `;
 
 const CancelButton = styled.button`
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  background: #f7fafc;
   color: #4a5568;
   border: 2px solid #e2e8f0;
-  padding: 14px 28px;
+  padding: 0.8rem 1.5rem;
   border-radius: 12px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-
-  &:hover {
-    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
-    color: #c53030;
-    border-color: #feb2b2;
-  }
-`;
-
-const AgregarBtn = styled.button`
-  background: #4caf50;
-  color: white;
+  font-weight: 600;
   font-size: 1rem;
-  padding: 0.7rem 1.2rem;
-  border: none;
-  border-radius: 8px;
   cursor: pointer;
-  margin: 1rem 0;
-  font-family: "Raleway";
+  transition: all 0.3s ease;
 
   &:hover {
-    background: #3e8e41;
+    background: #edf2f7;
+    border-color: #cbd5e0;
   }
 `;
 
-const Select = styled.select`
-  width: 100%;
-  padding: 14px 18px;
-  border: 2px solid #e2e8f0;
+const SubmitButton = styled.button`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
   border-radius: 12px;
-  font-size: 16px;
-  background-color: #ffffff;
-  font-family: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
   transition: all 0.3s ease;
-  appearance: none;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
-  &:focus {
-    border-color: #667eea;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
   }
 
-  @media (max-width: 768px) {
-    font-size: 15px;
-    padding: 12px 16px;
-    border-radius: 10px;
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
   }
+`;
 
-  @media (max-width: 480px) {
-    font-size: 14px;
-    padding: 10px 14px;
-    border-radius: 8px;
+const LoadingSpinner = styled.div`
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 `;

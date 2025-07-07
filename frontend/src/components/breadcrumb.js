@@ -60,6 +60,12 @@ const Content = styled.div`
       : 'text-shadow: none;'
   }
 
+  @media (min-width: 770px) and (max-width: 1200px) {
+    left: 50px;
+    transform: translateY(-50%);
+    font-size: 3.5rem;
+  }
+
   @media (max-width: 768px) {
     top: 65%;
     left: 50%;

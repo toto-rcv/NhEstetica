@@ -32,6 +32,7 @@ import TablasRedirect from './components/tablas/TablasRedirect';
 import ProductosAdmin from './pages/admin/productos';
 import TratamientosAdmin from './pages/admin/tratamientos';
 import ComisionesAdmin from './pages/admin/comisiones';
+import TurnosAdmin from './pages/admin/turnos';
 
 const serviciosRoutes = [
   { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
@@ -62,6 +63,10 @@ function AppContent() {
           <Route key={path} path={`/servicios/${path}`} element={element} />
         ))}
         <Route path="/productos/:id" element={<ProductDetail />} />
+        <Route path="/servicios/corporales/:treatmentId" element={<TreatmentDetailPage />} />
+        <Route path="/servicios/faciales/:treatmentId" element={<TreatmentDetailPage />} />
+        <Route path="/servicios/masajes/:treatmentId" element={<TreatmentDetailPage />} />
+        <Route path="/servicios/depilacion/:treatmentId" element={<TreatmentDetailPage />} />
         <Route path="/servicios/:treatmentId" element={<TreatmentDetailPage />} />
 
         {/* Rutas protegidas de admin */}
@@ -113,6 +118,11 @@ function AppContent() {
         <Route path="/admin/comisiones" element={
           <ProtectedRoute>
             <ComisionesAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/turnos" element={
+          <ProtectedRoute>
+            <TurnosAdmin />
           </ProtectedRoute>
         } />
         <Route path="/404" element={<NotFound />} />

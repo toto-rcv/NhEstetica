@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TablasLayout from '../../components/tablas/TablasLayout';
 import TablaVentasTratamientos from '../../components/tablas/ventas/tratamientos/TablaVentasTratamientos';
 import VentaForm from '../../components/tablas/ventas/tratamientos/AgregarVenta';
+import { clientesService } from '../../services/clientesService';
 
 const VentasTratamientos = () => {
   const [ventas, setVentas] = useState([]);
@@ -66,13 +67,11 @@ const VentasTratamientos = () => {
 
   const fetchData = async () => {
     try {
-      const [ventasRes, clientesRes, tratamientosRes, personalRes] = await Promise.all([
+      const [ventasRes, clientesData, tratamientosRes, personalRes] = await Promise.all([
         fetch('/api/ventas/tratamientos', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }),
-        fetch('/api/clientes', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        }),
+        clientesService.getClientes(),
         fetch('/api/tratamientos', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }),
@@ -83,7 +82,6 @@ const VentasTratamientos = () => {
 
       const personalData = await personalRes.json();
       const ventasData = await ventasRes.json();
-      const clientesData = await clientesRes.json();
       const tratamientosData = await tratamientosRes.json();
 
       // Ordenar ventas por fecha (más reciente primero)

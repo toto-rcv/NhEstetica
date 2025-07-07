@@ -15,7 +15,7 @@ exports.getIngresosPorFecha = async (req, res) => {
         p.nombre AS producto_nombre,
         COALESCE(vp.cantidad, 1) AS cantidad,
         COALESCE(vp.forma_de_pago, '-') AS forma_de_pago,
-        vp.precio AS importe,
+        (vp.precio * COALESCE(vp.cantidad, 1)) AS importe,
         COALESCE(vp.observacion, '-') AS observacion,
         vp.fecha
        FROM ventas_productos vp

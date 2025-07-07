@@ -112,13 +112,139 @@ const Productos = () => {
     await loadProductos('');
   };
 
+  // Función para manejar el cambio de imagen en modo edición
+  const handleImageChange = async (e, rowIndex) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setError('Solo se permiten archivos de imagen');
+      return;
+    }
+
+    // Validar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen no puede superar los 5MB');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Subir la nueva imagen
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No hay token de autenticación');
+      
+      const response = await fetch('/api/upload/image?type=producto', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen');
+      }
+
+      const result = await response.json();
+      const newImagePath = result.imagePath;
+
+      // Obtener el producto actual
+      const currentProduct = data[rowIndex];
+      
+      // Actualizar el producto en la base de datos
+      const updatedProductData = {
+        ...currentProduct,
+        imagen: newImagePath
+      };
+
+      // Guardar en la base de datos
+      await productosService.updateProducto(currentProduct.id, updatedProductData);
+
+      // Actualizar la imagen en los datos locales inmediatamente
+      const updatedData = [...data];
+      updatedData[rowIndex] = {
+        ...updatedData[rowIndex],
+        imagen: newImagePath
+      };
+      setData(updatedData);
+
+      // Mostrar mensaje de éxito
+      setMensaje('Imagen actualizada correctamente');
+      setTimeout(() => setMensaje(''), 3000);
+
+    } catch (error) {
+      console.error('Error al cambiar imagen:', error);
+      setError(error.message || 'Error al cambiar la imagen');
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función helper para manejar rutas de imágenes
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    
+    // Si ya es una ruta de API, usarla directamente
+    if (imagePath.startsWith('/api/upload/image/')) {
+      return imagePath;
+    }
+    
+    // Si es el formato anterior, convertirla al nuevo formato
+    if (imagePath.startsWith('/images-de-productos/')) {
+      const filename = imagePath.replace('/images-de-productos/', '');
+      return `/api/upload/image/producto/${filename}`;
+    }
+    
+    // Por defecto, asumir que es una ruta relativa válida
+    return imagePath;
+  };
+
   const columns = [
     { accessorKey: 'nombre', header: 'Nombre' },
     { accessorKey: 'costo', header: 'Costo' },
     { accessorKey: 'precio', header: 'Precio' },
     { accessorKey: 'subtitle', header: 'Subtítulo', hideOnMobile: true },
     { accessorKey: 'descripcion', header: 'Descripción', hideOnMobile: true },
-    { accessorKey: 'imagen', header: 'Imagen', hideOnMobile: true },
+    { 
+      accessorKey: 'imagen', 
+      header: 'Imagen', 
+      hideOnMobile: true,
+      cell: ({ row, table }) => {
+        const isEditing = table.options.state?.editingCell && 
+                         table.options.state.editingCell.rowIndex === row.index && 
+                         table.options.state.editingCell.columnId === 'imagen';
+        
+        return (
+          <ImageCell>
+            <ImageUploadContainer>
+              <ImageUploadInput
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageChange(e, row.index)}
+                id={`image-upload-${row.index}`}
+              />
+              <ImageUploadLabel htmlFor={`image-upload-${row.index}`}>
+                {row.original.imagen ? (
+                  <ProductImage src={getImageUrl(row.original.imagen)} alt="Producto" />
+                ) : (
+                  <NoImagePlaceholder>
+                    📷 Agregar
+                  </NoImagePlaceholder>
+                )}
+              </ImageUploadLabel>
+            </ImageUploadContainer>
+          </ImageCell>
+        );
+      },
+      size: 80,
+    },
     { accessorKey: 'categoria', header: 'Categoría' },
     { accessorKey: 'marca', header: 'Marca' },
     { 
@@ -233,15 +359,39 @@ const Productos = () => {
     try {
       const rowToDelete = data[rowIndex];
       if (rowToDelete && rowToDelete.id) {
-        await productosService.deleteProducto(rowToDelete.id);
+        // Eliminar producto y obtener respuesta
+        const response = await productosService.deleteProducto(rowToDelete.id);
+        
+        // Recargar productos
         await loadProductos(terminoBusqueda);
+        
         // Limpiar búsqueda si estaba activa
         if (terminoBusqueda) {
           limpiarBusqueda();
         }
+        
+        // Mostrar mensaje de éxito con información sobre ventas asociadas
+        if (response.ventasAsociadas > 0) {
+          setMensaje(`${response.message} (${response.ventasAsociadas} venta(s) histórica(s) se mantienen)`);
+        } else {
+          setMensaje(response.message);
+        }
+        setTimeout(() => setMensaje(''), 5000); // Limpiar mensaje después de 5 segundos
       }
     } catch (err) {
-      setError('Error al eliminar producto');
+      console.error('Error al eliminar producto:', err);
+      
+      // Manejar diferentes tipos de errores
+      if (err.message && err.message.includes('No se puede eliminar')) {
+        setError(err.message);
+      } else if (err.message && err.message.includes('no encontrado')) {
+        setError('El producto ya no existe en la base de datos');
+      } else {
+        setError('Error al eliminar producto. Inténtalo de nuevo.');
+      }
+      
+      // Limpiar error después de 5 segundos
+      setTimeout(() => setError(null), 5000);
     }
   };
 
@@ -664,5 +814,91 @@ const PaginationNumber = styled.button`
     width: 35px;
     height: 35px;
     font-size: 0.8rem;
+  }
+`;
+
+// Componentes para mostrar imágenes en la tabla
+const ImageCell = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+`;
+
+const ProductImage = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+  }
+`;
+
+const NoImagePlaceholder = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 0.7rem;
+  text-align: center;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    color: #007bff;
+    transform: scale(1.05);
+  }
+`;
+
+// Componentes para la subida de imagen en modo edición
+const ImageUploadContainer = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ImageUploadInput = styled.input`
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  cursor: pointer;
+`;
+
+const ImageUploadLabel = styled.label`
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:hover ${ProductImage} {
+    transform: scale(1.05);
+  }
+
+  &:hover ${NoImagePlaceholder} {
+    background: #e9ecef;
+    border-color: #adb5bd;
   }
 `; 

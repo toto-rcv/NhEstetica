@@ -15,6 +15,7 @@ exports.register = async (req, res) => {
   try {
     // Verificar si el email ya existe en clientes
     const [existingCliente] = await pool.execute('SELECT * FROM clientes WHERE email = ?', [email]);
+    
     if (existingCliente.length > 0) {
       return res.status(409).json({ success: false, message: 'Ya existe un cliente con este email' });
     }
@@ -36,8 +37,9 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+  
   if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email/Usuario y contraseña son requeridos' });
+    return res.status(400).json({ success: false, message: 'El usuario y la contraseña son requeridos' });
   }
 
   try {
@@ -46,12 +48,14 @@ exports.login = async (req, res) => {
 
     // Primero buscar en usuarios (administradores) - buscar por username (que ahora es email)
     const [users] = await pool.execute('SELECT * FROM users WHERE username = ?', [email]);
+    
     if (users.length > 0) {
       user = users[0];
       userType = 'admin';
     } else {
       // Si no está en users, buscar en clientes por email
       const [clientes] = await pool.execute('SELECT * FROM clientes WHERE email = ?', [email]);
+      
       if (clientes.length > 0) {
         user = clientes[0];
         userType = 'cliente';
@@ -59,40 +63,46 @@ exports.login = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Email o contraseña incorrectos' });
+      return res.status(401).json({ success: false, message: 'El usuario o la contraseña es incorrecto' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ success: false, message: 'Email o contraseña incorrectos' });
+      return res.status(401).json({ success: false, message: 'El usuario o la contraseña es incorrecto' });
     }
 
     const token = generateToken(user);
     
     if (userType === 'admin') {
+      const userData = { 
+        id: user.id, 
+        username: user.username,
+        permisos: user.permisos,
+        type: 'admin'
+      };
+      const token = generateToken(userData);
+      
       res.json({
         success: true,
         message: 'Login exitoso',
-        user: { 
-          id: user.id, 
-          username: user.username,
-          permisos: user.permisos,
-          type: 'admin'
-        },
+        user: userData,
         token
       });
     } else {
+      const userData = { 
+        id: user.id, 
+        nombre: user.nombre,
+        apellido: user.apellido,
+        email: user.email,
+        imagen: user.imagen,
+        type: 'cliente'
+      };
+      const token = generateToken(userData);
+      
       res.json({
         success: true,
         message: 'Login exitoso',
-        user: { 
-          id: user.id, 
-          nombre: user.nombre,
-          apellido: user.apellido,
-          email: user.email,
-          imagen: user.imagen,
-          type: 'cliente'
-        },
+        user: userData,
         token
       });
     }

@@ -247,6 +247,15 @@ const StyledSlider = styled(Slider)`
     color: var(--terciary-color);
     font-size: 12px;
   }
+
+  @media (max-width: 768px) {
+  .slick-slide {
+      padding: 0 15px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+  }
+}
 `;
 
 const StarsWrapper = styled.div`

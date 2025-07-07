@@ -1,20 +1,15 @@
-// components/tablas/caja/Ingresos.js
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { ingresosService } from '../../../services/ingresosService';
 
-const Ingresos = ({ fechaSeleccionada }) => {
+const Ingresos = ({ fechaSeleccionada, cajaCerrada }) => {
   const [ingresos, setIngresos] = useState([]);
 
   useEffect(() => {
     const fetchIngresos = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/ingresos/fecha/${fechaSeleccionada}`);
-        if (res.ok) {
-          const data = await res.json();
-          setIngresos(data);
-        } else {
-          setIngresos([]);
-        }
+        const data = await ingresosService.getIngresosByFecha(fechaSeleccionada);
+        setIngresos(data);
       } catch (err) {
         setIngresos([]);
       }
@@ -25,12 +20,42 @@ const Ingresos = ({ fechaSeleccionada }) => {
 
   if (!ingresos.length) return <EmptyMessage>No hay ingresos registrados</EmptyMessage>;
 
-  const total = ingresos.reduce((acc, i) => acc + (i.importe || 0), 0);
+const calcularTotalFila = (ing) => {
+  // Asegurar que el importe sea un número válido
+  let importe = 0;
+  if (ing.importe !== null && ing.importe !== undefined && ing.importe !== '') {
+    importe = parseFloat(ing.importe);
+    if (isNaN(importe)) {
+      importe = 0;
+    }
+  }
+
+  const sesiones = !isNaN(Number(ing.sesiones)) ? Number(ing.sesiones) : 0;
+
+  // Verificar si es un tratamiento (tiene nombre de tratamiento y no es '-')
+  if (ing.tratamiento_nombre && ing.tratamiento_nombre !== '-' && ing.tratamiento_nombre !== '') {
+    return importe * sesiones;
+  } 
+  // Verificar si es un producto (tiene nombre de producto y no es '-')
+  else if (ing.producto_nombre && ing.producto_nombre !== '-' && ing.producto_nombre !== '') {
+    return importe; // El backend ya calcula precio * cantidad
+  }
+
+  return importe;
+};
+
+
+  const total = ingresos.reduce((acc, i) => acc + calcularTotalFila(i), 0);
 
   return (
     <Section>
       <Header>
         <Title>Ingresos</Title>
+        {cajaCerrada && (
+          <StatusMessage>
+            🔒 Caja cerrada - No se pueden agregar más ingresos
+          </StatusMessage>
+        )}
       </Header>
       <Table>
         <thead>
@@ -54,7 +79,7 @@ const Ingresos = ({ fechaSeleccionada }) => {
               <td>{ing.producto_nombre}</td>
               <td>{ing.cantidad}</td>
               <td>{ing.forma_de_pago}</td>
-              <td>${ing.importe}</td>
+              <td>${calcularTotalFila(ing).toFixed(2)}</td>
               <td>{ing.observacion}</td>
             </tr>
           ))}
@@ -62,7 +87,7 @@ const Ingresos = ({ fechaSeleccionada }) => {
         <tfoot>
           <TrFooter>
             <td colSpan={7}><strong>Total</strong></td>
-            <td><strong>${total.toFixed(2)}</strong></td>
+            <TotalCell>${total.toLocaleString('es-AR')}</TotalCell>
           </TrFooter>
         </tfoot>
       </Table>
@@ -72,7 +97,7 @@ const Ingresos = ({ fechaSeleccionada }) => {
 
 export default Ingresos;
 
-
+// Styled Components
 const Title = styled.h3`
   margin-bottom: 1rem;
   color: #2c3e50;
@@ -104,7 +129,6 @@ const Table = styled.table`
   }
 `;
 
-
 const TrFooter = styled.tr`
   background-color: #ecf0f1;
   font-weight: 700;
@@ -127,6 +151,20 @@ const Header = styled.div`
   align-items: center;
 
   h3 {
-  font-size: 1.5rem;
+    font-size: 1.5rem;
   }
+`;
+
+const StatusMessage = styled.div`
+  background: #e67e22;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+const TotalCell = styled.td`
+  color: green;
+  font-weight: bold;
 `;

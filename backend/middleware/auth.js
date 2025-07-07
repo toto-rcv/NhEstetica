@@ -29,8 +29,14 @@ const authenticateToken = (req, res, next) => {
 
 // Función para generar token JWT
 const generateToken = (user) => {
+  const payload = {
+    id: user.id,
+    username: user.username || user.email, // Usar email para clientes, username para admins
+    type: user.type || (user.username ? 'admin' : 'cliente')
+  };
+  
   return jwt.sign(
-    { id: user.id, username: user.username },
+    payload,
     JWT_SECRET,
     { expiresIn: '24h' } // Token válido por 24 horas
   );

@@ -4,6 +4,7 @@ import TablasLayout from '../../components/tablas/TablasLayout';
 import TablaClientes from '../../components/tablas/clientes/TablaClientes';
 import ClienteForm from '../../components/tablas/clientes/AgregarCliente';
 import DetalleCliente from '../../components/tablas/clientes/DetalleCliente';
+import { clientesService } from '../../services/clientesService';
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -11,6 +12,7 @@ const Clientes = () => {
   const [mensaje, setMensaje] = useState('');
   const [clienteEditandoId, setClienteEditandoId] = useState(null);
   const [clienteEditado, setClienteEditado] = useState(null);
+  
   // Estados para la búsqueda
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [buscando, setBuscando] = useState(false);
@@ -18,7 +20,13 @@ const Clientes = () => {
   
   // Estados para la paginación
   const [paginaActual, setPaginaActual] = useState(1);
-  const clientesPorPagina = 5;
+  const clientesPorPagina = 8;
+
+  // Estados para filtros avanzados
+  const [filtroNacionalidad, setFiltroNacionalidad] = useState('');
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState('');
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState('');
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   useEffect(() => {
     cargarClientes();
@@ -26,47 +34,82 @@ const Clientes = () => {
 
   const cargarClientes = async () => {
     try {
-      const res = await fetch('/api/clientes', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      const data = await res.json();
+      setLoading(true);
+      const data = await clientesService.getClientes();
       setClientes(data);
-      setClientesOriginales(data); // Guardamos los clientes originales
-      setLoading(false);
+      setClientesOriginales(data);
     } catch (error) {
       console.error('Error al obtener clientes:', error);
+      setMensaje('Error al cargar los clientes');
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const aplicarFiltros = () => {
+    let clientesFiltrados = [...clientesOriginales];
+
+    // Filtro por texto
+    if (terminoBusqueda.trim()) {
+      const termino = terminoBusqueda.toLowerCase();
+      clientesFiltrados = clientesFiltrados.filter(cliente =>
+        cliente.nombre.toLowerCase().includes(termino) ||
+        cliente.apellido.toLowerCase().includes(termino) ||
+        cliente.email.toLowerCase().includes(termino) ||
+        cliente.telefono.includes(termino)
+      );
+    }
+
+    // Filtro por nacionalidad
+    if (filtroNacionalidad) {
+      clientesFiltrados = clientesFiltrados.filter(cliente => 
+        cliente.nacionalidad === filtroNacionalidad
+      );
+    }
+
+    // Filtro por fecha
+    if (filtroFechaDesde || filtroFechaHasta) {
+      clientesFiltrados = clientesFiltrados.filter(cliente => {
+        const fechaCliente = new Date(cliente.antiguedad);
+        const fechaDesde = filtroFechaDesde ? new Date(filtroFechaDesde) : null;
+        const fechaHasta = filtroFechaHasta ? new Date(filtroFechaHasta) : null;
+        
+        if (fechaDesde && fechaCliente < fechaDesde) return false;
+        if (fechaHasta && fechaCliente > fechaHasta) return false;
+        return true;
+      });
+    }
+
+    setClientes(clientesFiltrados);
+    setPaginaActual(1);
+    
+    if (clientesFiltrados.length === 0 && (terminoBusqueda || filtroNacionalidad || filtroFechaDesde || filtroFechaHasta)) {
+      setMensaje('No se encontraron clientes con los criterios seleccionados');
+    } else {
+      setMensaje('');
     }
   };
 
   const buscarClientes = async (termino) => {
     if (!termino.trim()) {
-      // Si no hay término de búsqueda, mostrar todos los clientes
       setClientes(clientesOriginales);
       setMensaje('');
-      setPaginaActual(1); // Resetear a la primera página
+      setPaginaActual(1);
       return;
     }
 
     setBuscando(true);
     try {
-      const res = await fetch(`/api/clientes/search?term=${encodeURIComponent(termino)}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      const data = await res.json();
+      const data = await clientesService.searchClientes(termino);
       
       if (data.length === 0) {
-        setMensaje('No se pudo encontrar al Cliente solicitado');
+        setMensaje('No se encontraron clientes con ese criterio de búsqueda');
         setClientes([]);
       } else {
         setClientes(data);
         setMensaje(`Se encontraron ${data.length} cliente${data.length > 1 ? 's' : ''}`);
       }
-      setPaginaActual(1); // Resetear a la primera página
+      setPaginaActual(1);
     } catch (error) {
       console.error('Error al buscar clientes:', error);
       setMensaje('Error al buscar clientes');
@@ -79,22 +122,23 @@ const Clientes = () => {
     const termino = e.target.value;
     setTerminoBusqueda(termino);
     
-    // Limpiar el timeout anterior si existe
     if (window.searchTimeout) {
       clearTimeout(window.searchTimeout);
     }
     
-    // Búsqueda en tiempo real con debounce
     window.searchTimeout = setTimeout(() => {
-      buscarClientes(termino);
-    }, 500);
+      aplicarFiltros();
+    }, 300);
   };
 
-  const limpiarBusqueda = () => {
+  const limpiarFiltros = () => {
     setTerminoBusqueda('');
+    setFiltroNacionalidad('');
+    setFiltroFechaDesde('');
+    setFiltroFechaHasta('');
     setClientes(clientesOriginales);
     setMensaje('');
-    setPaginaActual(1); // Resetear a la primera página
+    setPaginaActual(1);
   };
 
   const iniciarEdicion = (cliente) => {
@@ -121,41 +165,17 @@ const Clientes = () => {
 
   const guardarEdicion = async () => {
     try {
-      let body;
-      let headers = {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      };
-      let isFormData = clienteEditado.imagen instanceof File;
-      if (isFormData) {
-        body = new FormData();
-        body.append('nombre', clienteEditado.nombre);
-        body.append('apellido', clienteEditado.apellido);
-        body.append('direccion', clienteEditado.direccion);
-        body.append('email', clienteEditado.email);
-        body.append('telefono', clienteEditado.telefono);
-        body.append('antiguedad', clienteEditado.antiguedad);
-        body.append('imagen', clienteEditado.imagen);
-      } else {
-        headers['Content-Type'] = 'application/json';
-        body = JSON.stringify(clienteEditado);
-      }
-      const res = await fetch(`/api/clientes/${clienteEditado.id}`, {
-        method: 'PUT',
-        headers,
-        body,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        // Actualizar tanto la lista actual como la original
-        setClientes(prev => prev.map(c => (c.id === data.id ? data : c)));
-        setClientesOriginales(prev => prev.map(c => (c.id === data.id ? data : c)));
-        setMensaje('Cliente actualizado ✅');
-        cancelarEdicion();
-      } else {
-        setMensaje(data.message || 'Error al guardar cambios');
-      }
+      const clienteActualizado = await clientesService.updateCliente(clienteEditado.id, clienteEditado);
+      
+      // Actualizar la lista de clientes con el cliente actualizado
+      setClientes(prev => prev.map(c => (c.id === clienteActualizado.id ? clienteActualizado : c)));
+      setClientesOriginales(prev => prev.map(c => (c.id === clienteActualizado.id ? clienteActualizado : c)));
+      
+      setMensaje('Cliente actualizado exitosamente ✅');
+      cancelarEdicion();
     } catch (error) {
-      setMensaje('Error de red al guardar cambios');
+      console.error('Error al actualizar cliente:', error);
+      setMensaje(error.message || 'Error al actualizar el cliente');
     }
   };
 
@@ -164,34 +184,31 @@ const Clientes = () => {
     if (!confirmar) return;
 
     try {
-      const res = await fetch(`/api/clientes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      if (res.ok) {
-        // Actualizar tanto la lista actual como la original
-        const nuevosClientes = clientes.filter(cliente => cliente.id !== id);
-        const nuevosClientesOriginales = clientesOriginales.filter(cliente => cliente.id !== id);
-        
-        setClientes(nuevosClientes);
-        setClientesOriginales(nuevosClientesOriginales);
-        
-        // Ajustar página actual si es necesario
-        const nuevasPaginas = Math.ceil(nuevosClientes.length / clientesPorPagina);
-        if (paginaActual > nuevasPaginas && nuevasPaginas > 0) {
-          setPaginaActual(nuevasPaginas);
-        }
-        
-        setMensaje('Cliente eliminado correctamente ❌');
-      } else {
-        const data = await res.json();
-        setMensaje(data.message || 'Error al eliminar cliente');
+      await clientesService.deleteCliente(id);
+      
+      const nuevosClientes = clientes.filter(cliente => cliente.id !== id);
+      const nuevosClientesOriginales = clientesOriginales.filter(cliente => cliente.id !== id);
+      
+      setClientes(nuevosClientes);
+      setClientesOriginales(nuevosClientesOriginales);
+      
+      const nuevasPaginas = Math.ceil(nuevosClientes.length / clientesPorPagina);
+      if (paginaActual > nuevasPaginas && nuevasPaginas > 0) {
+        setPaginaActual(nuevasPaginas);
       }
+      
+      setMensaje('Cliente eliminado correctamente ✅');
     } catch (error) {
-      setMensaje('Error de red al intentar eliminar cliente');
+      console.error('Error al eliminar cliente:', error);
+      
+      // Manejar diferentes tipos de errores
+      if (error.message && error.message.includes('registros relacionados')) {
+        setMensaje('❌ No se puede eliminar el cliente porque tiene registros relacionados (turnos, ventas, etc.)');
+      } else if (error.message && error.message.includes('no encontrado')) {
+        setMensaje('❌ Cliente no encontrado');
+      } else {
+        setMensaje(`❌ Error al eliminar el cliente: ${error.message || 'Error desconocido'}`);
+      }
     }
   };
 
@@ -206,50 +223,29 @@ const Clientes = () => {
     nacionalidad: '',
   });
   
-const handleInputChange = (e) => {
-  const { name, value, files } = e.target;
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
 
-  if (name === 'imagen') {
-    const imagen = files ? files[0] : value; // aceptar ambos casos
-    setNuevoCliente(prev => ({ ...prev, imagen }));
-  } else {
-    setNuevoCliente(prev => ({ ...prev, [name]: value }));
-  }
-};
+    if (name === 'imagen') {
+      const imagen = files ? files[0] : value;
+      setNuevoCliente(prev => ({ ...prev, imagen }));
+    } else {
+      setNuevoCliente(prev => ({ ...prev, [name]: value }));
+    }
+  };
 
   const handleAgregarCliente = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const formData = new FormData();
-  formData.append('nombre', nuevoCliente.nombre);
-  formData.append('apellido', nuevoCliente.apellido);
-  formData.append('direccion', nuevoCliente.direccion);
-  formData.append('email', nuevoCliente.email);
-  formData.append('telefono', nuevoCliente.telefono);
-  formData.append('antiguedad', nuevoCliente.antiguedad || '');
-  formData.append('nacionalidad', nuevoCliente.nacionalidad || '');
-
-  if (nuevoCliente.imagen) {
-    formData.append('imagen', nuevoCliente.imagen);
-  }
-
-  const url = nuevoCliente.id ? `/api/clientes/${nuevoCliente.id}` : '/api/clientes';
-  const method = nuevoCliente.id ? 'PUT' : 'POST';
-
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        // NO poner 'Content-Type' para que fetch lo configure automáticamente
-      },
-      body: formData,
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setMensaje(nuevoCliente.id ? 'Cliente actualizado con éxito ✏️' : 'Cliente agregado con éxito ✅');
+    try {
+      if (nuevoCliente.id) {
+        await clientesService.updateCliente(nuevoCliente.id, nuevoCliente);
+        setMensaje('Cliente actualizado exitosamente ✅');
+      } else {
+        await clientesService.createCliente(nuevoCliente);
+        setMensaje('Cliente agregado exitosamente ✅');
+      }
+      
       await cargarClientes();
       setNuevoCliente({
         nombre: '',
@@ -261,16 +257,10 @@ const handleInputChange = (e) => {
         imagen: null,
         nacionalidad: '',
       });
-      // Reset búsqueda o paginación según corresponda
-    } else {
-      setMensaje(data.message || 'Error al guardar cliente');
+    } catch (error) {
+      setMensaje(error.message || 'Error al guardar el cliente');
     }
-  } catch (error) {
-    setMensaje('Error de red al intentar guardar cliente');
-  }
-};
-
-
+  };
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
 
@@ -304,41 +294,153 @@ const handleInputChange = (e) => {
     }
   };
 
+  // Calcular estadísticas
+  const estadisticas = {
+    total: clientes.length,
+    argentinos: clientes.filter(c => c.nacionalidad === 'Argentina').length,
+    paraguayos: clientes.filter(c => c.nacionalidad === 'Paraguay').length,
+    nuevosEsteMes: clientes.filter(c => {
+      const fechaCliente = new Date(c.antiguedad);
+      const hoy = new Date();
+      return fechaCliente.getMonth() === hoy.getMonth() && fechaCliente.getFullYear() === hoy.getFullYear();
+    }).length
+  };
+
   return (
-    <TablasLayout title="Gestión de Clientes">
+    <TablasLayout>
       <Container>
-        <Title>Gestión de Clientes</Title>
-        <Text>Aquí podrás gestionar la información de los clientes del establecimiento.</Text>
+        <Header>
+          <HeaderContent>
+            <TitleSection>
+              <Title>👥 Gestión de Clientes</Title>
+              <Subtitle>Administra y supervisa la información de tus clientes</Subtitle>
+            </TitleSection>
+            <ActionButtons>
+              <ClienteForm
+                nuevoCliente={nuevoCliente}
+                onChange={handleInputChange}
+                onSubmit={handleAgregarCliente}
+                mensaje={mensaje}
+              />
+            </ActionButtons>
+          </HeaderContent>
+        </Header>
 
-        {mensaje && <MensajeContainer tipo={mensaje.includes('No se pudo encontrar') ? 'error' : 'success'}>{mensaje}</MensajeContainer>}
+        {/* Estadísticas rápidas */}
+        <StatsContainer>
+          <StatCard>
+            <StatNumber>{estadisticas.total}</StatNumber>
+            <StatLabel>Total Clientes</StatLabel>
+            <StatIcon>👥</StatIcon>
+          </StatCard>
+          <StatCard>
+            <StatNumber>{estadisticas.argentinos}</StatNumber>
+            <StatLabel>Argentinos</StatLabel>
+            <StatIcon>🇦🇷</StatIcon>
+          </StatCard>
+          <StatCard>
+            <StatNumber>{estadisticas.paraguayos}</StatNumber>
+            <StatLabel>Paraguayos</StatLabel>
+            <StatIcon>🇵🇾</StatIcon>
+          </StatCard>
+          <StatCard>
+            <StatNumber>{estadisticas.nuevosEsteMes}</StatNumber>
+            <StatLabel>Nuevos este mes</StatLabel>
+            <StatIcon>🆕</StatIcon>
+          </StatCard>
+        </StatsContainer>
 
-        {/* Sección con buscador y botón agregar */}
-        <TopActionsContainer>
-          <SearchInputContainer>
-            <SearchInput
-              type="text"
-              placeholder="Buscar cliente por nombre o apellido..."
-              value={terminoBusqueda}
-              onChange={handleBusquedaChange}
-            />
-            {buscando && <SearchSpinner>🔍</SearchSpinner>}
-            {terminoBusqueda && (
-              <ClearButton onClick={limpiarBusqueda}>
-                ✕
-              </ClearButton>
+        {mensaje && (
+          <MensajeContainer tipo={mensaje.includes('Error') || mensaje.includes('No se') ? 'error' : 'success'}>
+            {mensaje}
+          </MensajeContainer>
+        )}
+
+        {/* Controles de búsqueda y filtros */}
+        <SearchSection>
+          <SearchContainer>
+            <SearchInputContainer>
+              <SearchIcon>🔍</SearchIcon>
+              <SearchInput
+                type="text"
+                placeholder="Buscar por nombre, apellido, email o teléfono..."
+                value={terminoBusqueda}
+                onChange={handleBusquedaChange}
+              />
+              {buscando && <SearchSpinner>⏳</SearchSpinner>}
+              {terminoBusqueda && (
+                <ClearButton onClick={limpiarFiltros}>
+                  ✕
+                </ClearButton>
+              )}
+            </SearchInputContainer>
+          </SearchContainer>
+
+          <FilterSection>
+            <FilterToggle onClick={() => setMostrarFiltros(!mostrarFiltros)}>
+              🔧 Filtros {mostrarFiltros ? '▼' : '▶'}
+            </FilterToggle>
+            
+            {mostrarFiltros && (
+              <FiltersContainer>
+                <FilterGroup>
+                  <FilterLabel>Nacionalidad</FilterLabel>
+                  <FilterSelect
+                    value={filtroNacionalidad}
+                    onChange={(e) => setFiltroNacionalidad(e.target.value)}
+                  >
+                    <option value="">Todas</option>
+                    <option value="Argentina">Argentina</option>
+                    <option value="Paraguay">Paraguay</option>
+                  </FilterSelect>
+                </FilterGroup>
+
+                <FilterGroup>
+                  <FilterLabel>Desde</FilterLabel>
+                  <FilterInput
+                    type="date"
+                    value={filtroFechaDesde}
+                    onChange={(e) => setFiltroFechaDesde(e.target.value)}
+                  />
+                </FilterGroup>
+
+                <FilterGroup>
+                  <FilterLabel>Hasta</FilterLabel>
+                  <FilterInput
+                    type="date"
+                    value={filtroFechaHasta}
+                    onChange={(e) => setFiltroFechaHasta(e.target.value)}
+                  />
+                </FilterGroup>
+
+                <FilterActions>
+                  <ApplyFiltersButton onClick={aplicarFiltros}>
+                    Aplicar Filtros
+                  </ApplyFiltersButton>
+                  <ClearFiltersButton onClick={limpiarFiltros}>
+                    Limpiar
+                  </ClearFiltersButton>
+                </FilterActions>
+              </FiltersContainer>
             )}
-          </SearchInputContainer>
-          
-          <ClienteForm
-            nuevoCliente={nuevoCliente}
-            onChange={handleInputChange}
-            onSubmit={handleAgregarCliente}
-            mensaje={mensaje}
-          />
-        </TopActionsContainer>
+          </FilterSection>
+        </SearchSection>
 
         {loading ? (
-          <p>Cargando clientes...</p>
+          <LoadingContainer>
+            <LoadingSpinner>⏳</LoadingSpinner>
+            <LoadingText>Cargando clientes...</LoadingText>
+          </LoadingContainer>
+        ) : clientes.length === 0 ? (
+          <EmptyState>
+            <EmptyIcon>👥</EmptyIcon>
+            <EmptyTitle>No hay clientes registrados</EmptyTitle>
+            <EmptySubtitle>
+              {terminoBusqueda || filtroNacionalidad || filtroFechaDesde || filtroFechaHasta
+                ? 'No se encontraron clientes con los criterios seleccionados'
+                : 'Comienza agregando tu primer cliente'}
+            </EmptySubtitle>
+          </EmptyState>
         ) : (
           <>
             <TablaClientes
@@ -354,12 +456,13 @@ const handleInputChange = (e) => {
               onEditImageChange={handleEditImageChange}
             />
             
-            {/* Componente de Paginación */}
+            {/* Paginación mejorada */}
             {totalPaginas > 1 && (
               <PaginationContainer>
                 <PaginationInfo>
-                  Mostrando {indicePrimerCliente + 1} - {Math.min(indiceUltimoCliente, clientes.length)} de {clientes.length} clientes
+                  <strong>{indicePrimerCliente + 1} - {Math.min(indiceUltimoCliente, clientes.length)}</strong> de <strong>{clientes.length}</strong> clientes
                 </PaginationInfo>
+                
                 <PaginationControls>
                   <PaginationButton 
                     onClick={paginaAnterior} 
@@ -370,6 +473,13 @@ const handleInputChange = (e) => {
                   
                   {[...Array(totalPaginas)].map((_, index) => {
                     const numeroPagina = index + 1;
+                    const isVisible = 
+                      numeroPagina === 1 || 
+                      numeroPagina === totalPaginas || 
+                      (numeroPagina >= paginaActual - 1 && numeroPagina <= paginaActual + 1);
+                    
+                    if (!isVisible) return null;
+                    
                     return (
                       <PaginationButton
                         key={numeroPagina}
@@ -393,12 +503,11 @@ const handleInputChange = (e) => {
           </>
         )}
 
-        {!clienteSeleccionado && (
-          <DetailsContainer>
-            <p style={{ textAlign: 'center', color: '#666' }}>
-              Haz clic en una fila de la tabla para ver los detalles del empleado
-            </p>
-          </DetailsContainer>
+        {!clienteSeleccionado && !loading && clientes.length > 0 && (
+          <DetailsPlaceholder>
+            <PlaceholderIcon>👆</PlaceholderIcon>
+            <PlaceholderText>Haz clic en cualquier cliente para ver sus detalles</PlaceholderText>
+          </DetailsPlaceholder>
         )}
 
         {clienteSeleccionado && (
@@ -411,100 +520,156 @@ const handleInputChange = (e) => {
 
 export default Clientes;
 
+// Estilos modernos y profesionales
 const Container = styled.div`
-  text-align: left;
-  padding: 3rem;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+  padding: 2rem;
 `;
 
-const Title = styled.h2`
-  color: #333;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+const Header = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
 `;
 
-const Text = styled.p`
-  color: #666;
-  font-size: 1.1rem;
-  line-height: 1.6;
-`;
-
-
-const DetailsContainer = styled.div`
-  margin-top: 2rem;
-  background: var(--background-overlay);
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: visible;
-  padding: 1rem;
-  
-  @media (max-width: 768px) {
-    margin-top: 1.5rem;
-    padding: 0.5rem;
-  }
-  
-  @media (max-width: 600px) {
-    margin-top: 1rem;
-    padding: 0.3rem;
-  }
-`;
-
-const TopActionsContainer = styled.div`
+const HeaderContent = styled.div`
   display: flex;
-  align-items: center;
-  gap: 2rem;
-  margin: 2rem 0;
-  flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+`;
 
+const TitleSection = styled.div`
+  flex: 1;
+  min-width: 300px;
+`;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+const Title = styled.h1`
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const Subtitle = styled.p`
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+`;
+
+const StatsContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+`;
+
+const StatCard = styled.div`
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   }
+`;
+
+const StatNumber = styled.div`
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.9rem;
+  color: #718096;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+`;
+
+const StatIcon = styled.div`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  opacity: 0.6;
+`;
+
+const SearchSection = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+`;
+
+const SearchContainer = styled.div`
+  margin-bottom: 1.5rem;
 `;
 
 const SearchInputContainer = styled.div`
   position: relative;
-  flex: 1;
-  max-width: 400px;
-  min-width: 250px;
+  max-width: 500px;
+`;
 
-  @media (max-width: 768px) {
-    max-width: 100%;
-  }
+const SearchIcon = styled.div`
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #a0aec0;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 12px 45px 12px 15px;
+  padding: 1rem 1rem 1rem 3rem;
   font-size: 1rem;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  outline: none;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f7fafc;
   transition: all 0.3s ease;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   &:focus {
-    border-color: #3498db;
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   }
 
   &::placeholder {
-    color: #999;
-    font-style: italic;
+    color: #a0aec0;
   }
 `;
 
 const SearchSpinner = styled.div`
   position: absolute;
-  right: 35px;
+  right: 3rem;
   top: 50%;
   transform: translateY(-50%);
+  font-size: 1.2rem;
   animation: spin 1s linear infinite;
   
   @keyframes spin {
@@ -515,36 +680,220 @@ const SearchSpinner = styled.div`
 
 const ClearButton = styled.button`
   position: absolute;
-  right: 8px;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #999;
+  color: #a0aec0;
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
+  border-radius: 50%;
+  transition: all 0.2s ease;
 
   &:hover {
-    color: #e74c3c;
+    background: #fed7d7;
+    color: #e53e3e;
   }
 `;
 
-const MensajeContainer = styled.div`
-  padding: 12px 20px;
-  margin: 1rem 0;
+const FilterSection = styled.div``;
+
+const FilterToggle = styled.button`
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #4a5568;
+
+  &:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+  }
+`;
+
+const FiltersContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+`;
+
+const FilterGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const FilterLabel = styled.label`
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
+`;
+
+const FilterSelect = styled.select`
+  padding: 0.8rem;
+  border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-weight: 500;
+  background: white;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const FilterInput = styled.input`
+  padding: 0.8rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const FilterActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: end;
+`;
+
+const ApplyFiltersButton = styled.button`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+`;
+
+const ClearFiltersButton = styled.button`
+  background: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #edf2f7;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+`;
+
+const LoadingSpinner = styled.div`
+  font-size: 3rem;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.p`
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #718096;
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+`;
+
+const EmptyTitle = styled.h3`
+  font-size: 1.5rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+`;
+
+const EmptySubtitle = styled.p`
+  color: #718096;
   text-align: center;
-  background-color: ${props => props.tipo === 'error' ? '#fee' : '#efe'};
-  color: ${props => props.tipo === 'error' ? '#c53030' : '#38a169'};
-  border: 1px solid ${props => props.tipo === 'error' ? '#fed7d7' : '#c6f6d5'};
+  max-width: 400px;
+`;
+
+const DetailsPlaceholder = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  margin-top: 2rem;
+`;
+
+const PlaceholderIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+`;
+
+const PlaceholderText = styled.p`
+  color: #718096;
+  font-size: 1.1rem;
+`;
+
+const MensajeContainer = styled.div`
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid;
+  background: ${props => props.tipo === 'error' ? '#fed7d7' : '#c6f6d5'};
+  color: ${props => props.tipo === 'error' ? '#c53030' : '#2f855a'};
+  border-color: ${props => props.tipo === 'error' ? '#feb2b2' : '#9ae6b4'};
 `;
 
 const PaginationContainer = styled.div`
@@ -552,62 +901,48 @@ const PaginationContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 1rem;
-    align-items: center;
   }
 `;
 
-const PaginationInfo = styled.span`
+const PaginationInfo = styled.div`
+  color: #4a5568;
   font-size: 0.9rem;
-  color: #666;
-  
-  @media (max-width: 768px) {
-    text-align: center;
-    font-size: 0.8rem;
-  }
 `;
 
 const PaginationControls = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
-  @media (max-width: 480px) {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.3rem;
-  }
 `;
 
 const PaginationButton = styled.button`
-  padding: 0.5rem 1rem;
-  border: 1px solid ${props => props.$active ? '#3498db' : '#e1e5e9'};
+  padding: 0.6rem 1rem;
+  border: 2px solid ${props => props.$active ? '#667eea' : '#e2e8f0'};
   border-radius: 8px;
-  background: ${props => props.$active ? '#3498db' : 'white'};
-  color: ${props => props.$active ? 'white' : '#666'};
+  background: ${props => props.$active ? '#667eea' : 'white'};
+  color: ${props => props.$active ? 'white' : '#4a5568'};
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
   min-width: 40px;
 
   &:hover:not(:disabled) {
-    background: ${props => props.$active ? '#2980b9' : '#e1e5e9'};
+    background: ${props => props.$active ? '#5a67d8' : '#f7fafc'};
     transform: translateY(-1px);
   }
 
   &:disabled {
-    background: #f0f0f0;
-    color: #ccc;
+    background: #f7fafc;
+    color: #a0aec0;
     cursor: not-allowed;
-    border-color: #e0e0e0;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 0.4rem 0.7rem;
-    font-size: 0.8rem;
-    min-width: 35px;
+    border-color: #e2e8f0;
   }
 `;

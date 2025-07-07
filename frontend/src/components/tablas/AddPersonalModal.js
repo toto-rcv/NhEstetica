@@ -93,11 +93,19 @@ const AddPersonalModal = ({ isOpen, onClose, onSuccess }) => {
 
     setUploadingImage(true);
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No hay token de autenticación');
+      }
+
       const formData = new FormData();
       formData.append('image', imageFile);
 
       const response = await fetch(`/api/upload/image?type=personal`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
 

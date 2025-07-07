@@ -35,10 +35,16 @@ const ProductsGrid = ({ products, loading = false }) => {
             <Card key={index}>
               {isValidProduct ? (
                 <LinkStyled to={`/productos/${product.id}`}>
-                  <ProductImage src={product.image} alt={product.name} />
+                  <ProductImage 
+                    src={product.image && product.image.trim() !== '' ? product.image : null} 
+                    alt={product.name} 
+                  />
                 </LinkStyled>
               ) : (
-                <ProductImage src={product.image} alt={product.name} />
+                <ProductImage 
+                  src={product.image && product.image.trim() !== '' ? product.image : null} 
+                  alt={product.name} 
+                />
               )}
               <ProductName>{product.name}</ProductName>
               <ProductBrand>{product.brand}</ProductBrand>

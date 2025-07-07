@@ -1,6 +1,13 @@
 const API_BASE_URL = '/api';
 
 export const productosService = {
+  // Obtener token de autorización
+  getAuthHeaders() {
+    return {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    };
+  },
+
   // Obtener todos los productos (con búsqueda opcional y paginación)
   async getProductos(searchTerm = '', page = 1, limit = 10) {
     const params = new URLSearchParams();
@@ -9,21 +16,27 @@ export const productosService = {
     params.append('limit', limit.toString());
     
     const url = `${API_BASE_URL}/productos?${params.toString()}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: this.getAuthHeaders(),
+    });
     if (!response.ok) throw new Error('Error al obtener productos');
     return await response.json();
   },
 
   // Obtener producto por ID
   async getProductoById(id) {
-    const response = await fetch(`${API_BASE_URL}/productos/${id}`);
+    const response = await fetch(`${API_BASE_URL}/productos/${id}`, {
+      headers: this.getAuthHeaders(),
+    });
     if (!response.ok) throw new Error('Error al obtener producto');
     return await response.json();
   },
 
   // Buscar producto por nombre exacto
   async getProductoByNombre(nombre) {
-    const response = await fetch(`${API_BASE_URL}/productos/nombre/${encodeURIComponent(nombre)}`);
+    const response = await fetch(`${API_BASE_URL}/productos/nombre/${encodeURIComponent(nombre)}`, {
+      headers: this.getAuthHeaders(),
+    });
     if (!response.ok) {
       if (response.status === 404) return null;
       throw new Error('Error al buscar producto');
@@ -33,9 +46,14 @@ export const productosService = {
 
   // Crear producto
   async createProducto(productoData) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...this.getAuthHeaders(),
+    };
+
     const response = await fetch(`${API_BASE_URL}/productos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(productoData),
     });
     if (!response.ok) throw new Error('Error al crear producto');
@@ -44,9 +62,14 @@ export const productosService = {
 
   // Actualizar producto
   async updateProducto(id, productoData) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...this.getAuthHeaders(),
+    };
+
     const response = await fetch(`${API_BASE_URL}/productos/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(productoData),
     });
     if (!response.ok) throw new Error('Error al actualizar producto');
@@ -57,8 +80,14 @@ export const productosService = {
   async deleteProducto(id) {
     const response = await fetch(`${API_BASE_URL}/productos/${id}`, {
       method: 'DELETE',
+      headers: this.getAuthHeaders(),
     });
-    if (!response.ok) throw new Error('Error al eliminar producto');
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error al eliminar producto');
+    }
+    
     return await response.json();
   },
 }; 

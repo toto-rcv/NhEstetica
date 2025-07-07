@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TablasLayout from '../../components/tablas/TablasLayout';
 import TablaVentasProductos from '../../components/tablas/ventas/productos/TablaVentasProductos';
 import VentaForm from '../../components/tablas/ventas/productos/AgregarVenta';
+import { clientesService } from '../../services/clientesService';
 
 const VentasProductos = () => {
   const [ventas, setVentas] = useState([]);
@@ -49,17 +50,13 @@ const VentasProductos = () => {
 
 const fetchData = async () => {
   try {
-    const [ventasRes, clientesRes, productosRes] = await Promise.all([
+    const [ventasRes, clientesData, productosRes] = await Promise.all([
       fetch('/api/ventas/productos', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }),
-      fetch('/api/clientes', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      }),
+      clientesService.getClientes(),
       fetch('/api/productos?limit=1000', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -68,7 +65,6 @@ const fetchData = async () => {
     ]);
 
     const ventasData = await ventasRes.json();
-    const clientesData = await clientesRes.json();
     const productosResponse = await productosRes.json();
     
     // La API devuelve un objeto con estructura de paginación: {data: productos[], pagination: {}}

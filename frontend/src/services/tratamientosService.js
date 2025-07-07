@@ -1,11 +1,19 @@
 const API_URL = '/api/tratamientos';
+const PUBLIC_API_URL = '/api/tratamientos/public';
 
 export const tratamientosService = {
+  // Obtener token de autorización
+  getAuthHeaders() {
+    return {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    };
+  },
+
   getTratamientos: async (searchTerm = '') => {
     try {
       const url = searchTerm 
-        ? `${API_URL}?query=${encodeURIComponent(searchTerm)}`
-        : API_URL;
+        ? `${PUBLIC_API_URL}?query=${encodeURIComponent(searchTerm)}`
+        : PUBLIC_API_URL;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Error al obtener tratamientos');
@@ -19,7 +27,7 @@ export const tratamientosService = {
 
   getTratamiento: async (id) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`);
+      const response = await fetch(`${PUBLIC_API_URL}/${id}`);
       if (!response.ok) {
         throw new Error('Error al obtener tratamiento');
       }
@@ -32,11 +40,14 @@ export const tratamientosService = {
 
   createTratamiento: async (tratamiento) => {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...tratamientosService.getAuthHeaders(),
+      };
+
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(tratamiento),
       });
       if (!response.ok) {
@@ -51,11 +62,14 @@ export const tratamientosService = {
 
   updateTratamiento: async (id, tratamiento) => {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...tratamientosService.getAuthHeaders(),
+      };
+
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(tratamiento),
       });
       if (!response.ok) {
@@ -72,6 +86,7 @@ export const tratamientosService = {
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
+        headers: tratamientosService.getAuthHeaders(),
       });
       if (!response.ok) {
         throw new Error('Error al eliminar tratamiento');

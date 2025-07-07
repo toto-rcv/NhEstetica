@@ -233,10 +233,53 @@ exports.getProductoByNombre = async (req, res) => {
 // Eliminar producto
 exports.deleteProducto = async (req, res) => {
   const { id } = req.params;
+  
   try {
-    await db.pool.query('DELETE FROM productos WHERE id = ?', [id]);
-    res.json({ message: 'Producto eliminado correctamente' });
+    // Primero verificar si el producto existe
+    const [productoExiste] = await db.pool.query('SELECT id, nombre FROM productos WHERE id = ?', [id]);
+    
+    if (productoExiste.length === 0) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    // Verificar si el producto está siendo usado en ventas (solo para información)
+    const [ventasProducto] = await db.pool.query(
+      'SELECT COUNT(*) as count FROM ventas_productos WHERE producto_id = ?', 
+      [id]
+    );
+
+    // Proceder con la eliminación directamente
+    const [result] = await db.pool.query('DELETE FROM productos WHERE id = ?', [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    // Mensaje informativo sobre las ventas asociadas
+    let message = `Producto "${productoExiste[0].nombre}" eliminado correctamente`;
+    if (ventasProducto[0].count > 0) {
+      message += `. Nota: ${ventasProducto[0].count} venta(s) histórica(s) asociada(s) se mantienen intactas.`;
+    }
+
+    res.json({ 
+      message: message,
+      deletedId: id,
+      ventasAsociadas: ventasProducto[0].count
+    });
+    
   } catch (err) {
-    res.status(500).json({ message: 'Error al eliminar producto', error: err });
+    console.error('Error al eliminar producto:', err);
+    
+    // Manejar errores específicos de MySQL
+    if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(400).json({ 
+        message: 'No se puede eliminar el producto porque está siendo usado en otras partes del sistema. Primero debe eliminar las referencias asociadas.' 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Error interno del servidor al eliminar producto', 
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno'
+    });
   }
 }; 

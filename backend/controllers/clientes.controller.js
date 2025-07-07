@@ -4,7 +4,7 @@ const path = require('path');
 
 exports.getClientes = async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT * FROM clientes');
+    const [rows] = await pool.execute('SELECT * FROM clientes ORDER BY created_at DESC');
     res.json(rows);
   } catch (err) {
     console.error('Error al obtener clientes:', err);
@@ -21,6 +21,20 @@ exports.getClienteById = async (req, res) => {
     }
     res.json(rows[0]);
   } catch (err) {
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+exports.getClienteByEmail = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const [rows] = await pool.execute('SELECT * FROM clientes WHERE email = ?', [email]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Cliente no encontrado' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error al obtener cliente por email:', err);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
@@ -68,6 +82,18 @@ exports.updateCliente = async (req, res) => {
     const { id } = req.params;
     let { nombre, apellido, direccion, telefono, email, antiguedad, nacionalidad } = req.body;
 
+    // Validar campos requeridos
+    if (!nombre || !apellido) {
+      return res.status(400).json({ message: 'Nombre y apellido son requeridos' });
+    }
+
+    // Verificar si el cliente existe
+    const [existingCliente] = await pool.execute('SELECT * FROM clientes WHERE id = ?', [id]);
+    if (existingCliente.length === 0) {
+      return res.status(404).json({ message: 'Cliente no encontrado' });
+    }
+
+    // Procesar la fecha de antiguedad si es necesario
     if (antiguedad && antiguedad.includes('T')) {
       antiguedad = antiguedad.slice(0, 10);
     }
@@ -76,30 +102,50 @@ exports.updateCliente = async (req, res) => {
     let eliminarAnterior = false;
     let imagenAnterior = null;
 
+    // Si se subió una nueva imagen
     if (req.file) {
       imagen = `/images-de-clientes/${req.file.filename}`;
       eliminarAnterior = true;
+      imagenAnterior = existingCliente[0].imagen;
     }
 
-    if (eliminarAnterior) {
-      const [rows] = await pool.execute('SELECT imagen FROM clientes WHERE id = ?', [id]);
-      if (rows.length && rows[0].imagen) {
-        imagenAnterior = rows[0].imagen;
-      }
+    // Construir la query dinámicamente
+    let query = `UPDATE clientes SET 
+      nombre = ?, 
+      apellido = ?, 
+      direccion = ?, 
+      telefono = ?, 
+      email = ?, 
+      antiguedad = ?, 
+      nacionalidad = ?`;
+    
+    let values = [
+      nombre,
+      apellido,
+      direccion || '',
+      telefono || '',
+      email || '',
+      antiguedad || null,
+      nacionalidad || null
+    ];
+
+    // Si hay nueva imagen, incluirla en la query
+    if (imagen) {
+      query += ', imagen = ?';
+      values.push(imagen);
     }
 
-    const query =
-      imagen
-        ? `UPDATE clientes SET nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, antiguedad = ?, imagen = ?, nacionalidad = ? WHERE id = ?`
-        : `UPDATE clientes SET nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, antiguedad = ?, nacionalidad = ? WHERE id = ?`;
+    query += ' WHERE id = ?';
+    values.push(id);
 
-    const values =
-      imagen
-        ? [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, imagen, nacionalidad || null, id]
-        : [nombre, apellido, direccion || '', telefono || '', email || '', antiguedad || 0, nacionalidad || null, id];
+    // Ejecutar la actualización
+    const [result] = await pool.execute(query, values);
 
-    await pool.execute(query, values);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Cliente no encontrado' });
+    }
 
+    // Eliminar imagen anterior si se subió una nueva
     if (eliminarAnterior && imagenAnterior) {
       const rutaFisica = path.join(__dirname, '../public', imagenAnterior);
       try {
@@ -107,31 +153,89 @@ exports.updateCliente = async (req, res) => {
           fs.unlink(rutaFisica, (err) => {
             if (err) console.error('No se pudo eliminar la imagen anterior:', err);
           });
-        } else {
-          console.warn('La imagen anterior no existe en el servidor:', rutaFisica);
         }
       } catch (err) {
         console.error('Error comprobando o eliminando la imagen anterior:', err);
       }
     }
 
-    const [rows] = await pool.execute('SELECT * FROM clientes WHERE id = ?', [id]);
-    res.json(rows[0] || { message: 'Cliente actualizado correctamente' });
+    // Obtener el cliente actualizado
+    const [updatedCliente] = await pool.execute('SELECT * FROM clientes WHERE id = ?', [id]);
+    
+    res.json({
+      message: 'Cliente actualizado correctamente',
+      cliente: updatedCliente[0]
+    });
 
   } catch (err) {
     console.error('Error al actualizar cliente:', err);
-    res.status(500).json({ message: 'Error al actualizar cliente' });
+    res.status(500).json({ 
+      message: 'Error al actualizar cliente',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno'
+    });
   }
 };
 
 exports.deleteCliente = async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.execute('DELETE FROM clientes WHERE id = ?', [id]);
+    // Verificar si el cliente existe
+    const [existingCliente] = await pool.execute('SELECT * FROM clientes WHERE id = ?', [id]);
+    if (existingCliente.length === 0) {
+      return res.status(404).json({ message: 'Cliente no encontrado' });
+    }
+
+    // Verificar si el cliente tiene registros relacionados
+    const [turnos] = await pool.execute('SELECT COUNT(*) as count FROM turnos WHERE cliente_id = ?', [id]);
+    const [ventasTratamientos] = await pool.execute('SELECT COUNT(*) as count FROM ventas_tratamientos WHERE cliente_id = ?', [id]);
+    const [ventasProductos] = await pool.execute('SELECT COUNT(*) as count FROM ventas_productos WHERE cliente_id = ?', [id]);
+
+    if (turnos[0].count > 0 || ventasTratamientos[0].count > 0 || ventasProductos[0].count > 0) {
+      return res.status(400).json({ 
+        message: 'No se puede eliminar el cliente porque tiene registros relacionados',
+        details: {
+          turnos: turnos[0].count,
+          ventasTratamientos: ventasTratamientos[0].count,
+          ventasProductos: ventasProductos[0].count
+        }
+      });
+    }
+
+    // Eliminar la imagen del cliente si existe
+    if (existingCliente[0].imagen) {
+      const rutaFisica = path.join(__dirname, '../public', existingCliente[0].imagen);
+      try {
+        if (fs.existsSync(rutaFisica)) {
+          fs.unlinkSync(rutaFisica);
+        }
+      } catch (err) {
+        console.error('Error al eliminar la imagen del cliente:', err);
+        // No fallar si no se puede eliminar la imagen
+      }
+    }
+
+    // Eliminar el cliente
+    const [result] = await pool.execute('DELETE FROM clientes WHERE id = ?', [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Cliente no encontrado' });
+    }
+
     res.json({ message: 'Cliente eliminado correctamente' });
   } catch (err) {
     console.error('Error al eliminar cliente:', err);
-    res.status(500).json({ message: 'Error al eliminar cliente' });
+    
+    // Manejar errores específicos de MySQL
+    if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(400).json({ 
+        message: 'No se puede eliminar el cliente porque tiene registros relacionados en otras tablas' 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Error al eliminar cliente',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno'
+    });
   }
 };
 

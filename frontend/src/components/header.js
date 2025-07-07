@@ -100,8 +100,8 @@ function Header() {
                 </>
               )}
             </DropdownWrapper>
-            <StyledLink to="/promociones">Promociones</StyledLink>
             <StyledLink to="/productos">Productos</StyledLink>
+            <StyledLink to="/promociones">Promociones</StyledLink>
             <StyledLink to="/contacto">Contacto</StyledLink>
           </nav>
         </NavContainer>

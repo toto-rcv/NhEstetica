@@ -1,5 +1,19 @@
 const { pool } = require('../config/database');
 
+// Función auxiliar para verificar si la caja está cerrada
+const isCajaCerrada = async (fecha) => {
+  try {
+    const [results] = await pool.query('SELECT monto_cierre FROM caja_aperturas_cierres WHERE fecha = ?', [fecha]);
+    if (results.length === 0) {
+      return false; // No hay caja registrada, no está cerrada
+    }
+    return results[0].monto_cierre !== 0; // Si monto_cierre es diferente de 0, está cerrada
+  } catch (err) {
+    console.error('Error al verificar estado de caja:', err);
+    return false;
+  }
+};
+
 // Obtener todas las ventas de tratamientos (con datos de cliente y tratamiento)
 exports.getVentas = async (req, res) => {
   try {
@@ -86,6 +100,13 @@ exports.createVenta = async (req, res) => {
   }
 
   try {
+    // Verificar si la caja está cerrada para la fecha de la venta
+    const fechaVenta = fecha || new Date().toISOString().split('T')[0];
+    const cajaCerrada = await isCajaCerrada(fechaVenta);
+    if (cajaCerrada) {
+      return res.status(400).json({ message: 'No se pueden registrar ventas en una caja cerrada' });
+    }
+
     // Validar cliente
     const [clienteRows] = await pool.execute('SELECT id FROM clientes WHERE id = ?', [cliente_id]);
     if (clienteRows.length === 0) {

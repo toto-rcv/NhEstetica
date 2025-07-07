@@ -53,6 +53,7 @@ function DepilacionLaser() {
                 customButtonText="Saca turno"
                 customButtonLink="https://wa.me/5491168520606"
                 detailsLink={"/servicios/depilacion/" + tratamiento.id}
+                tratamiento={tratamiento}
               />
             ) : (
               <TreatmentsRight
@@ -66,6 +67,7 @@ function DepilacionLaser() {
                 customButtonText="Saca turno"
                 customButtonLink="https://wa.me/5491168520606"
                 detailsLink={"/servicios/depilacion/" + tratamiento.id}
+                tratamiento={tratamiento}
               />
             )}
           </FadeIn>

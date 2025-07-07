@@ -1,19 +1,49 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import ReservaTurnoModal from "../ReservaTurnoModal";
 
-const TreatmentsRight = ({ link, image, title, description, price, promoLink, showLine = false, customButtonText, customButtonLink, detailsLink }) => {
+const TreatmentsRight = ({
+    link, image, title, description, price,
+    showLine = false, customButtonText, customButtonLink,
+    detailsLink, tratamiento
+}) => {
+    const [showModal, setShowModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
     const handleClick = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleImageClick = () => {
         handleClick();
-        if (customButtonLink) {
+        if (customButtonText === "Saca turno" && tratamiento) {
+            setShowModal(true);
+        } else if (customButtonLink) {
             window.location.href = customButtonLink;
         } else {
             window.location.href = `/servicios/${link}`;
         }
+    };
+
+    const handleButtonClick = (e) => {
+        e.preventDefault();
+        if (customButtonText === "Saca turno" && tratamiento) {
+            setShowModal(true);
+        } else if (customButtonLink) {
+            window.location.href = customButtonLink;
+        } else {
+            window.location.href = `/servicios/${link}`;
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+    };
+
+    const handleReservaSuccess = () => {
+        setShowSuccessModal(true);
+        setShowModal(false);
     };
 
     return (
@@ -21,18 +51,6 @@ const TreatmentsRight = ({ link, image, title, description, price, promoLink, sh
             <ContentWrapper>
                 <ImageContainer>
                     <Image src={image} alt={title} onClick={handleImageClick} />
-                    <ButtonOverlay>
-                        <StyledLink 
-                            to={customButtonLink || `/servicios/${link}`} 
-                            onClick={handleClick}
-                            as={customButtonLink ? 'a' : Link}
-                            href={customButtonLink}
-                            target={customButtonLink ? "_blank" : undefined}
-                            rel={customButtonLink ? "noopener noreferrer" : undefined}
-                        >
-                            {customButtonText || "Ver más"}
-                        </StyledLink>
-                    </ButtonOverlay>
                 </ImageContainer>
                 <TextContent>
                     <Title showLine={showLine}>{title}</Title>
@@ -40,26 +58,44 @@ const TreatmentsRight = ({ link, image, title, description, price, promoLink, sh
                     <ActionsContainer>
                         <Price>{price}</Price>
                         <ButtonRow>
-                            {promoLink && (
-                                <PromoLink href={promoLink} target="_blank" rel="noopener noreferrer">¡CONSULTA LAS PROMOS!</PromoLink>
-                            )}
                             {detailsLink && (
-                                <DetailsButton to={detailsLink} onClick={handleClick}>VER DETALLES</DetailsButton>
+                                <DetailsButton to={detailsLink} onClick={handleClick}>
+                                    VER DETALLES
+                                </DetailsButton>
+                            )}
+                            {customButtonText === "Saca turno" && tratamiento && (
+                                <SacaTurnoButton onClick={handleButtonClick}>
+                                    SACA TURNO
+                                </SacaTurnoButton>
+                            )}
+                            {customButtonText && customButtonText !== "Saca turno" && (
+                                <DetailsButton to={`/servicios/${link}`} onClick={handleClick}>
+                                    {customButtonText.toUpperCase()}
+                                </DetailsButton>
                             )}
                         </ButtonRow>
                     </ActionsContainer>
-                    <MobileButton 
-                        to={customButtonLink || `/servicios/${link}`} 
-                        onClick={handleClick}
-                        as={customButtonLink ? 'a' : Link}
-                        href={customButtonLink}
-                        target={customButtonLink ? "_blank" : undefined}
-                        rel={customButtonLink ? "noopener noreferrer" : undefined}
-                    >
-                        {customButtonText || "Ver más"}
-                    </MobileButton>
                 </TextContent>
             </ContentWrapper>
+
+            {tratamiento && (
+                <ReservaTurnoModal
+                    isOpen={showModal}
+                    onClose={handleModalClose}
+                    tratamiento={tratamiento}
+                    onSuccess={handleReservaSuccess}
+                />
+            )}
+
+            {showSuccessModal && (
+                <SuccessOverlay onClick={() => setShowSuccessModal(false)}>
+                    <SuccessModal onClick={(e) => e.stopPropagation()}>
+                        <h2>¡Turno reservado exitosamente!</h2>
+                        <p>Te contactaremos pronto para confirmar tu cita.</p>
+                        <CloseSuccessButton onClick={() => setShowSuccessModal(false)}>Cerrar</CloseSuccessButton>
+                    </SuccessModal>
+                </SuccessOverlay>
+            )}
         </Container>
     );
 };
@@ -170,55 +206,6 @@ const Price = styled.div`
         font-size: 1.8rem;
     }
 `;
-
-const PromoLink = styled.a`
-    font-size: 1rem;
-    color: var(--terciary-color);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    padding: 0.8rem 1.8rem;
-    border: 2px solid var(--terciary-color);
-    border-radius: 25px;
-    white-space: nowrap;
-    position: relative;
-    overflow: hidden;
-    background: transparent;
-    z-index: 1;
-    text-align: center;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--terciary-color);
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: -1;
-    }
-
-    &:hover {
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-
-        &::before {
-            transform: translateX(0);
-        }
-    }
-
-    @media (max-width: 768px) {
-        font-size: 0.9rem;
-        padding: 0.7rem 1.5rem;
-        width: auto;
-        text-align: center;
-        margin-top: 0.5rem;
-    }
-`;
-
 const DetailsButton = styled(Link)`
     font-size: 1rem;
     color: var(--terciary-color);
@@ -273,6 +260,16 @@ const ImageContainer = styled.div`
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
 
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.2); /* <- el overlay sutil */
+        pointer-events: none;
+        z-index: 1;
+        transition: background 0.3s ease;
+    }
+
     @media (max-width: 768px) {
         max-width: 100%;
         height: 250px;
@@ -285,71 +282,116 @@ const Image = styled.img`
     object-fit: cover;
     transition: transform 0.3s ease;
     cursor: pointer;
+    position: relative;
+    z-index: 0;
 
     &:hover {
         transform: scale(1.05);
     }
 `;
 
-const ButtonOverlay = styled.div`
+
+
+const SuccessOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+`;
+
+const SuccessModal = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.3s ease;
+
+  @keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  h2 {
+    color: var(--primary-color-dark);
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+`;
+
+const CloseSuccessButton = styled.button`
+  padding: 0.6rem 1.2rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: var(--primary-color-dark);
+  }
+`;
+
+const SacaTurnoButton = styled.button`
+  font-size: 1rem;
+  color: var(--terciary-color);
+  font-family: var(--text-font);
+  font-weight: 600;
+  padding: 0.8rem 1.8rem;
+  border: 2px solid var(--terciary-color);
+  border-radius: 25px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+
+  &::before {
+    content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    width: 100%;
+    height: 100%;
+    background: var(--terciary-color);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
 
-    @media (max-width: 768px) {
-        display: none;
-    }
-`;
-
-const StyledLink = styled(Link)`
-    display: inline-block;
-    padding: 0.8rem 2rem;
-    background-color: transparent;
+  &:hover {
     color: white;
-    text-decoration: none;
-    border: 2px solid white;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-    font-weight: 500;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+    &::before {
+      transform: translateX(0);
     }
+  }
 
-    @media (max-width: 768px) {
-        display: inline-block;
-        padding: 0.8rem 2rem;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        margin-top: 1rem;
-    }
-`;
-
-const MobileButton = styled(Link)`
-    display: none;
-    padding: 0.8rem 2rem;
-    background-color: var(--primary-color);
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    margin: 1rem auto;
-    text-align: center;
-
-    &:hover {
-        background-color: var(--primary-color-dark);
-    }
-
-    @media (max-width: 768px) {
-        display: inline-block;
-    }
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.7rem 1.5rem;
+  }
 `;

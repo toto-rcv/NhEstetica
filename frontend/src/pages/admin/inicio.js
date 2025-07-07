@@ -36,10 +36,12 @@ const Inicio = () => {
   };
 
   const formatMoney = (amount) => {
+    // Asegurar que amount sea un número
+    const numericAmount = parseFloat(amount) || 0;
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS'
-    }).format(amount);
+    }).format(numericAmount);
   };
 
   const formatDate = (dateString) => {
@@ -100,7 +102,7 @@ const Inicio = () => {
             <ClientesGrid>
               {/* Clientes Activos */}
               <ClientesSection>
-                <ClientesSectionTitle activos>
+                <ClientesSectionTitle $activos>
                   Clientes Activos (compraron hace menos de 1 mes)
                 </ClientesSectionTitle>
                 <ClientesStats>
@@ -131,7 +133,7 @@ const Inicio = () => {
 
               {/* Clientes Pasivos */}
               <ClientesSection>
-                <ClientesSectionTitle pasivos>
+                <ClientesSectionTitle $pasivos>
                   Clientes Pasivos (compraron hace más de 3 meses)
                 </ClientesSectionTitle>
                 <ClientesStats>
@@ -375,7 +377,6 @@ const StatAmount = styled.p`
 
 const RankingContainer = styled.div`
   background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-  border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   border: 1px solid #e0e0e0;
@@ -387,15 +388,14 @@ const RankingContainer = styled.div`
 `;
 
 const RankingTitle = styled.h3`
-  color: #333;
   margin: 0;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+
   font-size: 1.3rem;
   font-weight: 600;
   border: none;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #333;
   position: relative;
   
   &:before {
@@ -408,7 +408,6 @@ const RankingTitle = styled.h3`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   
@@ -432,7 +431,7 @@ const Table = styled.table`
 `;
 
 const Th = styled.th`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);
   padding: 1.2rem;
   text-align: left;
   font-weight: 600;
@@ -441,14 +440,6 @@ const Th = styled.th`
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   font-size: 0.95rem;
   letter-spacing: 0.5px;
-  
-  &:first-child {
-    border-top-left-radius: 8px;
-  }
-  
-  &:last-child {
-    border-top-right-radius: 8px;
-  }
 `;
 
 const Td = styled.td`
@@ -526,12 +517,12 @@ const ClientesSection = styled.div`
 `;
 
 const ClientesSectionTitle = styled.h4`
-  color: ${props => props.activos ? '#4caf50' : '#ff9800'};
+  color: ${props => props.$activos ? '#4caf50' : '#ff9800'};
   margin: 0 0 1rem 0;
   padding: 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  border-bottom: 2px solid ${props => props.activos ? '#4caf50' : '#ff9800'};
+  border-bottom: 2px solid ${props => props.$activos ? '#4caf50' : '#ff9800'};
 `;
 
 const ClientesStats = styled.div`
@@ -748,7 +739,7 @@ const TratamientosVencimientoTitle = styled.h3`
   font-size: 1.3rem;
   font-weight: 600;
   border-bottom: 1px solid #ffb74d;
-  text-align: center;
+  text-align: left;
   position: relative;
   
   &:before {

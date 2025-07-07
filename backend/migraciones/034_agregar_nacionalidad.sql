@@ -1,2 +1,0 @@
-ALTER TABLE clientes
-ADD COLUMN nacionalidad VARCHAR(100) DEFAULT NULL AFTER telefono;

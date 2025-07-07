@@ -22,6 +22,7 @@ const handleDropdownHover = (label, isOpen) => () => {
   { path: '/admin/personal', label: 'Personal' },
   { path: '/admin/productos', label: 'Productos' },
   { path: '/admin/tratamientos', label: 'Tratamientos' },
+  { path: '/admin/turnos', label: 'Turnos' },
   {
     label: 'Ventas',
     dropdown: [

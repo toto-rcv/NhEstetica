@@ -51,8 +51,8 @@ function TratamientosCorporales() {
                 price={`$${tratamiento.precio}`}
                 promoLink="https://wa.me/5491168520606"
                 customButtonText="Saca turno"
-                customButtonLink="https://wa.me/5491168520606"
                 detailsLink={"/servicios/corporales/" + tratamiento.id}
+                tratamiento={tratamiento}
               />
             ) : (
               <TreatmentsRight
@@ -64,8 +64,8 @@ function TratamientosCorporales() {
                 price={`$${tratamiento.precio}`}
                 promoLink="https://wa.me/5491168520606"
                 customButtonText="Saca turno"
-                customButtonLink="https://wa.me/5491168520606"
                 detailsLink={"/servicios/corporales/" + tratamiento.id}
+                tratamiento={tratamiento}
               />
             )}
           </FadeIn>

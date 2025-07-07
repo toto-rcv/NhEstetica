@@ -58,8 +58,12 @@ const AddTratamientoModal = ({ isOpen, onClose, onSuccess }) => {
     formData.append('image', file);
     
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/upload/image?type=tratamiento', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
       

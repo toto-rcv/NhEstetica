@@ -70,8 +70,13 @@ const AddProductoModal = ({ isOpen, onClose, onSuccess }) => {
     formData.append('image', file);
     
     try {
-      const response = await fetch('/api/upload/image', {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No hay token de autenticación');
+      const response = await fetch('/api/upload/image?type=producto', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
       

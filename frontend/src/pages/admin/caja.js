@@ -7,6 +7,9 @@ import CajaResumen from '../../components/tablas/caja/FormasDePago';
 
 import ModalCaja from '../../components/tablas/caja/ModalCaja';
 import ModalCerrarCaja from '../../components/tablas/caja/ModalCerrarCaja';
+import { cajaService } from '../../services/cajaService';
+import { egresosService } from '../../services/egresosService';
+import { ingresosService } from '../../services/ingresosService';
 
 const Caja = () => {
   const hoy = new Date();
@@ -21,6 +24,7 @@ const Caja = () => {
   const [egresosEfectivo, setEgresosEfectivo] = useState(0);
   const [ingresosEfectivo, setIngresosEfectivo] = useState(0);
   const [contadorActualizacion, setContadorActualizacion] = useState(0);
+  const [cajaCerrada, setCajaCerrada] = useState(false);
   const [year, month, day] = fechaSeleccionada.split('-');
   const fechaLegible = new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString('es-AR', {
     day: 'numeric',
@@ -38,27 +42,17 @@ const Caja = () => {
 
   const handleGuardarMonto = async (monto) => {
     try {
-      const res = await fetch('http://localhost:5000/api/caja/apertura', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fecha: fechaSeleccionada,
-          monto_apertura: monto,
-          monto_cierre: 0
-        })
+      const data = await cajaService.createAperturaCaja({
+        fecha: fechaSeleccionada,
+        monto_apertura: monto,
+        monto_cierre: 0
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setMontoApertura(monto);
-        setFechaCaja(fechaSeleccionada);
-        setModalAbierto(false);
-      } else {
-        alert(data.message || 'Error al guardar la caja');
-      }
+      setMontoApertura(monto);
+      setFechaCaja(fechaSeleccionada);
+      setModalAbierto(false);
     } catch (error) {
-      alert('Error de conexión con el servidor');
+      alert(error.message || 'Error al guardar la caja');
       console.error(error);
     }
   };
@@ -67,25 +61,13 @@ const Caja = () => {
     const montoCierre = parseFloat(montoApertura) + ingresosEfectivo - egresosEfectivo;
     
     try {
-      const res = await fetch(`http://localhost:5000/api/caja/apertura/cerrar/${fechaSeleccionada}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          monto_cierre: montoCierre
-        })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('Caja cerrada exitosamente');
-        setModalCerrarAbierto(false);
-        fetchCaja(); // Recargar los datos de la caja
-      } else {
-        alert(data.message || 'Error al cerrar la caja');
-      }
+      await cajaService.cerrarCaja(fechaSeleccionada, montoCierre);
+      
+      alert('Caja cerrada exitosamente');
+      setModalCerrarAbierto(false);
+      fetchCaja(); // Recargar los datos de la caja
     } catch (error) {
-      alert('Error de conexión con el servidor');
+      alert(error.message || 'Error al cerrar caja');
       console.error(error);
     }
   };
@@ -93,19 +75,25 @@ const Caja = () => {
   const fetchCaja = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/caja/apertura/fecha/${fechaSeleccionada}`);
-      if (res.ok) {
-        const data = await res.json();
+      const data = await cajaService.getCajaByFecha(fechaSeleccionada);
+      
+      if (data) {
         setMontoApertura(data.monto_apertura);
         setFechaCaja(data.fecha);
+        // Verificar si la caja está cerrada (monto_cierre mayor que 0)
+        const montoCierre = parseFloat(data.monto_cierre);
+        const isCajaCerrada = montoCierre > 0;
+        setCajaCerrada(isCajaCerrada);
       } else {
         setMontoApertura(null);
         setFechaCaja(null);
+        setCajaCerrada(false);
       }
     } catch (error) {
       console.error('Error al cargar caja del día:', error);
       setMontoApertura(null);
       setFechaCaja(null);
+      setCajaCerrada(false);
     } finally {
       setCargando(false);
     }
@@ -113,16 +101,11 @@ const Caja = () => {
 
   const fetchEgresosEfectivo = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/egresos/fecha/${fechaSeleccionada}`);
-      if (res.ok) {
-        const data = await res.json();
-        const totalEfectivo = data
-          .filter(e => e.forma_pago === 'Efectivo')
-          .reduce((acc, cur) => acc + parseFloat(cur.importe || 0), 0);
-        setEgresosEfectivo(totalEfectivo);
-      } else {
-        setEgresosEfectivo(0);
-      }
+      const data = await egresosService.getEgresosByFecha(fechaSeleccionada);
+      const totalEfectivo = data
+        .filter(e => e.forma_pago === 'Efectivo')
+        .reduce((acc, cur) => acc + parseFloat(cur.importe || 0), 0);
+      setEgresosEfectivo(totalEfectivo);
     } catch (err) {
       setEgresosEfectivo(0);
     }
@@ -130,16 +113,11 @@ const Caja = () => {
 
   const fetchIngresosEfectivo = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/ingresos/fecha/${fechaSeleccionada}`);
-      if (res.ok) {
-        const data = await res.json();
-        const totalEfectivo = data
-          .filter(i => i.forma_de_pago === 'Efectivo')
-          .reduce((acc, cur) => acc + parseFloat(cur.importe || 0), 0);
-        setIngresosEfectivo(totalEfectivo);
-      } else {
-        setIngresosEfectivo(0);
-      }
+      const data = await ingresosService.getIngresosByFecha(fechaSeleccionada);
+      const totalEfectivo = data
+        .filter(i => i.forma_de_pago === 'Efectivo')
+        .reduce((acc, cur) => acc + parseFloat(cur.importe || 0), 0);
+      setIngresosEfectivo(totalEfectivo);
     } catch (err) {
       setIngresosEfectivo(0);
     }
@@ -188,10 +166,15 @@ const Caja = () => {
                     </tr>
                   </tbody>
                 </CajaTable>
-                {esHoy && (
+                {esHoy && !cajaCerrada && (
                   <CerrarCajaButton onClick={() => setModalCerrarAbierto(true)}>
                     Cerrar Caja
                   </CerrarCajaButton>
+                )}
+                {cajaCerrada && (
+                  <CajaCerradaMessage>
+                    ✅ Caja cerrada - No se pueden realizar más operaciones
+                  </CajaCerradaMessage>
                 )}
               </CajaContainer>
             ) : (
@@ -204,6 +187,7 @@ const Caja = () => {
 
         <Egresos
           fechaSeleccionada={fechaSeleccionada}
+          cajaCerrada={cajaCerrada}
           onActualizar={() => {
             fetchCaja();
             fetchEgresosEfectivo();
@@ -214,6 +198,7 @@ const Caja = () => {
 
         <Ingresos
           fechaSeleccionada={fechaSeleccionada}
+          cajaCerrada={cajaCerrada}
           onActualizar={() => {
             fetchCaja();
             fetchEgresosEfectivo();
@@ -221,6 +206,7 @@ const Caja = () => {
             setContadorActualizacion(prev => prev + 1); // <-- NUEVO
           }}
         />
+        
 
         <CajaResumen 
           fechaSeleccionada={fechaSeleccionada}
@@ -370,4 +356,16 @@ const CerrarCajaButton = styled.button`
   &:active {
     transform: translateY(0);
   }
+`;
+
+const CajaCerradaMessage = styled.div`
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 `;

@@ -10,13 +10,20 @@ async function obtenerClientesActivosYPasivos() {
         c.nombre,
         c.apellido,
         CONCAT(c.nombre, ' ', c.apellido) as cliente,
-        MAX(v.fecha) as ultima_compra,
-        COUNT(v.id) as total_compras
+        GREATEST(
+          COALESCE((SELECT MAX(fecha) FROM ventas_productos WHERE cliente_id = c.id), '1900-01-01'),
+          COALESCE((SELECT MAX(fecha) FROM ventas_tratamientos WHERE cliente_id = c.id), '1900-01-01')
+        ) as ultima_compra,
+        (
+          COALESCE((SELECT COUNT(*) FROM ventas_productos WHERE cliente_id = c.id), 0) +
+          COALESCE((SELECT COUNT(*) FROM ventas_tratamientos WHERE cliente_id = c.id), 0)
+        ) as total_compras
       FROM clientes c
-      INNER JOIN ventas_productos v ON c.id = v.cliente_id
-      WHERE v.fecha >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-      GROUP BY c.id, c.nombre, c.apellido
-      ORDER BY MAX(v.fecha) DESC
+      WHERE (
+        EXISTS (SELECT 1 FROM ventas_productos WHERE cliente_id = c.id AND fecha >= DATE_SUB(NOW(), INTERVAL 1 MONTH)) OR
+        EXISTS (SELECT 1 FROM ventas_tratamientos WHERE cliente_id = c.id AND fecha >= DATE_SUB(NOW(), INTERVAL 1 MONTH))
+      )
+      ORDER BY ultima_compra DESC
     `);
 
     // Obtener IDs de clientes activos para excluirlos de pasivos
@@ -33,14 +40,21 @@ async function obtenerClientesActivosYPasivos() {
           c.nombre,
           c.apellido,
           CONCAT(c.nombre, ' ', c.apellido) as cliente,
-          MAX(v.fecha) as ultima_compra,
-          COUNT(v.id) as total_compras
+          GREATEST(
+            COALESCE((SELECT MAX(fecha) FROM ventas_productos WHERE cliente_id = c.id), '1900-01-01'),
+            COALESCE((SELECT MAX(fecha) FROM ventas_tratamientos WHERE cliente_id = c.id), '1900-01-01')
+          ) as ultima_compra,
+          (
+            COALESCE((SELECT COUNT(*) FROM ventas_productos WHERE cliente_id = c.id), 0) +
+            COALESCE((SELECT COUNT(*) FROM ventas_tratamientos WHERE cliente_id = c.id), 0)
+          ) as total_compras
         FROM clientes c
-        INNER JOIN ventas_productos v ON c.id = v.cliente_id
-        WHERE v.fecha < DATE_SUB(NOW(), INTERVAL 3 MONTH)
-        AND c.id NOT IN (${placeholders})
-        GROUP BY c.id, c.nombre, c.apellido
-        ORDER BY MAX(v.fecha) DESC
+        WHERE c.id NOT IN (${placeholders})
+        AND (
+          EXISTS (SELECT 1 FROM ventas_productos WHERE cliente_id = c.id AND fecha < DATE_SUB(NOW(), INTERVAL 3 MONTH)) OR
+          EXISTS (SELECT 1 FROM ventas_tratamientos WHERE cliente_id = c.id AND fecha < DATE_SUB(NOW(), INTERVAL 3 MONTH))
+        )
+        ORDER BY ultima_compra DESC
       `, idsClientesActivos);
       clientesPasivos = result;
     } else {
@@ -51,13 +65,20 @@ async function obtenerClientesActivosYPasivos() {
           c.nombre,
           c.apellido,
           CONCAT(c.nombre, ' ', c.apellido) as cliente,
-          MAX(v.fecha) as ultima_compra,
-          COUNT(v.id) as total_compras
+          GREATEST(
+            COALESCE((SELECT MAX(fecha) FROM ventas_productos WHERE cliente_id = c.id), '1900-01-01'),
+            COALESCE((SELECT MAX(fecha) FROM ventas_tratamientos WHERE cliente_id = c.id), '1900-01-01')
+          ) as ultima_compra,
+          (
+            COALESCE((SELECT COUNT(*) FROM ventas_productos WHERE cliente_id = c.id), 0) +
+            COALESCE((SELECT COUNT(*) FROM ventas_tratamientos WHERE cliente_id = c.id), 0)
+          ) as total_compras
         FROM clientes c
-        INNER JOIN ventas_productos v ON c.id = v.cliente_id
-        WHERE v.fecha < DATE_SUB(NOW(), INTERVAL 3 MONTH)
-        GROUP BY c.id, c.nombre, c.apellido
-        ORDER BY MAX(v.fecha) DESC
+        WHERE (
+          EXISTS (SELECT 1 FROM ventas_productos WHERE cliente_id = c.id AND fecha < DATE_SUB(NOW(), INTERVAL 3 MONTH)) OR
+          EXISTS (SELECT 1 FROM ventas_tratamientos WHERE cliente_id = c.id AND fecha < DATE_SUB(NOW(), INTERVAL 3 MONTH))
+        )
+        ORDER BY ultima_compra DESC
       `);
       clientesPasivos = result;
     }
@@ -122,62 +143,49 @@ exports.getRankingClientes = async (req, res) => {
 
     console.log('Buscando clientes para mes:', currentMonth, 'año:', currentYear);
 
-    // Intentar primero con la columna estado, si falla usar consulta sin estado
-    let rows;
-    try {
-      [rows] = await pool.execute(`
-        SELECT 
-          c.id,
-          c.nombre,
-          c.apellido,
-          CONCAT(c.nombre, ' ', c.apellido) as cliente,
-          COALESCE(SUM(CASE 
-            WHEN MONTH(v.fecha) = ? AND YEAR(v.fecha) = ? 
-            THEN v.precio * v.cantidad 
-            ELSE 0 
-          END), 0) as total_mes,
-          COALESCE(SUM(CASE 
-            WHEN YEAR(v.fecha) = ? 
-            THEN v.precio * v.cantidad 
-            ELSE 0 
-          END), 0) as total_año
-        FROM clientes c
-        LEFT JOIN ventas_productos v ON c.id = v.cliente_id
-        WHERE c.estado = 'Activo'
-        GROUP BY c.id, c.nombre, c.apellido
-        ORDER BY total_año DESC, total_mes DESC
-      `, [currentMonth, currentYear, currentYear]);
-    } catch (error) {
-      console.log('Error con columna estado, intentando sin estado:', error.message);
-      // Si falla, intentar sin la columna estado
-      [rows] = await pool.execute(`
-        SELECT 
-          c.id,
-          c.nombre,
-          c.apellido,
-          CONCAT(c.nombre, ' ', c.apellido) as cliente,
-          COALESCE(SUM(CASE 
-            WHEN MONTH(v.fecha) = ? AND YEAR(v.fecha) = ? 
-            THEN v.precio * v.cantidad 
-            ELSE 0 
-          END), 0) as total_mes,
-          COALESCE(SUM(CASE 
-            WHEN YEAR(v.fecha) = ? 
-            THEN v.precio * v.cantidad 
-            ELSE 0 
-          END), 0) as total_año
-        FROM clientes c
-        LEFT JOIN ventas_productos v ON c.id = v.cliente_id
-        GROUP BY c.id, c.nombre, c.apellido
-        ORDER BY total_año DESC, total_mes DESC
-      `, [currentMonth, currentYear, currentYear]);
-    }
+    // Consulta simplificada sin la columna estado
+    const [rows] = await pool.execute(`
+      SELECT 
+        c.id,
+        c.nombre,
+        c.apellido,
+        CONCAT(c.nombre, ' ', c.apellido) as cliente,
+        CAST(COALESCE(
+          (SELECT SUM(vp.precio * vp.cantidad) 
+           FROM ventas_productos vp 
+           WHERE vp.cliente_id = c.id 
+           AND MONTH(vp.fecha) = ? AND YEAR(vp.fecha) = ?), 0
+        ) AS DECIMAL(15,2)) +
+        CAST(COALESCE(
+          (SELECT SUM(vt.precio * vt.sesiones) 
+           FROM ventas_tratamientos vt 
+           WHERE vt.cliente_id = c.id 
+           AND MONTH(vt.fecha) = ? AND YEAR(vt.fecha) = ?), 0
+        ) AS DECIMAL(15,2)) as total_mes,
+        CAST(COALESCE(
+          (SELECT SUM(vp.precio * vp.cantidad) 
+           FROM ventas_productos vp 
+           WHERE vp.cliente_id = c.id 
+           AND YEAR(vp.fecha) = ?), 0
+        ) AS DECIMAL(15,2)) +
+        CAST(COALESCE(
+          (SELECT SUM(vt.precio * vt.sesiones) 
+           FROM ventas_tratamientos vt 
+           WHERE vt.cliente_id = c.id 
+           AND YEAR(vt.fecha) = ?), 0
+        ) AS DECIMAL(15,2)) as total_año
+      FROM clientes c
+      HAVING total_año > 0 OR total_mes > 0
+      ORDER BY total_año DESC, total_mes DESC
+    `, [currentMonth, currentYear, currentMonth, currentYear, currentYear, currentYear]);
 
     console.log('Clientes encontrados:', rows.length);
 
-    // Agregar ranking basado en el total del año
+    // Agregar ranking basado en el total del año y convertir valores a números
     const clientesConRanking = rows.map((cliente, index) => ({
       ...cliente,
+      total_mes: parseFloat(cliente.total_mes) || 0,
+      total_año: parseFloat(cliente.total_año) || 0,
       ranking: index + 1
     }));
 
@@ -197,14 +205,30 @@ exports.getRankingClientes = async (req, res) => {
     // Solo calcular estadísticas si hay clientes
     if (clientesConRanking.length > 0) {
       // Encontrar cliente que más gastó en el mes
-      clienteMasGastoMes = clientesConRanking.reduce((prev, current) => 
-        (current.total_mes > prev.total_mes) ? current : prev
-      );
+      let maxGastoMes = 0;
+      let clienteMaxGastoMes = null;
+      
+      clientesConRanking.forEach(cliente => {
+        const gastoMes = parseFloat(cliente.total_mes) || 0;
+        if (gastoMes > maxGastoMes) {
+          maxGastoMes = gastoMes;
+          clienteMaxGastoMes = cliente;
+        }
+      });
+      clienteMasGastoMes = clienteMaxGastoMes;
 
       // Encontrar cliente que más gastó en el año
-      clienteMasGastoAño = clientesConRanking.reduce((prev, current) => 
-        (current.total_año > prev.total_año) ? current : prev
-      );
+      let maxGastoAño = 0;
+      let clienteMaxGastoAño = null;
+      
+      clientesConRanking.forEach(cliente => {
+        const gastoAño = parseFloat(cliente.total_año) || 0;
+        if (gastoAño > maxGastoAño) {
+          maxGastoAño = gastoAño;
+          clienteMaxGastoAño = cliente;
+        }
+      });
+      clienteMasGastoAño = clienteMaxGastoAño;
 
       clienteMasGastoMes = {
         cliente: clienteMasGastoMes.cliente,
@@ -241,7 +265,7 @@ exports.getEstadisticasGenerales = async (req, res) => {
 
     // Total de clientes activos
     const [clientesActivos] = await pool.execute(
-      'SELECT COUNT(*) as total FROM clientes WHERE estado = "Activo"'
+      'SELECT COUNT(*) as total FROM clientes'
     );
 
     // Total de ventas del mes

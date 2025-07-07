@@ -1,10 +1,19 @@
 const API_BASE_URL = '/api';
 
 export const personalService = {
+  // Obtener token de autorización
+  getAuthHeaders() {
+    return {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    };
+  },
+
   // Obtener todo el personal
   async getPersonal() {
     try {
-      const response = await fetch(`${API_BASE_URL}/personal`);
+      const response = await fetch(`${API_BASE_URL}/personal`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Error al obtener el personal');
       }
@@ -18,7 +27,9 @@ export const personalService = {
   // Obtener un empleado por ID
   async getPersonalById(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/personal/${id}`);
+      const response = await fetch(`${API_BASE_URL}/personal/${id}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Error al obtener el empleado');
       }
@@ -32,11 +43,14 @@ export const personalService = {
   // Crear nuevo empleado
   async createPersonal(empleadoData) {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeaders(),
+      };
+
       const response = await fetch(`${API_BASE_URL}/personal`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(empleadoData),
       });
 
@@ -61,11 +75,14 @@ export const personalService = {
     try {
       console.log('Enviando datos al backend:', empleadoData);
       
+      const headers = {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeaders(),
+      };
+
       const response = await fetch(`${API_BASE_URL}/personal/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(empleadoData),
       });
 
@@ -93,6 +110,7 @@ export const personalService = {
     try {
       const response = await fetch(`${API_BASE_URL}/personal/${id}`, {
         method: 'DELETE',
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -110,7 +128,9 @@ export const personalService = {
   // Buscar personal
   async searchPersonal(termino) {
     try {
-      const response = await fetch(`${API_BASE_URL}/personal/search?termino=${encodeURIComponent(termino)}`);
+      const response = await fetch(`${API_BASE_URL}/personal/search?termino=${encodeURIComponent(termino)}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Error al buscar el personal');
       }

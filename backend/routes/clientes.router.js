@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getClientes,
   getClienteById,
+  getClienteByEmail,
   createCliente,
   updateCliente,
   deleteCliente,
@@ -47,6 +48,9 @@ router.get('/', getClientes);
 
 // Buscar clientes por término (opcional)
 router.get('/search', searchClientes);
+
+// Obtener cliente por email
+router.get('/by-email/:email', getClienteByEmail);
 
 // Obtener cliente por ID
 router.get('/:id', getClienteById);

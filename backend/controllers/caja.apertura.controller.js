@@ -35,9 +35,11 @@ const getCajaByFecha = async (req, res) => {
 
   try {
     const [results] = await pool.query('SELECT * FROM caja_aperturas_cierres WHERE fecha = ?', [fecha]);
+    
     if (results.length === 0) {
       return res.status(404).json({ message: 'No hay caja registrada en esa fecha' });
     }
+    
     res.json(results[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -117,6 +119,23 @@ const cerrarCaja = async (req, res) => {
   }
 
   try {
+    // Verificar si la caja ya está cerrada
+    const [cajaActual] = await pool.query(
+      'SELECT monto_cierre FROM caja_aperturas_cierres WHERE fecha = ?',
+      [fecha]
+    );
+
+    if (cajaActual.length === 0) {
+      return res.status(404).json({ message: 'No hay caja abierta para esa fecha' });
+    }
+
+    // Convertir a número para comparar correctamente
+    const montoCierreActual = parseFloat(cajaActual[0].monto_cierre);
+    
+    if (montoCierreActual > 0) {
+      return res.status(400).json({ message: 'La caja ya está cerrada' });
+    }
+
     const [result] = await pool.query(
       'UPDATE caja_aperturas_cierres SET monto_cierre = ? WHERE fecha = ?',
       [monto_cierre, fecha]

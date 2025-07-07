@@ -1,3 +1,0 @@
-ALTER TABLE productos
-ADD COLUMN costo BIGINT NOT NULL DEFAULT 0
-AFTER nombre;

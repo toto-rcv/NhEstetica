@@ -53,6 +53,7 @@ function Masajes() {
                 customButtonText="Saca turno"
                 customButtonLink="https://wa.me/5491168520606"
                 detailsLink={"/servicios/masajes/" + tratamiento.id}
+                tratamiento={tratamiento}
               />
             ) : (
               <TreatmentsRight
@@ -66,6 +67,7 @@ function Masajes() {
                 customButtonText="Saca turno"
                 customButtonLink="https://wa.me/5491168520606"
                 detailsLink={"/servicios/masajes/" + tratamiento.id}
+                tratamiento={tratamiento}
               />
             )}
           </FadeIn>

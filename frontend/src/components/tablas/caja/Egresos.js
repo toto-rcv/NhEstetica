@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ModalEgreso from './ModalEgreso';
+import { egresosService } from '../../../services/egresosService';
 
-const Egresos = ({ fechaSeleccionada, onActualizar }) => {
+const Egresos = ({ fechaSeleccionada, cajaCerrada, onActualizar }) => {
   const [egresos, setEgresos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -14,9 +15,7 @@ const Egresos = ({ fechaSeleccionada, onActualizar }) => {
   const fetchEgresos = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/egresos/fecha/${fechaSeleccionada}`);
-      if (!res.ok) throw new Error('Error al cargar egresos');
-      const data = await res.json();
+      const data = await egresosService.getEgresosByFecha(fechaSeleccionada);
       setEgresos(data);
       setError(null);
     } catch (err) {
@@ -32,12 +31,7 @@ const Egresos = ({ fechaSeleccionada, onActualizar }) => {
 
  const handleGuardarEgreso = async (nuevoEgreso) => {
     try {
-      const res = await fetch('http://localhost:5000/api/egresos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevoEgreso),
-      });
-      if (!res.ok) throw new Error('Error al guardar egreso');
+      await egresosService.createEgreso(nuevoEgreso);
       fetchEgresos();
       setModalAbierto(false);
       onActualizar && onActualizar(); // <-- importante
@@ -49,10 +43,7 @@ const Egresos = ({ fechaSeleccionada, onActualizar }) => {
   const handleEliminarEgreso = async (id) => {
     if (!window.confirm('¿Seguro que deseas eliminar este egreso?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/egresos/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Error al eliminar egreso');
+      await egresosService.deleteEgreso(id);
       fetchEgresos();
     } catch (err) {
       alert(err.message);
@@ -82,13 +73,7 @@ const handleGuardarEdicion = async () => {
   const { detalle, forma_pago, importe } = egresoEditado;
 
   try {
-    const res = await fetch(`http://localhost:5000/api/egresos/${editandoId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ detalle, forma_pago, importe }),
-    });
-
-    if (!res.ok) throw new Error('Error al actualizar egreso');
+    await egresosService.updateEgreso(editandoId, { detalle, forma_pago, importe });
 
     await fetchEgresos();
     setEditandoId(null);
@@ -107,7 +92,12 @@ const handleGuardarEdicion = async () => {
     <Section>
       <Header>
         <h3>Egresos</h3>
-        <AddButton onClick={() => setModalAbierto(true)}>Agregar Egreso</AddButton>
+        <AddButton 
+          onClick={() => setModalAbierto(true)}
+          disabled={cajaCerrada}
+        >
+          Agregar Egreso
+        </AddButton>
       </Header>
 
       {egresos.length > 0 ? (
@@ -131,12 +121,14 @@ const handleGuardarEdicion = async () => {
               <input
                 value={egresoEditado.detalle}
                 onChange={(ev) => handleEditChange('detalle', ev.target.value)}
+                disabled={cajaCerrada}
               />
             </td>
             <td>
               <select
                 value={egresoEditado.forma_pago}
                 onChange={(e) => handleEditChange('forma_pago', e.target.value)}
+                disabled={cajaCerrada}
               >
                 <option value="">Seleccione</option>
                 <option value="Efectivo">Efectivo</option>
@@ -150,10 +142,11 @@ const handleGuardarEdicion = async () => {
                 type="number"
                 value={egresoEditado.importe}
                 onChange={(ev) => handleEditChange('importe', ev.target.value)}
+                disabled={cajaCerrada}
               />
             </td>
             <td>
-              <ActionButton onClick={handleGuardarEdicion}>💾</ActionButton>
+              <ActionButton onClick={handleGuardarEdicion} disabled={cajaCerrada}>💾</ActionButton>
               <ActionButton onClick={handleCancelarEdicion}>❌</ActionButton>
             </td>
           </>
@@ -163,8 +156,8 @@ const handleGuardarEdicion = async () => {
             <td>{e.forma_pago}</td>
             <td>${parseFloat(e.importe).toFixed(2)}</td>
             <td>
-              <ActionButton onClick={() => handleEditarClick(e)}>✏️</ActionButton>
-              <ActionButton onClick={() => handleEliminarEgreso(e.id)}>🗑️</ActionButton>
+              <ActionButton onClick={() => handleEditarClick(e)} disabled={cajaCerrada}>✏️</ActionButton>
+              <ActionButton onClick={() => handleEliminarEgreso(e.id)} disabled={cajaCerrada}>🗑️</ActionButton>
             </td>
           </>
         )}
@@ -228,8 +221,14 @@ const AddButton = styled.button`
     cursor: pointer;
     font-size: 17px;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: linear-gradient(135deg, #5566cc 0%, #553399 100%);
+  }
+
+  &:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 `;
 
@@ -264,8 +263,13 @@ const ActionButton = styled.button`
   cursor: pointer;
   margin: 0 0.3rem;
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.7;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 

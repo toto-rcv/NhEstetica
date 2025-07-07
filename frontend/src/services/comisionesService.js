@@ -1,10 +1,19 @@
 const API_BASE_URL = '/api';
 
 export const comisionesService = {
+  // Obtener token de autorización
+  getAuthHeaders() {
+    return {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    };
+  },
+
   // Obtener todas las comisiones
   async getComisiones() {
     try {
-      const response = await fetch(`${API_BASE_URL}/comisiones`);
+      const response = await fetch(`${API_BASE_URL}/comisiones`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Error al obtener las comisiones');
       }
@@ -18,7 +27,9 @@ export const comisionesService = {
   // Obtener una comisión por ID
   async getComisionById(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/comisiones/${id}`);
+      const response = await fetch(`${API_BASE_URL}/comisiones/${id}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Error al obtener la comisión');
       }
@@ -32,7 +43,9 @@ export const comisionesService = {
   // Obtener comisiones por fecha
   async getComisionesByFecha(fecha) {
     try {
-      const response = await fetch(`${API_BASE_URL}/comisiones/fecha/${fecha}`);
+      const response = await fetch(`${API_BASE_URL}/comisiones/fecha/${fecha}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Error al obtener las comisiones por fecha');
       }
@@ -46,11 +59,14 @@ export const comisionesService = {
   // Crear nueva comisión
   async createComision(comisionData) {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeaders(),
+      };
+
       const response = await fetch(`${API_BASE_URL}/comisiones`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(comisionData),
       });
 
@@ -69,11 +85,14 @@ export const comisionesService = {
   // Actualizar comisión
   async updateComision(id, comisionData) {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeaders(),
+      };
+
       const response = await fetch(`${API_BASE_URL}/comisiones/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(comisionData),
       });
 
@@ -94,6 +113,7 @@ export const comisionesService = {
     try {
       const response = await fetch(`${API_BASE_URL}/comisiones/${id}`, {
         method: 'DELETE',
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {

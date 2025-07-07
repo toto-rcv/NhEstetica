@@ -1,39 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Breadcrumb from "../../components/breadcrumb";
 import TreatmentService from '../../components/servicios/treatmentServiceSingle';
 import { motion } from 'framer-motion';
-import { treatments } from '../../data/treatments';
+import { tratamientosService } from '../../services/tratamientosService';
 
 function TreatmentDetailPage() {
   const { treatmentId } = useParams();
-  const treatment = treatments.find(t => t.id === treatmentId);
+  const [treatment, setTreatment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!treatment) {
+  useEffect(() => {
+    const fetchTreatment = async () => {
+      try {
+        const data = await tratamientosService.getTratamientos();
+        const foundTreatment = data.find(t => t.id == treatmentId);
+        if (foundTreatment) {
+          setTreatment(foundTreatment);
+        } else {
+          setError('Tratamiento no encontrado');
+        }
+      } catch (err) {
+        setError('Error al cargar el tratamiento');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTreatment();
+  }, [treatmentId]);
+
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '2rem' }}>Cargando tratamiento...</div>;
+  }
+
+  if (error || !treatment) {
     return <Navigate to="/servicios" />;
   }
 
   return (
     <>
       <Breadcrumb
-        image={treatment.image}
-        title={treatment.title}
+        image={treatment.imagen}
+        title={treatment.nombre}
         position="left"
         titleColor="#F5F5F5"
       />
       <BackgroundService>
         <FadeIn delay={0.2}>
           <TreatmentService
-            image={treatment.image}
-            title={treatment.title.toUpperCase()}
-            description={treatment.description}
-            price={treatment.price}
+            image={treatment.imagen}
+            title={treatment.nombre.toUpperCase()}
+            description={treatment.descripcion}
+            price={`$${treatment.precio}`}
             imagePosition="left"
             showLine={true}
             promoLink="https://wa.me/5491168520606"
             customButtonText="Reservá tu turno"
             customButtonLink="https://wa.me/5491168520606"
+            tratamiento={treatment}
           />
         </FadeIn>
 
