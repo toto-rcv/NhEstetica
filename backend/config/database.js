@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
@@ -5,19 +6,19 @@ const bcrypt = require('bcryptjs');
 
 // Configuración root para crear base y usuario
 const rootConfig = {
-  host: 'localhost',
+  host: process.env.DB_HOST || 'localhost',
   user: 'root',
-  password: 'password', // Intentar sin contraseña primero
-  port: 3306
+  password: process.env.DB_ROOT_PASSWORD || '', // Intentar sin contraseña primero
+  port: process.env.DB_PORT || 3306
 };
 
 // Configuración para el usuario de la aplicación
 const appConfig = {
-  host: 'localhost',
-  user: 'nhestetica_user',
-  password: 'nhestetica123',
-  database: 'nhestetica_db',
-  port: 3306
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'nhestetica_user',
+  password: process.env.DB_PASSWORD || 'nhestetica123',
+  database: process.env.DB_NAME || 'nhestetica_db',
+  port: process.env.DB_PORT || 3306
 };
 
 // Crear pool de conexiones para usar en la app
@@ -46,9 +47,9 @@ async function fullSetup() {
     }
 
     // 2. Crear base de datos y usuario de aplicación
-    await rootConnection.execute('CREATE DATABASE IF NOT EXISTS nhestetica_db');
-    await rootConnection.execute(`CREATE USER IF NOT EXISTS 'nhestetica_user'@'localhost' IDENTIFIED BY 'nhestetica123'`);
-    await rootConnection.execute(`GRANT ALL PRIVILEGES ON nhestetica_db.* TO 'nhestetica_user'@'localhost'`);
+    await rootConnection.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'nhestetica_db'}`);
+    await rootConnection.execute(`CREATE USER IF NOT EXISTS '${process.env.DB_USER || 'nhestetica_user'}'@'localhost' IDENTIFIED BY '${process.env.DB_PASSWORD || 'nhestetica123'}'`);
+    await rootConnection.execute(`GRANT ALL PRIVILEGES ON ${process.env.DB_NAME || 'nhestetica_db'}.* TO '${process.env.DB_USER || 'nhestetica_user'}'@'localhost'`);
     await rootConnection.execute('FLUSH PRIVILEGES');
     await rootConnection.end();
     console.log('✅ Base de datos y usuario MySQL verificados/creados');
@@ -80,18 +81,18 @@ async function fullSetup() {
     console.log('✅ Script SQL ejecutado');
 
     // 5. Crear usuario de app con contraseña hasheada si no existe
-    const [existingUsers] = await appConnection.execute('SELECT * FROM users WHERE username = ?', ['user']);
+    const [existingUsers] = await appConnection.execute('SELECT * FROM users WHERE username = ?', ['adminNh@gmail.com']);
     if (existingUsers.length === 0) {
       const hashedPassword = await bcrypt.hash('123', 10);
-      await appConnection.execute('INSERT INTO users (username, password) VALUES (?, ?)', ['user', hashedPassword]);
-      console.log('✅ Usuario "user" creado con contraseña hasheada');
+      await appConnection.execute('INSERT INTO users (username, password) VALUES (?, ?)', ['adminNh@gmail.com', hashedPassword]);
+      console.log('✅ Usuario "adminNh@gmail.com" creado con contraseña hasheada');
     } else {
       // Si existe pero la contraseña no está hasheada, la actualizamos
       const user = existingUsers[0];
       if (user.password === '123') {
         const hashedPassword = await bcrypt.hash('123', 10);
-        await appConnection.execute('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, 'user']);
-        console.log('🔒 Contraseña de "user" actualizada a hash');
+        await appConnection.execute('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, 'adminNh@gmail.com']);
+        console.log('🔒 Contraseña de "adminNh@gmail.com" actualizada a hash');
       }
     }
     console.log('🎉 Base de datos y usuario de app listos');
@@ -112,4 +113,4 @@ module.exports = {
 // Si se ejecuta directamente, corre el setup
 if (require.main === module) {
   fullSetup();
-} 
+}

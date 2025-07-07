@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "npm run setup && concurrently \"npm run server\" \"npm run client\"",
+    "setup": "node backend/run-migrations.js",
     "server": "node backend/server.js",
     "client": "npm start --prefix frontend"
   },

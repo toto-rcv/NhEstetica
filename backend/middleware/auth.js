@@ -1,7 +1,9 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 // Clave secreta para firmar los tokens (en producción debería estar en variables de entorno)
-const JWT_SECRET = 'nhestetica_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
+
 
 // Middleware para verificar si el usuario está autenticado
 const authenticateToken = (req, res, next) => {
