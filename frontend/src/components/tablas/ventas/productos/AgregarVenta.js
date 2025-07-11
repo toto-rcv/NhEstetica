@@ -108,8 +108,9 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
           >
             <option value="">Seleccioná una forma de pago</option>
             <option value="Efectivo">Efectivo</option>
-            <option value="Contado">Contado</option>
-            <option value="Debito">Débito</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Débito">Débito</option>
+            <option value="Crédito">Crédito</option>
           </select>
 
           <input
@@ -118,7 +119,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, productos }) => {
             value={nuevaVenta.cuotas}
             onChange={onChange}
             placeholder="Cuotas"
-            disabled={nuevaVenta.forma_de_pago !== 'Debito'}
+            disabled={nuevaVenta.forma_de_pago === 'Crédito' ? false : true}
             min="1"
           />
 

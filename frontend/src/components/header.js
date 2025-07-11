@@ -103,6 +103,27 @@ function Header() {
             <StyledLink to="/productos">Productos</StyledLink>
             <StyledLink to="/promociones">Promociones</StyledLink>
             <StyledLink to="/contacto">Contacto</StyledLink>
+            <DropdownWrapper
+              onMouseEnter={() => setShowDropdown(true)}
+              onMouseLeave={() => setShowDropdown(false)}
+            >
+              <StyledLink to="/personal">
+                Personal <IoMdArrowDropdown />
+              </StyledLink>
+              {showDropdown && (
+                <>
+                  <HoverBridge />
+                  <DropdownContainer>
+                    <DropdownItem to="/personal" onClick={() => setShowDropdown(false)}>
+                      Personal
+                    </DropdownItem>
+                    <DropdownItem to="/gerentes" onClick={() => setShowDropdown(false)}>
+                      Gerentes
+                    </DropdownItem>
+                  </DropdownContainer>
+                </>
+              )}
+            </DropdownWrapper>
           </nav>
         </NavContainer>
 

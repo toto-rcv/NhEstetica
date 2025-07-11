@@ -86,11 +86,21 @@ const TablaVentasTratamientos = ({
             <td>
               {`$${(venta.precio * venta.sesiones).toFixed(0)}`}
             </td>
-            <td>
+             <td>
               {enEdicion ? (
-                <input type="text" name="forma_de_pago" value={ventaEditada.forma_de_pago || ''} onChange={onEditChange} />
+                <select
+                  name="forma_de_pago"
+                  value={ventaEditada?.forma_de_pago || ''}
+                  onChange={onEditChange}
+                >
+                  <option value="">Seleccionar forma de pago...</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Débito">Débito</option>
+                  <option value="Crédito">Crédito</option>
+                  <option value="Transferencia">Transferencia</option>
+                </select>
               ) : (
-                venta.forma_de_pago || '-'
+                venta.forma_de_pago || "-"
               )}
             </td>
 

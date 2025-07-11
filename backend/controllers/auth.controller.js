@@ -80,6 +80,11 @@ exports.login = async (req, res) => {
         permisos: user.permisos,
         type: 'admin'
       };
+      
+      // Debug: mostrar información del usuario
+      console.log('Login admin - Usuario:', userData);
+      console.log('Permisos:', userData.permisos);
+      
       const token = generateToken(userData);
       
       res.json({
