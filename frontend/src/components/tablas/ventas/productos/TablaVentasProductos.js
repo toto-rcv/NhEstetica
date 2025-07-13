@@ -129,9 +129,10 @@ const TablaVentasProductos = ({
                   onChange={onEditChange}
                 >
                   <option value="">Seleccionar forma de pago...</option>
-                  <option value="efectivo">Efectivo</option>
-                  <option value="tarjeta">Tarjeta</option>
-                  <option value="transferencia">Transferencia</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Débito">Débito</option>
+                  <option value="Crédito">Crédito</option>
+                  <option value="Transferencia">Transferencia</option>
                 </select>
               ) : (
                 venta.forma_de_pago || "-"

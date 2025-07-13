@@ -93,10 +93,21 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, tratamientos, per
 
             <select name="forma_de_pago" value={nuevaVenta.forma_de_pago} onChange={onChange}>
               <option value="">Seleccioná una forma de pago</option>
-              <option value="Efectivo">Efectivo</option>
-              <option value="Contado">Contado</option>
-              <option value="Debito">Débito</option>
+             <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Débito">Débito</option>
+              <option value="Crédito">Crédito</option>
             </select>
+
+             <input
+              type="number"
+              name="cuotas"
+              value={nuevaVenta.cuotas}
+              onChange={onChange}
+              placeholder="Cuotas"
+              disabled={nuevaVenta.forma_de_pago === 'Crédito' ? false : true}
+              min="1"
+            />
 
             <label>
               Fecha de vencimiento:
@@ -106,16 +117,7 @@ const VentaForm = ({ nuevaVenta, onChange, onSubmit, clientes, tratamientos, per
                 value={nuevaVenta.vencimiento || ''}
                 onChange={onChange}
               />
-            </label>
-
-            <input
-              type="number"
-              name="cuotas"
-              placeholder="Cuotas"
-              min="0"
-              value={nuevaVenta.cuotas || ''}
-              onChange={onChange}
-            />
+            </label>          
 
             <input
               type="text"

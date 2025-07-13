@@ -20,6 +20,7 @@ import Masajes from './pages/services/Masajes';
 import ProductDetail from './pages/products/ProductDetail';
 import TreatmentDetailPage from './pages/services/TreatmentDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRouteFull from './components/ProtectedRouteFull';
 
 // Importar páginas de admin
 import InicioAdmin from './pages/admin/inicio';
@@ -33,6 +34,9 @@ import ProductosAdmin from './pages/admin/productos';
 import TratamientosAdmin from './pages/admin/tratamientos';
 import ComisionesAdmin from './pages/admin/comisiones';
 import TurnosAdmin from './pages/admin/turnos';
+import ResumenMensual from './pages/admin/resumenMensual';
+import Gerentes from './pages/admin/gerentes';
+import ConfiguracionEmailPage from './pages/admin/configuracionEmail';
 
 const serviciosRoutes = [
   { path: 'TratamientosCorporales', element: <TratamientosCorporales /> },
@@ -75,10 +79,15 @@ function AppContent() {
             <TablasRedirect />
           </ProtectedRoute>
         } />
-        <Route path="/admin/inicio" element={
+        <Route path="/admin/estadisticas" element={
           <ProtectedRoute>
             <InicioAdmin />
           </ProtectedRoute>
+        } />
+        <Route path="/admin/resumen" element={
+          <ProtectedRouteFull>
+            <ResumenMensual />
+          </ProtectedRouteFull>
         } />
         <Route path="/admin/caja" element={
           <ProtectedRoute>
@@ -124,6 +133,26 @@ function AppContent() {
           <ProtectedRoute>
             <TurnosAdmin />
           </ProtectedRoute>
+        } />
+        <Route path="/admin/gerentes" element={
+          <ProtectedRouteFull>
+            <Gerentes />
+          </ProtectedRouteFull>
+        } />
+        <Route path="/admin/configuracion-email" element={
+          <ProtectedRouteFull>
+            <ConfiguracionEmailPage />
+          </ProtectedRouteFull>
+        } />
+        <Route path="/personal" element={
+          <ProtectedRoute>
+            <Personal />
+          </ProtectedRoute>
+        } />
+        <Route path="/gerentes" element={
+          <ProtectedRouteFull>
+            <Gerentes />
+          </ProtectedRouteFull>
         } />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />

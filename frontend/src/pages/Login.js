@@ -241,7 +241,7 @@ function Login() {
         
         // Redirigir según el tipo de usuario
         if (userData.type === 'admin') {
-          navigate('/admin/inicio');
+          navigate('/admin/estadisticas');
         } else {
           navigate('/');
         }

@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const AuditoriaService = require('../services/auditoriaService');
 
 // Función auxiliar para verificar si la caja está cerrada
 const isCajaCerrada = async (fecha) => {
@@ -73,6 +74,18 @@ const createEgreso = async (req, res) => {
       [detalle, forma_pago, importe, fecha]
     );
 
+    // Registrar auditoría
+    const usuario = req.user || { id: null, nombre: 'Sistema' };
+    await AuditoriaService.registrarCambio({
+      tabla: 'egresos',
+      accion: 'INSERT',
+      registro_id: result.insertId,
+      datos_nuevos: { detalle, forma_pago, importe, fecha },
+      usuario,
+      ip_address: req.ip,
+      user_agent: req.get('User-Agent')
+    });
+
     res.status(201).json({ message: 'Egreso creado', id: result.insertId });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -89,13 +102,13 @@ const updateEgreso = async (req, res) => {
   }
 
   try {
-    // Obtener la fecha del egreso para verificar si la caja está cerrada
-    const [egresoResults] = await pool.query('SELECT fecha FROM egresos WHERE id = ?', [id]);
-    if (egresoResults.length === 0) {
+    // Obtener el egreso actual para auditoría
+    const [egresoActual] = await pool.query('SELECT * FROM egresos WHERE id = ?', [id]);
+    if (egresoActual.length === 0) {
       return res.status(404).json({ message: 'Egreso no encontrado' });
     }
 
-    const fechaEgreso = egresoResults[0].fecha;
+    const fechaEgreso = egresoActual[0].fecha;
     const cajaCerrada = await isCajaCerrada(fechaEgreso);
     if (cajaCerrada) {
       return res.status(400).json({ message: 'No se pueden modificar egresos de una caja cerrada' });
@@ -110,6 +123,19 @@ const updateEgreso = async (req, res) => {
       return res.status(404).json({ message: 'Egreso no encontrado' });
     }
 
+    // Registrar auditoría
+    const usuario = req.user || { id: null, nombre: 'Sistema' };
+    await AuditoriaService.registrarCambio({
+      tabla: 'egresos',
+      accion: 'UPDATE',
+      registro_id: id,
+      datos_anteriores: egresoActual[0],
+      datos_nuevos: { ...egresoActual[0], detalle, forma_pago, importe },
+      usuario,
+      ip_address: req.ip,
+      user_agent: req.get('User-Agent')
+    });
+
     res.json({ message: 'Egreso actualizado' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -120,13 +146,13 @@ const updateEgreso = async (req, res) => {
 const deleteEgreso = async (req, res) => {
   const { id } = req.params;
   try {
-    // Obtener la fecha del egreso para verificar si la caja está cerrada
-    const [egresoResults] = await pool.query('SELECT fecha FROM egresos WHERE id = ?', [id]);
-    if (egresoResults.length === 0) {
+    // Obtener el egreso para auditoría
+    const [egresoActual] = await pool.query('SELECT * FROM egresos WHERE id = ?', [id]);
+    if (egresoActual.length === 0) {
       return res.status(404).json({ message: 'Egreso no encontrado' });
     }
 
-    const fechaEgreso = egresoResults[0].fecha;
+    const fechaEgreso = egresoActual[0].fecha;
     const cajaCerrada = await isCajaCerrada(fechaEgreso);
     if (cajaCerrada) {
       return res.status(400).json({ message: 'No se pueden eliminar egresos de una caja cerrada' });
@@ -136,6 +162,19 @@ const deleteEgreso = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Egreso no encontrado' });
     }
+
+    // Registrar auditoría
+    const usuario = req.user || { id: null, nombre: 'Sistema' };
+    await AuditoriaService.registrarCambio({
+      tabla: 'egresos',
+      accion: 'DELETE',
+      registro_id: id,
+      datos_anteriores: egresoActual[0],
+      usuario,
+      ip_address: req.ip,
+      user_agent: req.get('User-Agent')
+    });
+
     res.json({ message: 'Egreso eliminado' });
   } catch (err) {
     res.status(500).json({ error: err.message });

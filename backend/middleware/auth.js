@@ -1,7 +1,9 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 // Clave secreta para firmar los tokens (en producción debería estar en variables de entorno)
-const JWT_SECRET = 'nhestetica_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
+
 
 // Middleware para verificar si el usuario está autenticado
 const authenticateToken = (req, res, next) => {
@@ -22,6 +24,16 @@ const authenticateToken = (req, res, next) => {
         message: 'Token inválido o expirado' 
       });
     }
+    
+    // Asegurar que el email esté disponible
+    if (user.type === 'cliente' && user.email) {
+      user.nombre = user.nombre || user.username;
+      user.email = user.email;
+    } else if (user.type === 'admin') {
+      user.nombre = user.username;
+      user.email = user.username; // Para admins, usar username como email
+    }
+    
     req.user = user;
     next();
   });
@@ -32,6 +44,8 @@ const generateToken = (user) => {
   const payload = {
     id: user.id,
     username: user.username || user.email, // Usar email para clientes, username para admins
+    email: user.email || user.username, // Incluir email explícitamente
+    nombre: user.nombre || user.username,
     type: user.type || (user.username ? 'admin' : 'cliente')
   };
   

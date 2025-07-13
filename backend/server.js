@@ -23,9 +23,11 @@ app.use('/api/productos', require('./routes/productos.router'));
 app.use('/api/tratamientos/public', require('./routes/tratamientos.router'));
 app.use('/api/turnos/public', require('./routes/turnos.public.router'));
 app.use('/api/clientes/public', require('./routes/clientes.public.router'));
+app.use('/api/consulta', require('./routes/consulta.router'));
 
 // Rutas protegidas con autenticación
 app.use('/api/inicio', authenticateToken, require('./routes/inicio.router'));
+app.use('/api/resumen', authenticateToken, require('./routes/resumen.router'));
 app.use('/api/clientes', authenticateToken, require('./routes/clientes.router'));
 app.use('/api/personal', authenticateToken, require('./routes/personal.router'));
 app.use('/api/ventas/tratamientos', authenticateToken, require('./routes/ventas.tratamientos.router'));
@@ -35,6 +37,9 @@ app.use('/api/caja/apertura', authenticateToken, require('./routes/caja.apertura
 app.use('/api/egresos', authenticateToken, require('./routes/egresos.router'));
 app.use('/api/ingresos', authenticateToken, require('./routes/ingresos.router'));
 app.use('/api/turnos', authenticateToken, require('./routes/turnos.router'));
+app.use('/api/gastos-fijos', authenticateToken, require('./routes/gastos.fijos.router'));
+app.use('/api/gerentes', authenticateToken, require('./routes/gerentes.router'));
+app.use('/api/email', require('./routes/email.router'));
 
 // Rutas de upload con autenticación solo para POST (subir), pero GET (servir imágenes) es público
 app.use('/api/upload', require('./routes/upload.router'));

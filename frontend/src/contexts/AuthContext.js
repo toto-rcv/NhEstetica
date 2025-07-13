@@ -35,8 +35,9 @@ export const AuthProvider = ({ children }) => {
           const permisos = localStorage.getItem('permisos');
           userData.permisos = permisos;
           
-          // Verificar si tiene permiso(1) - Permiso de administrador total
-          userData.hasAdminPermission = permisos === '1' || permisos === 1;
+          // Verificar permisos de administrador
+          userData.hasAdminPermission = permisos === '1' || permisos === 1 || permisos === '2' || permisos === 2;
+          userData.hasFullPermission = permisos === '1' || permisos === 1;
           
           if (!userData.hasAdminPermission) {
             console.warn('Usuario admin sin permisos suficientes');
@@ -84,7 +85,8 @@ export const AuthProvider = ({ children }) => {
         }
         
         // Verificar permisos de administrador
-        userData.hasAdminPermission = userData.permisos === '1' || userData.permisos === 1;
+        userData.hasAdminPermission = userData.permisos === '1' || userData.permisos === 1 || userData.permisos === '2' || userData.permisos === 2;
+        userData.hasFullPermission = userData.permisos === '1' || userData.permisos === 1;
         
         if (!userData.hasAdminPermission) {
           console.warn('Login de admin sin permisos suficientes');
@@ -142,7 +144,7 @@ export const AuthProvider = ({ children }) => {
   // Función para ir al admin (solo si tiene permisos)
   const goToAdmin = () => {
     if (user?.type === 'admin' && user?.hasAdminPermission) {
-      navigate('/admin/inicio');
+      navigate('/admin/estadisticas');
     } else {
       console.error('Sin permisos para acceder al admin');
       // Opcional: mostrar mensaje de error al usuario
@@ -152,7 +154,14 @@ export const AuthProvider = ({ children }) => {
   // Función para verificar permisos específicos
   const hasPermission = (permission) => {
     if (!user || user.type !== 'admin') return false;
-    return user.hasAdminPermission && (user.permisos === '1' || user.permisos === 1);
+    return user.hasAdminPermission && (user.permisos === '1' || user.permisos === 1 || user.permisos === '2' || user.permisos === 2);
+  };
+
+  // Función para verificar permisos completos (solo permisos 1)
+  const hasFullPermission = () => {
+    if (!user || user.type !== 'admin') return false;
+    // Solo permisos 1 tienen acceso completo
+    return user.permisos === '1' || user.permisos === 1;
   };
 
   const value = {
@@ -163,6 +172,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     goToAdmin,
     hasPermission,
+    hasFullPermission,
     loadAuthState
   };
 

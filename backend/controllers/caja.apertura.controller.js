@@ -1,4 +1,6 @@
 const { pool } = require('../config/database');
+const AuditoriaService = require('../services/auditoriaService');
+const EmailService = new (require('../services/emailService'))();
 
 // Obtener todas las aperturas/cierres
 const getCajas = async (req, res) => {
@@ -121,7 +123,7 @@ const cerrarCaja = async (req, res) => {
   try {
     // Verificar si la caja ya está cerrada
     const [cajaActual] = await pool.query(
-      'SELECT monto_cierre FROM caja_aperturas_cierres WHERE fecha = ?',
+      'SELECT * FROM caja_aperturas_cierres WHERE fecha = ?',
       [fecha]
     );
 
@@ -136,6 +138,19 @@ const cerrarCaja = async (req, res) => {
       return res.status(400).json({ message: 'La caja ya está cerrada' });
     }
 
+    // Registrar auditoría del cambio
+    const usuario = req.user || { id: null, nombre: 'Sistema' };
+    await AuditoriaService.registrarCambio({
+      tabla: 'caja_aperturas_cierres',
+      accion: 'UPDATE',
+      registro_id: cajaActual[0].id,
+      datos_anteriores: cajaActual[0],
+      datos_nuevos: { ...cajaActual[0], monto_cierre },
+      usuario,
+      ip_address: req.ip,
+      user_agent: req.get('User-Agent')
+    });
+
     const [result] = await pool.query(
       'UPDATE caja_aperturas_cierres SET monto_cierre = ? WHERE fecha = ?',
       [monto_cierre, fecha]
@@ -145,8 +160,75 @@ const cerrarCaja = async (req, res) => {
       return res.status(404).json({ message: 'No hay caja abierta para esa fecha' });
     }
 
-    res.json({ message: 'Caja cerrada exitosamente', monto_cierre });
+    // Obtener datos completos para el email
+    const [cajaCompleta] = await pool.query(
+      'SELECT * FROM caja_aperturas_cierres WHERE fecha = ?',
+      [fecha]
+    );
+
+    // Obtener ingresos del día
+    const [ingresos] = await pool.query(`
+      SELECT 
+        'Producto' AS tipo,
+        c.nombre AS cliente_nombre,
+        c.apellido AS cliente_apellido,
+        '-' AS tratamiento_nombre,
+        '-' AS sesiones,
+        p.nombre AS producto_nombre,
+        COALESCE(vp.cantidad, 1) AS cantidad,
+        COALESCE(vp.forma_de_pago, '-') AS forma_de_pago,
+        (vp.precio * COALESCE(vp.cantidad, 1)) AS importe,
+        COALESCE(vp.observacion, '-') AS observacion,
+        vp.fecha
+       FROM ventas_productos vp
+       JOIN clientes c ON vp.cliente_id = c.id
+       JOIN productos p ON vp.producto_id = p.id
+       WHERE DATE(vp.fecha) = ?
+       UNION ALL
+       SELECT 
+        'Tratamiento' AS tipo,
+        c.nombre AS cliente_nombre,
+        c.apellido AS cliente_apellido,
+        t.nombre AS tratamiento_nombre,
+        COALESCE(vt.sesiones, '-') AS sesiones,
+        '-' AS producto_nombre,
+        '-' AS cantidad,
+        COALESCE(vt.forma_de_pago, '-') AS forma_de_pago,
+        vt.precio AS importe,
+        COALESCE(vt.observacion, '-') AS observacion,
+        vt.fecha
+       FROM ventas_tratamientos vt
+       JOIN clientes c ON vt.cliente_id = c.id
+       JOIN tratamientos t ON vt.tratamiento_id = t.id
+       WHERE DATE(vt.fecha) = ?
+    `, [fecha, fecha]);
+
+    // Obtener egresos del día
+    const [egresos] = await pool.query(
+      'SELECT * FROM egresos WHERE DATE(fecha) = ? ORDER BY fecha DESC',
+      [fecha]
+    );
+
+    // Obtener cambios de auditoría del día
+    const cambios = await AuditoriaService.obtenerCambiosPorFecha(fecha);
+
+    // Enviar email con el reporte
+    const emailEnviado = await EmailService.enviarReporteCierreCaja(
+      fecha,
+      cajaCompleta[0],
+      ingresos,
+      egresos,
+      cambios
+    );
+
+    res.json({ 
+      message: 'Caja cerrada exitosamente', 
+      monto_cierre,
+      email_enviado: emailEnviado,
+      cambios_registrados: cambios.length
+    });
   } catch (err) {
+    console.error('Error al cerrar caja:', err);
     res.status(500).json({ error: err.message });
   }
 };

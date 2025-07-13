@@ -9,36 +9,113 @@ const ContactForm = () => {
     mensaje: ''
   });
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Datos enviados:', formData);
-    // Aquí podés integrar EmailJS, backend, etc.
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/consulta/crear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Consulta enviada correctamente');
+        setMessageType('success');
+        // Limpiar formulario
+        setFormData({
+          nombre: '',
+          apellido: '',
+          email: '',
+          mensaje: ''
+        });
+      } else {
+        setMessage(data.message || 'Error al enviar la consulta');
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Error al enviar consulta:', error);
+      setMessage('Error de conexión. Por favor intenta nuevamente.');
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-return (
-  <Wrapper>
-    <TopLeftImage src="/contacto/FlowerContact.png" alt="Decoración izquierda" />
-    <BottomRightImage src="/contacto/WomanContact.png" alt="Decoración derecha" />
+  return (
+    <Wrapper>
+      <TopLeftImage src="/contacto/FlowerContact.png" alt="Decoración izquierda" />
+      <BottomRightImage src="/contacto/WomanContact.png" alt="Decoración derecha" />
 
-    <Section>
-      <Subtitle>Envíanos un mensaje</Subtitle>
-      <Title>HACÉ TU CONSULTA</Title>
-      <FormContainer onSubmit={handleSubmit}>
-        <Input type="text" name="nombre" placeholder="Nombre" onChange={handleChange} required />
-        <Input type="text" name="apellido" placeholder="Apellido" onChange={handleChange} required />
-        <Input type="email" name="email" placeholder="Correo Electrónico" onChange={handleChange} required />
-        <Textarea name="mensaje" placeholder="Mensaje" rows="4" onChange={handleChange} required />
-        <Button type="submit">ENVIAR</Button>
-      </FormContainer>
-    </Section>
-  </Wrapper>
-);
+      <Section>
+        <Subtitle>Envíanos un mensaje</Subtitle>
+        <Title>HACÉ TU CONSULTA</Title>
+        
+        {message && (
+          <MessageContainer type={messageType}>
+            {message}
+          </MessageContainer>
+        )}
 
+        <FormContainer onSubmit={handleSubmit}>
+          <Input 
+            type="text" 
+            name="nombre" 
+            placeholder="Nombre" 
+            value={formData.nombre}
+            onChange={handleChange} 
+            required 
+            disabled={loading}
+          />
+          <Input 
+            type="text" 
+            name="apellido" 
+            placeholder="Apellido" 
+            value={formData.apellido}
+            onChange={handleChange} 
+            required 
+            disabled={loading}
+          />
+          <Input 
+            type="email" 
+            name="email" 
+            placeholder="Correo Electrónico" 
+            value={formData.email}
+            onChange={handleChange} 
+            required 
+            disabled={loading}
+          />
+          <Textarea 
+            name="mensaje" 
+            placeholder="Mensaje" 
+            rows="4" 
+            value={formData.mensaje}
+            onChange={handleChange} 
+            required 
+            disabled={loading}
+          />
+          <Button type="submit" disabled={loading}>
+            {loading ? 'ENVIANDO...' : 'ENVIAR'}
+          </Button>
+        </FormContainer>
+      </Section>
+    </Wrapper>
+  );
 };
 
 export default ContactForm;
@@ -70,6 +147,17 @@ const Title = styled.h2`
   margin-top: 0;
 `;
 
+const MessageContainer = styled.div`
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 600px;
+  border-radius: 6px;
+  font-weight: 500;
+  background-color: ${props => props.type === 'success' ? '#d4edda' : '#f8d7da'};
+  color: ${props => props.type === 'success' ? '#155724' : '#721c24'};
+  border: 1px solid ${props => props.type === 'success' ? '#c3e6cb' : '#f5c6cb'};
+`;
+
 const FormContainer = styled.form`
     border: 2px solid var(--primary-color);
     border-radius: 10px;
@@ -87,6 +175,11 @@ const Input = styled.input`
   border-radius: 6px;
   font-family: var(--text-font);
   font-size: 1rem;
+  
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
 `;
 
 const Textarea = styled.textarea`
@@ -96,6 +189,11 @@ const Textarea = styled.textarea`
   border-radius: 6px;
   font-size: 1rem;
   resize: vertical;
+  
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
 `;
 
 const Button = styled.button`
@@ -110,8 +208,13 @@ const Button = styled.button`
   text-transform: uppercase;
   font-size: 1.05rem;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--terciary-color);
+  }
+  
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
   }
 `;
 

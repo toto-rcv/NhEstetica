@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TablasNavBar = () => {
   const location = useLocation();
-const [openDropdown, setOpenDropdown] = useState(null);
+  const { hasFullPermission } = useAuth();
+  const [openDropdown, setOpenDropdown] = useState(null);
 
 const handleDropdownHover = (label, isOpen) => () => {
   setOpenDropdown(isOpen ? label : null);
@@ -13,13 +15,17 @@ const handleDropdownHover = (label, isOpen) => () => {
 
 
   const navItems = [
-  { path: '/admin/inicio', label: 'Inicio' },
+  { path: '/admin/inicio', label: 'Inicio', dropdown: [
+    {path: '/admin/estadisticas', label: 'Estadísticas'},
+    ...(hasFullPermission() ? [{path: '/admin/resumen', label: 'Resumen'}] : []),
+  ]},
   { path: '/admin/caja', label: 'Caja', dropdown: [
     {path: '/admin/caja', label: 'Ingresos/Egresos'},
     {path: '/admin/comisiones', label: 'Comisiones'}
   ]},
   { path: '/admin/clientes', label: 'Clientes' },
   { path: '/admin/personal', label: 'Personal' },
+  ...(hasFullPermission() ? [{ path: '/admin/gerentes', label: 'Gerentes' }] : []),
   { path: '/admin/productos', label: 'Productos' },
   { path: '/admin/tratamientos', label: 'Tratamientos' },
   { path: '/admin/turnos', label: 'Turnos' },
@@ -29,7 +35,8 @@ const handleDropdownHover = (label, isOpen) => () => {
       { path: '/admin/ventas/productos', label: 'Productos' },
       { path: '/admin/ventas/tratamientos', label: 'Tratamientos' },
     ]
-  }
+  },
+  ...(hasFullPermission() ? [{ path: '/admin/configuracion-email', label: '📧 Email' }] : [])
 ];
 
 

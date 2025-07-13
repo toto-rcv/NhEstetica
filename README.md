@@ -12,6 +12,37 @@ Este proyecto incluye un sistema de login simple y **oculto** para la aplicació
 - **Persistencia de sesión**: Usa localStorage para mantener el estado de login
 - **Redirección automática**: Si ya estás autenticado, te redirige automáticamente
 
+## Sistema de Email con Brevo
+
+El sistema incluye un módulo completo de envío de emails usando **Brevo** (anteriormente Sendinblue):
+
+### Características del Sistema de Email
+
+- ✅ **Envío automático** de reportes de cierre de caja
+- ✅ **Alta tasa de entrega** (99%+) con Brevo
+- ✅ **Analytics y tracking** de emails enviados
+- ✅ **Auditoría completa** de cambios en el sistema
+- ✅ **Templates HTML** personalizados
+- ✅ **Configuración desde interfaz web**
+
+### Configuración Rápida de Brevo
+
+1. **Crear cuenta**: Ve a [Brevo](https://www.brevo.com/) y regístrate
+2. **Generar API Key**: En Settings > API Keys > Create new key
+3. **Configurar variables**: Copia `env.example` a `.env` y agrega tu API Key
+4. **Probar conexión**: Ejecuta `node test-brevo.js`
+
+```bash
+# Configurar variables de entorno
+cp env.example .env
+# Edita .env y agrega tu BREVO_API_KEY
+
+# Probar conexión
+node test-brevo.js
+```
+
+📖 **Documentación completa**: Ver `backend/README_EMAIL.md`
+
 ## Credenciales de Prueba
 
 El sistema incluye las siguientes credenciales de prueba:
@@ -34,7 +65,15 @@ cd backend
 npm install
 ```
 
-### 2. Iniciar el servidor backend
+### 2. Configurar variables de entorno
+
+```bash
+cd backend
+cp env.example .env
+# Edita .env con tus configuraciones
+```
+
+### 3. Iniciar el servidor backend
 
 ```bash
 cd backend
@@ -43,7 +82,7 @@ npm start
 
 El servidor se ejecutará en `http://localhost:5000`
 
-### 3. Iniciar el frontend
+### 4. Iniciar el frontend
 
 ```bash
 cd frontend
@@ -52,7 +91,7 @@ npm start
 
 La aplicación se abrirá en `http://localhost:3000`
 
-### 4. Acceder al login
+### 5. Acceder al login
 
 **Escribe directamente en el navegador:** `http://localhost:3000/login`
 
@@ -71,7 +110,13 @@ NhEstetica/
 │   │   └── App.js                # Rutas de la aplicación
 │   └── package.json
 └── backend/
-    ├── index.js                  # Servidor Express con endpoints de login
+    ├── services/
+    │   └── emailService.js       # Servicio de email con Brevo
+    ├── config/
+    │   └── email.js              # Configuración de email
+    ├── test-brevo.js             # Script de prueba de Brevo
+    ├── env.example               # Ejemplo de variables de entorno
+    ├── README_EMAIL.md           # Documentación completa del email
     └── package.json
 ```
 
@@ -80,6 +125,12 @@ NhEstetica/
 - `POST /api/login` - Autenticación de usuarios
 - `GET /api/check-auth` - Verificación de autenticación (placeholder)
 - `GET /api/saludo` - Endpoint de prueba
+
+### Endpoints de Email (Brevo)
+
+- `GET /api/email/configuracion` - Obtener configuración de email
+- `PUT /api/email/configuracion` - Actualizar configuración de email
+- `POST /api/email/prueba` - Enviar email de prueba
 
 ## Funcionalidades
 
@@ -102,12 +153,21 @@ NhEstetica/
 - Redirige al usuario a la página principal
 - Actualiza el estado del header
 
+### Sistema de Email
+- **Reportes automáticos** de cierre de caja
+- **Auditoría completa** de cambios en el sistema
+- **Templates HTML** personalizados y responsivos
+- **Analytics** de envío y entrega
+- **Configuración web** desde la interfaz administrativa
+
 ## Seguridad y Ocultación
 
 - ✅ **Login completamente oculto**: No aparece en menús ni navegación
 - ✅ **Acceso solo por URL**: Solo quienes conocen la ruta pueden acceder
 - ✅ **Redirección automática**: Usuarios autenticados no pueden acceder al login
 - ✅ **Sin referencias visibles**: No hay enlaces ni botones que lleven al login
+- ✅ **API Keys seguras**: Brevo usa API Keys más seguras que contraseñas
+- ✅ **Auditoría completa**: Registro de todos los cambios en el sistema
 
 ## Personalización
 
@@ -117,6 +177,7 @@ Para personalizar el sistema:
 2. **Estilos**: Edita los styled-components en `frontend/src/pages/Login.js`
 3. **Validaciones**: Agrega validaciones adicionales en el frontend o backend
 4. **Base de datos**: Reemplaza las credenciales hardcodeadas con una base de datos real
+5. **Email templates**: Personaliza los templates HTML en `backend/services/emailService.js`
 
 ## Notas de Seguridad
 
@@ -129,3 +190,5 @@ Para personalizar el sistema:
 - Usa una base de datos segura
 - Agrega validaciones más robustas
 - Considera implementar autenticación de dos factores
+- Configura correctamente las variables de entorno
+- Usa API Keys seguras para servicios externos

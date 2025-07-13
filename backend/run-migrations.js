@@ -1,14 +1,17 @@
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
 
-// Configuración de la base de datos
+// Configuración de la base de datos desde variables de entorno
 const dbConfig = {
-  host: 'localhost',
-  user: 'nhestetica_user',
-  password: 'nhestetica123',
-  database: 'nhestetica_db'
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'nhestetica_user',
+  password: process.env.DB_PASSWORD || 'nhestetica123',
+  database: process.env.DB_NAME || 'nhestetica_db',
+  port: process.env.DB_PORT || 3306
 };
+
 
 async function runMigrations() {
   let connection;
@@ -38,23 +41,41 @@ async function runMigrations() {
       const filePath = path.join(migrationsDir, file);
       const sqlContent = fs.readFileSync(filePath, 'utf8');
       
+      // Limpiar el contenido SQL
+      let cleanSql = sqlContent
+        // Remover comentarios de una línea que empiecen con --
+        .replace(/--.*$/gm, '')
+        // Remover líneas vacías
+        .replace(/^\s*[\r\n]/gm, '')
+        // Remover espacios en blanco al inicio y final
+        .trim();
+
       // Dividir el contenido en comandos individuales
-      const commands = sqlContent
+      const commands = cleanSql
         .split(';')
         .map(cmd => cmd.trim())
-        .filter(cmd => cmd.length > 0 && !cmd.startsWith('--'));
+        .filter(cmd => cmd.length > 0);
+
+      console.log(`   📝 Encontrados ${commands.length} comandos SQL`);
 
       // Ejecutar cada comando de la migración
-      for (const command of commands) {
+      for (let i = 0; i < commands.length; i++) {
+        const command = commands[i];
         if (command.trim()) {
           try {
+            console.log(`   🔄 Ejecutando comando ${i + 1}/${commands.length}: ${command.substring(0, 60)}...`);
             await connection.query(command);
-            console.log(`   ✅ Comando ejecutado: ${command.substring(0, 50)}...`);
+            console.log(`   ✅ Comando ${i + 1} ejecutado exitosamente`);
           } catch (error) {
-            if (error.code !== 'ER_DUP_ENTRY') { // Ignorar errores de duplicados
-              console.error(`   ❌ Error: ${error.message}`);
+            if (error.code === 'ER_DUP_ENTRY') {
+              console.log(`   ⚠️  Comando ${i + 1} ya existe (ignorado)`);
+            } else if (error.code === 'ER_DB_CREATE_EXISTS') {
+              console.log(`   ⚠️  Base de datos ya existe (ignorado)`);
+            } else if (error.code === 'ER_TABLE_EXISTS_ERROR') {
+              console.log(`   ⚠️  Tabla ya existe (ignorado)`);
             } else {
-              console.log(`   ⚠️  Comando ya existe (ignorado)`);
+              console.error(`   ❌ Error en comando ${i + 1}: ${error.message}`);
+              console.error(`   Comando: ${command.substring(0, 100)}...`);
             }
           }
         }
@@ -64,13 +85,30 @@ async function runMigrations() {
     }
 
     // Verificar las tablas creadas
+    console.log('\n🔍 Verificando tablas creadas...');
     await connection.query('USE nhestetica_db');
     const [tables] = await connection.query('SHOW TABLES');
     
     console.log('\n📋 Tablas en la base de datos:');
-    tables.forEach(table => {
-      console.log(`   - ${Object.values(table)[0]}`);
-    });
+    if (tables.length === 0) {
+      console.log('   ❌ No se encontraron tablas. Algo salió mal.');
+    } else {
+      tables.forEach(table => {
+        console.log(`   ✅ ${Object.values(table)[0]}`);
+      });
+    }
+
+    // Verificar datos iniciales
+    console.log('\n🔍 Verificando datos iniciales...');
+    try {
+      const [users] = await connection.query('SELECT COUNT(*) as count FROM users');
+      console.log(`   👥 Usuarios: ${users[0].count}`);
+      
+      const [horarios] = await connection.query('SELECT COUNT(*) as count FROM configuracion_horarios');
+      console.log(`   🕐 Horarios configurados: ${horarios[0].count}`);
+    } catch (error) {
+      console.log(`   ⚠️  Error verificando datos: ${error.message}`);
+    }
 
     console.log('\n🎉 Todas las migraciones ejecutadas exitosamente!');
     console.log('\n📝 Próximos pasos:');
