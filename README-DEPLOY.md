@@ -171,6 +171,13 @@ SHOW GRANTS FOR 'nhestetica_user'@'localhost';
 
 ## 🛠️ Troubleshooting
 
+### Si el despliegue falla
+```bash
+# Ejecutar script de corrección
+chmod +x fix-deployment.sh
+./fix-deployment.sh
+```
+
 ### Si PM2 no inicia
 ```bash
 pm2 delete nhestetica-backend
@@ -201,11 +208,33 @@ sudo systemctl status mysql
 sudo tail -f /var/log/mysql/error.log
 ```
 
+### Verificar archivos críticos
+```bash
+# Verificar que server.js existe
+ls -la /var/www/nhestetica/backend/server.js
+
+# Verificar que el build del frontend existe
+ls -la /var/www/nhestetica/frontend/build/
+
+# Verificar configuración de Nginx
+ls -la /etc/nginx/sites-enabled/
+```
+
 ### Verificar puertos
 ```bash
 sudo netstat -tlnp | grep :80
 sudo netstat -tlnp | grep :5000
 sudo netstat -tlnp | grep :3306
+```
+
+### Si los archivos no se copiaron correctamente
+```bash
+# Verificar estructura de directorios
+tree /var/www/nhestetica/ || ls -la /var/www/nhestetica/
+
+# Copiar manualmente si es necesario
+sudo cp -r backend/* /var/www/nhestetica/backend/
+sudo cp -r frontend/* /var/www/nhestetica/frontend/
 ```
 
 ## 🔄 Actualizaciones

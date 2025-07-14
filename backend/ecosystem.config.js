@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'nhestetica-backend',
     script: 'server.js',
-    cwd: './backend',
+    cwd: '/var/www/nhestetica/backend',
     instances: 1,
     autorestart: true,
     watch: false,

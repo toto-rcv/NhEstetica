@@ -16,6 +16,11 @@ echo "📁 Copiando archivos del proyecto..."
 sudo cp -r backend/* $BACKEND_DIR/
 sudo cp -r frontend/* $FRONTEND_DIR/
 
+# Verificar que los archivos se copiaron correctamente
+echo "🔍 Verificando archivos..."
+ls -la $BACKEND_DIR/
+ls -la $FRONTEND_DIR/
+
 # Instalar dependencias del backend
 echo "📦 Instalando dependencias del backend..."
 cd $BACKEND_DIR
