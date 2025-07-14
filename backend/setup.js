@@ -12,7 +12,6 @@ const dbConfig = {
   port: process.env.DB_PORT || 3306
 };
 
-
 async function runMigrations() {
   let connection;
   
@@ -110,15 +109,14 @@ async function runMigrations() {
       console.log(`   ⚠️  Error verificando datos: ${error.message}`);
     }
 
-    console.log('\n🎉 Todas las migraciones ejecutadas exitosamente!');
+    console.log('\n🎉 Setup completado exitosamente!');
     console.log('\n📝 Próximos pasos:');
-    console.log('   1. Inicia el backend: npm start');
-    console.log('   2. Inicia el frontend: npm start');
-    console.log('   3. Ve a /login y autentícate');
-    console.log('   4. Navega a /tablas para gestionar los datos');
+    console.log('   1. Inicia el servidor: node server.js');
+    console.log('   2. Ve a /login y autentícate');
+    console.log('   3. Navega a /tablas para gestionar los datos');
 
   } catch (error) {
-    console.error('❌ Error ejecutando migraciones:', error.message);
+    console.error('❌ Error ejecutando setup:', error.message);
     console.log('\n💡 Asegúrate de que:');
     console.log('   - MySQL esté instalado y ejecutándose');
     console.log('   - Las credenciales en dbConfig sean correctas');
@@ -129,8 +127,7 @@ async function runMigrations() {
       console.log('\n🔌 Conexión cerrada');
     }
   }
-
 }
 
-// Ejecutar las migraciones
+// Ejecutar el setup
 runMigrations(); 

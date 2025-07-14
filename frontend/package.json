@@ -23,7 +23,8 @@
     "react-scripts": "5.0.1",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
-    "react-markdown": "^8.0.7",
+    "react-markdown": "^10.1.0",
+    "react-select": "^5.10.1",
     "styled-components": "^6.1.19",
     "web-vitals": "^2.1.4",
     "yet-another-react-lightbox": "^3.23.3"
