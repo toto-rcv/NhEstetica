@@ -129,6 +129,7 @@ async function runMigrations() {
       console.log('\n🔌 Conexión cerrada');
     }
   }
+
 }
 
 // Ejecutar las migraciones

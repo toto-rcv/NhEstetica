@@ -14,7 +14,7 @@ Este proyecto incluye un sistema de login simple y **oculto** para la aplicació
 
 ## Sistema de Email con Brevo
 
-El sistema incluye un módulo completo de envío de emails usando **Brevo** (anteriormente Sendinblue):
+El , sistema incluye un módulo completo de envío de emails usando **Brevo** (anteriormente Sendinblue):
 
 ### Características del Sistema de Email
 
