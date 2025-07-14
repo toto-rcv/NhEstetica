@@ -27,6 +27,11 @@ chmod +x setup-server.sh
 ./setup-server.sh
 ```
 
+### 4. Configurar MySQL (opcional - se hace automáticamente en deploy.sh)
+```bash
+sudo mysql_secure_installation
+```
+
 ## 🚀 Despliegue
 
 ### Despliegue completo (primera vez)
@@ -96,7 +101,73 @@ sudo systemctl reload nginx
 
 ## 🔧 Configuración de Base de Datos
 
-Asegúrate de tener configurado el archivo `.env` en el backend con las credenciales de tu base de datos MySQL.
+### 1. Instalar MySQL
+```bash
+sudo apt install mysql-server
+sudo mysql_secure_installation
+```
+
+### 2. Configurar archivo .env
+Crea el archivo `.env` en el directorio `backend/` basado en `env.example`:
+
+```bash
+cd backend
+cp env.example .env
+nano .env
+```
+
+Configuración mínima necesaria:
+```env
+# Configuración de Base de Datos
+DB_HOST=localhost
+DB_USER=nhestetica_user
+DB_PASSWORD=nhestetica123
+DB_NAME=nhestetica_db
+DB_PORT=3306
+
+# Configuración de JWT
+JWT_SECRET=tu_clave_secreta_jwt_super_segura
+
+# Configuración del Servidor
+PORT=5000
+NODE_ENV=production
+```
+
+### 3. Configuración automática de la base de datos
+El sistema automáticamente:
+- Crea la base de datos `nhestetica_db`
+- Crea el usuario `nhestetica_user` con contraseña `nhestetica123`
+- Ejecuta las migraciones SQL
+- Crea el usuario administrador: `adminNh@gmail.com` / `123`
+
+### 4. Verificar conexión
+```bash
+cd /var/www/nhestetica/backend
+node -e "require('./config/database').fullSetup().then(() => console.log('✅ DB OK')).catch(console.error)"
+```
+
+### 5. Acceder a MySQL
+```bash
+sudo mysql -u root -p
+```
+
+### 6. Comandos útiles de MySQL
+```sql
+-- Ver bases de datos
+SHOW DATABASES;
+
+-- Usar la base de datos
+USE nhestetica_db;
+
+-- Ver tablas
+SHOW TABLES;
+
+-- Ver usuarios
+SELECT * FROM users;
+
+-- Verificar permisos del usuario
+SHOW GRANTS FOR 'nhestetica_user'@'localhost';
+```
 
 ## 🛠️ Troubleshooting
 
@@ -118,10 +189,23 @@ sudo systemctl restart nginx
 sudo chown -R $USER:$USER /var/www/nhestetica
 ```
 
+### Si hay problemas con MySQL
+```bash
+# Reiniciar MySQL
+sudo systemctl restart mysql
+
+# Verificar estado
+sudo systemctl status mysql
+
+# Ver logs
+sudo tail -f /var/log/mysql/error.log
+```
+
 ### Verificar puertos
 ```bash
 sudo netstat -tlnp | grep :80
 sudo netstat -tlnp | grep :5000
+sudo netstat -tlnp | grep :3306
 ```
 
 ## 🔄 Actualizaciones

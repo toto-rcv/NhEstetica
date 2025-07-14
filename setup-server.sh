@@ -15,6 +15,10 @@ sudo apt-get install -y nodejs
 echo "📦 Instalando PM2..."
 sudo npm install -g pm2
 
+# Instalar MySQL
+echo "📦 Instalando MySQL..."
+sudo apt install -y mysql-server
+
 # Instalar Nginx
 echo "📦 Instalando Nginx..."
 sudo apt install -y nginx
@@ -24,6 +28,7 @@ echo "🔥 Configurando firewall..."
 sudo ufw allow 22
 sudo ufw allow 80
 sudo ufw allow 443
+sudo ufw allow 3306
 sudo ufw --force enable
 
 # Crear directorios necesarios

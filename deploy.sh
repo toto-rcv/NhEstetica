@@ -21,6 +21,24 @@ echo "📦 Instalando dependencias del backend..."
 cd $BACKEND_DIR
 sudo npm install --production
 
+# Configurar base de datos
+echo "🗄️ Configurando base de datos..."
+sudo mysql_secure_installation <<EOF
+
+y
+0
+y
+y
+y
+y
+EOF
+
+# Crear archivo .env si no existe
+if [ ! -f "$BACKEND_DIR/.env" ]; then
+    echo "📝 Creando archivo .env..."
+    cp $BACKEND_DIR/env.example $BACKEND_DIR/.env
+fi
+
 # Construir frontend
 echo "🏗️ Construyendo frontend..."
 cd $FRONTEND_DIR
