@@ -24,8 +24,8 @@ const ContactSection = () => {
         <Card>
           <Icon icon={faClock} />
           <Label>HORARIO</Label>
-          <SmallText>Lunes a viernes</SmallText>
-          <SmallText>00:00 – 23:59</SmallText>
+          <SmallText>Lunes a viernes de 08:00 a 20:00</SmallText>
+          <SmallText>Sábados de 08:00 a 14:00</SmallText>
         </Card>
         <Card>
           <Icon icon={faEnvelope} />
